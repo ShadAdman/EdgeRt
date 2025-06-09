@@ -16,7 +16,8 @@ junit = "4.13.2"
 kotlin = "2.1.21"
 vanniktech-publish = "0.32.0"
 groupId = "io.github.shadmanadman"
-artifactId = "Kflite"
+artifactId = "kflite"
+signing ="signing"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }

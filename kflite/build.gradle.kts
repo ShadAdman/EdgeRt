@@ -1,4 +1,4 @@
-import com.vanniktech.maven.publish.SonatypeHost
+import com.vanniktech.maven.publish.SonatypeHost.Companion.CENTRAL_PORTAL
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
@@ -8,6 +8,8 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.kotlinCocoapods)
+    alias(libs.plugins.vanniktechPublish)
+    id(libs.versions.signing.get())
 }
 
 kotlin {
@@ -93,6 +95,55 @@ android {
 
 dependencies {
     debugImplementation(compose.uiTooling)
+}
+
+
+mavenPublishing {
+    publishToMavenCentral(CENTRAL_PORTAL)
+    signAllPublications()
+    val tag: String? = System.getenv("GITHUB_REF")?.split("/")?.lastOrNull()
+
+    coordinates(
+        groupId = libs.versions.groupId.get(),
+        artifactId = libs.versions.artifactId.get(),
+        version = tag ?: "1.0.0-SNAPSHOT"
+    )
+
+    pom {
+        name = "Kflite"
+        description = "A Kotlin Multiplatform library to run TensorFlow lite models on iOS and Android targets"
+        url = "https://github.com/shadmanadman/kflite"
+        licenses {
+            license {
+                name = "Apache License, Version 2.0"
+                url = "https://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+        }
+        developers {
+            developer {
+                id = "shadmanadman"
+                name = "Shadman Adman"
+                email = "adman.shadman@gmail.com"
+            }
+        }
+        scm {
+            connection = "scm:git:https://github.com/shadmanadman/kflite"
+            developerConnection = "scm:git:https://github.com/shadmanadman/kflite.git"
+            url = "https://github.com/shadmanadman/kflite"
+        }
+    }
+}
+
+signing {
+    val keyId = System.getenv("ORG_GRADLE_PROJECT_signingInMemoryKeyId")
+    val key = System.getenv("ORG_GRADLE_PROJECT_signingInMemoryKey")
+    val keyPassword = System.getenv("ORG_GRADLE_PROJECT_signingInMemoryKeyPassword")
+
+    useInMemoryPgpKeys(
+        keyId,
+        key,
+        keyPassword
+    )
 }
 
 
