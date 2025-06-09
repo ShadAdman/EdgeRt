@@ -14,6 +14,9 @@ composeMultiplatform = "1.8.1"
 tflite = "2.17.0"
 junit = "4.13.2"
 kotlin = "2.1.21"
+vanniktech-publish = "0.32.0"
+groupId = "io.github.shadmanadman"
+artifactId = "Kflite"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -39,3 +42,4 @@ composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "composeMul
 composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlinCocoapods = { id = "org.jetbrains.kotlin.native.cocoapods", version.ref = "kotlin" }
+vanniktechPublish = {id = "com.vanniktech.maven.publish", version.ref = "vanniktech-publish"}
