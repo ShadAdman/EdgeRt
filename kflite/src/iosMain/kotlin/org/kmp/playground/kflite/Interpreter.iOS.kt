@@ -4,14 +4,11 @@ import kotlinx.cinterop.ExperimentalForeignApi
 import platform.Foundation.NSData
 
 @OptIn(ExperimentalForeignApi::class)
-actual class Interpreter(
-    actual val fileResource: ByteArray,
-    actual val options: InterpreterOptions
-) {
+actual class Interpreter actual constructor(model: ByteArray, options: InterpreterOptions) {
 
     @OptIn(ExperimentalForeignApi::class)
     private val tflInterpreter: PlatformInterpreter = errorHandled { errPtr ->
-        PlatformInterpreter(fileResource.writeToTempFile(), options.tflInterpreterOptions, errPtr)
+        PlatformInterpreter(model.writeToTempFile(), options.tflInterpreterOptions, errPtr)
     }!!
 
     init {

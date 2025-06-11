@@ -4,14 +4,11 @@ import android.content.Context
 import java.io.File
 import kotlin.text.get
 
-actual class Interpreter(
-    actual val fileResource: ByteArray,
-    actual val options: InterpreterOptions
-) {
+actual class Interpreter actual constructor(model: ByteArray, options: InterpreterOptions) {
     private val context: Context by lazy { AppContext.get() }
 
     private val tensorFlowInterpreter = PlatformInterpreter(
-        fileResource.writeToTempFile(context),
+        model.writeToTempFile(context),
         options.tensorFlowInterpreterOptions
     )
 
