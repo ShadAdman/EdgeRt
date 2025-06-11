@@ -100,7 +100,6 @@ dependencies {
 
 mavenPublishing {
     publishToMavenCentral(CENTRAL_PORTAL)
-    signAllPublications()
     val tag: String? = System.getenv("GITHUB_REF")?.split("/")?.lastOrNull()
 
     coordinates(
@@ -132,6 +131,7 @@ mavenPublishing {
             url = "https://github.com/shadmanadman/kflite"
         }
     }
+    signAllPublications()
 }
 
 signing {

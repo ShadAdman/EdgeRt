@@ -2,12 +2,13 @@ package org.kmp.playground.kflite
 
 import android.content.Context
 import java.io.File
+import kotlin.text.get
 
 actual class Interpreter(
     actual val fileResource: ByteArray,
-    actual val options: InterpreterOptions,
-    context: Context
+    actual val options: InterpreterOptions
 ) {
+    private val context: Context by lazy { AppContext.get() }
 
     private val tensorFlowInterpreter = PlatformInterpreter(
         fileResource.writeToTempFile(context),
