@@ -2,6 +2,7 @@ package org.kmp.playground.kflite
 
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.Foundation.NSData
+import cocoapods.TFLTensorFlowLite.TFLInterpreter
 
 @OptIn(ExperimentalForeignApi::class)
 actual class Interpreter actual constructor(model: ByteArray, options: InterpreterOptions) {
