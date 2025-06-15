@@ -3,6 +3,16 @@ package org.kmp.playground.kflite
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.Foundation.NSData
 import cocoapods.TFLTensorFlowLite.TFLInterpreter
+import kotlinx.cinterop.FloatVar
+import kotlinx.cinterop.IntVar
+import kotlinx.cinterop.LongVar
+import kotlinx.cinterop.addressOf
+import kotlinx.cinterop.readBytes
+import kotlinx.cinterop.refTo
+import kotlinx.cinterop.reinterpret
+import kotlinx.cinterop.usePinned
+import kotlinx.cinterop.*
+
 
 @OptIn(ExperimentalForeignApi::class)
 actual class Interpreter actual constructor(model: ByteArray, options: InterpreterOptions) {
@@ -81,37 +91,95 @@ actual class Interpreter actual constructor(model: ByteArray, options: Interpret
     ) {
         if (inputs.size > getInputTensorCount()) throw IllegalArgumentException("Wrong inputs dimension.")
 
-        inputs.forEachIndexed { index, any ->
+        inputs.forEachIndexed { index, input ->
             val inputTensor = getInputTensor(index)
+            println("inputTensor: $input")
             errorHandled { errPtr ->
                 inputTensor.platformTensor.copyData(
-                    any as NSData,
+                    input as NSData,
                     errPtr
-                ) // Fixme: hardcast Any to NSData
+                )
             }
         }
 
+        // Run inference
         errorHandled { errPtr ->
             tflInterpreter.invokeWithError(errPtr)
         }
 
-        inputs.forEachIndexed { index, any ->
+        // Collect outputs
+        outputs.forEach { (index, outputContainer) ->
             val outputTensor = getOutputTensor(index)
+            val outputData = errorHandled { errPtr ->
+                outputTensor.platformTensor.dataWithError(errPtr)
+            } ?: error("Failed to get output tensor data")
 
-            val array = when (outputTensor.dataType) {
+            val outputByteArray = ByteArray(outputData.length.toInt())
+            outputData.bytes?.reinterpret<ByteVar>()?.readBytes(outputData.length.toInt())
+                ?.copyInto(outputByteArray)
+
+            val typedOutput: Any = when (outputTensor.dataType) {
                 TensorDataType.FLOAT32 -> {
-                    errorHandled { errPtr ->
-                        outputTensor.platformTensor.dataWithError(errPtr)
-                    }!!.toUByteArray().toFloatArray()
+                    val floatCount = outputByteArray.size / Float.SIZE_BYTES
+                    val buffer = outputByteArray.usePinned {
+                        it.addressOf(0).reinterpret<FloatVar>().readBytes(floatCount)
+                    }
+                    buffer.toFloatArray()
                 }
 
-                TensorDataType.INT32 -> IntArray(outputTensor.dataType.byteSize()) // Fixme:
-                TensorDataType.UINT8 -> UIntArray(outputTensor.dataType.byteSize()) // Fixme:
-                TensorDataType.INT64 -> LongArray(outputTensor.dataType.byteSize()) // Fixme:
+                TensorDataType.INT32 -> {
+                    val intCount = outputByteArray.size / Int.SIZE_BYTES
+                    val buffer = outputByteArray.usePinned {
+                        it.addressOf(0).reinterpret<IntVar>().readBytes(intCount)
+                    }
+                    buffer.toIntArray()
+                }
+
+                TensorDataType.UINT8 -> {
+                    outputByteArray.map { it.toUByte() }.toUByteArray()
+                }
+
+                TensorDataType.INT64 -> {
+                    val longCount = outputByteArray.size / Long.SIZE_BYTES
+                    val buffer = outputByteArray.usePinned {
+                        it.addressOf(0).reinterpret<LongVar>().readBytes(longCount)
+                    }
+                    buffer.toLongArray()
+                }
             }
 
-            (outputs[0] as Array<Any>)[0] =
-                array // TODO: hardcoded case, works only with digits sample
+            // Assign the result to output container
+            when (outputContainer) {
+                is FloatArray -> (typedOutput as FloatArray).copyInto(outputContainer)
+                is IntArray -> (typedOutput as IntArray).copyInto(outputContainer)
+                is LongArray -> (typedOutput as LongArray).copyInto(outputContainer)
+                is UIntArray -> (typedOutput as UIntArray).copyInto(outputContainer)
+                is Array<*> -> {
+                    if (outputContainer.isNotEmpty() && outputContainer[0] is Array<*>) {
+                        @Suppress("UNCHECKED_CAST")
+                        val outer = outputContainer as Array<Array<FloatArray>>
+                        val flat = typedOutput as FloatArray
+
+                        val totalSize = outer.size * outer[0].size * outer[0][0].size
+                        require(flat.size == totalSize) {
+                            println("The outer size is ${outer.size} * ${outer[0].size} * ${outer[0][0].size}")
+                            "Flat array size (${flat.size}) does not match output container size ($totalSize)"
+                        }
+
+                        var index = 0
+                        for (i in outer.indices) {
+                            for (j in outer[i].indices) {
+                                for (k in outer[i][j].indices) {
+                                    outer[i][j][k] = flat[index++]
+                                }
+                            }
+                        }
+                    } else {
+                        error("Unsupported array shape in output container: ${outputContainer::class}")
+                    }
+                }
+                else -> error("Unsupported output container type: ${outputContainer::class}")
+            }
         }
     }
 

@@ -12,5 +12,5 @@ actual fun ImageBitmap.toScaledByteBuffer(
     val scaledImage = uiImage?.scaleTo(inputWidth, inputHeight)
     val pixelData = scaledImage?.toRGBByteArray(normalize)
 
-    return pixelData?:"Error scaling image in ios"
+    return pixelData?.toNSData()?:"Error scaling image in ios"
 }

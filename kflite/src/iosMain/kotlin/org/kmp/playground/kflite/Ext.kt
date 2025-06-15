@@ -34,6 +34,47 @@ internal fun ByteArray.writeToTempFile(prefix: String = "model", suffix: String 
     return filePath
 }
 
+internal fun ByteArray.toLongArray(): LongArray {
+    require(this.size % Long.SIZE_BYTES == 0) { "ByteArray size must be a multiple of 8 to convert to LongArray." }
+    return LongArray(this.size / Long.SIZE_BYTES) { i ->
+        val offset = i * Long.SIZE_BYTES
+        ((this[offset + 0].toLong() and 0xFF) shl 56) or
+                ((this[offset + 1].toLong() and 0xFF) shl 48) or
+                ((this[offset + 2].toLong() and 0xFF) shl 40) or
+                ((this[offset + 3].toLong() and 0xFF) shl 32) or
+                ((this[offset + 4].toLong() and 0xFF) shl 24) or
+                ((this[offset + 5].toLong() and 0xFF) shl 16) or
+                ((this[offset + 6].toLong() and 0xFF) shl 8)  or
+                ((this[offset + 7].toLong() and 0xFF))
+    }
+}
+
+internal fun ByteArray.toIntArray(): IntArray {
+    require(this.size % Int.SIZE_BYTES == 0) { "ByteArray size must be a multiple of 4 to convert to IntArray." }
+    return IntArray(this.size / Int.SIZE_BYTES) { i ->
+        val offset = i * Int.SIZE_BYTES
+        ((this[offset + 0].toInt() and 0xFF) shl 24) or
+                ((this[offset + 1].toInt() and 0xFF) shl 16) or
+                ((this[offset + 2].toInt() and 0xFF) shl 8) or
+                ((this[offset + 3].toInt() and 0xFF))
+    }
+}
+
+internal fun ByteArray.toFloatArray(): FloatArray {
+    require(this.size % 4 == 0) { "UByteArray size must be a multiple of 4 to convert to FloatArray." }
+    return FloatArray(this.size / 4) { i ->
+        val index = i * 4
+        val intBits =
+            (this[index + 0].toInt() and 0xFF shl 24) or
+                    (this[index + 1].toInt() and 0xFF shl 16) or
+                    (this[index + 2].toInt() and 0xFF shl 8) or
+                    (this[index + 3].toInt() and 0xFF)
+        Float.fromBits(intBits)
+    }
+}
+
+
+
 
 @OptIn(ExperimentalForeignApi::class)
 internal fun ByteArray.toNSData(): NSData = memScoped {
