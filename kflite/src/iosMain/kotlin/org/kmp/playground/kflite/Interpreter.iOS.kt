@@ -118,26 +118,20 @@ actual class Interpreter actual constructor(model: ByteArray, options: Interpret
             val outputByteArray = ByteArray(outputData.length.toInt())
             outputData.bytes?.reinterpret<ByteVar>()?.readBytes(outputData.length.toInt())
                 ?.copyInto(outputByteArray)
+            val floatArray = outputByteArray.toFloatArray()
+            println("Raw output bytes: ${floatArray.joinToString()}")
 
             val outputPtr = outputData.bytes?.reinterpret<ByteVar>()
             requireNotNull(outputPtr) { "outputData.bytes was null" }
 
             val typedOutput: Any = when (outputTensor.dataType) {
-                TensorDataType.FLOAT32 -> {
-                    outputPtr.readBytes(outputData.length.toInt()).toFloatArray()
-                }
+                TensorDataType.FLOAT32 -> outputPtr.readBytes(outputData.length.toInt()).toFloatArray()
 
-                TensorDataType.INT32 -> {
-                    outputPtr.readBytes(outputData.length.toInt()).toIntArray()
-                }
+                TensorDataType.INT32 -> outputPtr.readBytes(outputData.length.toInt()).toIntArray()
 
-                TensorDataType.UINT8 -> {
-                    outputByteArray.map { it.toUByte() }.toUByteArray()
-                }
+                TensorDataType.UINT8 -> outputByteArray.map { it.toUByte() }.toUByteArray()
 
-                TensorDataType.INT64 -> {
-                    outputPtr.readBytes(outputData.length.toInt()).toLongArray()
-                }
+                TensorDataType.INT64 -> outputPtr.readBytes(outputData.length.toInt()).toLongArray()
             }
 
             // Assign the result to output container
