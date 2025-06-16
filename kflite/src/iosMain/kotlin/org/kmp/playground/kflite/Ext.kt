@@ -134,8 +134,12 @@ internal fun ImageBitmap.toUIImage(): UIImage? {
         false,
         kCGRenderingIntentDefault,
     ) ?: return null
+    val uiImage = UIImage.imageWithCGImage(cgImage)
+    uiImage.size.useContents {
+        println("Original UIImage size: ${this.width}x${this.height}")
+    }
 
-    return UIImage.imageWithCGImage(cgImage)
+    return uiImage
 }
 
 
@@ -153,6 +157,9 @@ fun UIImage.scaleTo(width: Int, height: Int): UIImage {
     val scaledImage = UIGraphicsGetImageFromCurrentImageContext()
     UIGraphicsEndImageContext()
 
+    scaledImage?.size?.useContents {
+        println("Original scaled UIImage size: ${this.width}x${this.height}")
+    }
     return scaledImage ?: error("Failed to scale image")
 }
 
@@ -212,3 +219,21 @@ fun Int.toByteList(): List<Byte> = listOf(
     ((this shr 16) and 0xFF).toByte(),
     ((this shr 24) and 0xFF).toByte()
 )
+
+
+fun FloatArray.reshape3D(shape: IntArray): Array<Array<FloatArray>> {
+    require(shape.size == 3) { "Only 3D reshaping is supported, got shape: ${shape.joinToString()}" }
+    val (d1, d2, d3) = shape
+    require(this.size == d1 * d2 * d3) {
+        "Shape mismatch: expected ${d1 * d2 * d3} elements, but got ${this.size}"
+    }
+
+    var index = 0
+    return Array(d1) {
+        Array(d2) {
+            FloatArray(d3) {
+                this[index++]
+            }
+        }
+    }
+}

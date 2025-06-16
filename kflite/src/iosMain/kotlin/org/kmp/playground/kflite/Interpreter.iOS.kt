@@ -91,6 +91,7 @@ actual class Interpreter actual constructor(model: ByteArray, options: Interpret
     ) {
         if (inputs.size > getInputTensorCount()) throw IllegalArgumentException("Wrong inputs dimension.")
 
+        println("Input size: ${(inputs[0] as NSData).length}")
         inputs.forEachIndexed { index, input ->
             val inputTensor = getInputTensor(index)
             println("inputTensor: $input")
@@ -118,21 +119,16 @@ actual class Interpreter actual constructor(model: ByteArray, options: Interpret
             outputData.bytes?.reinterpret<ByteVar>()?.readBytes(outputData.length.toInt())
                 ?.copyInto(outputByteArray)
 
+            val outputPtr = outputData.bytes?.reinterpret<ByteVar>()
+            requireNotNull(outputPtr) { "outputData.bytes was null" }
+
             val typedOutput: Any = when (outputTensor.dataType) {
                 TensorDataType.FLOAT32 -> {
-                    val floatCount = outputByteArray.size / Float.SIZE_BYTES
-                    val buffer = outputByteArray.usePinned {
-                        it.addressOf(0).reinterpret<FloatVar>().readBytes(floatCount)
-                    }
-                    buffer.toFloatArray()
+                    outputPtr.readBytes(outputData.length.toInt()).toFloatArray()
                 }
 
                 TensorDataType.INT32 -> {
-                    val intCount = outputByteArray.size / Int.SIZE_BYTES
-                    val buffer = outputByteArray.usePinned {
-                        it.addressOf(0).reinterpret<IntVar>().readBytes(intCount)
-                    }
-                    buffer.toIntArray()
+                    outputPtr.readBytes(outputData.length.toInt()).toIntArray()
                 }
 
                 TensorDataType.UINT8 -> {
@@ -140,11 +136,7 @@ actual class Interpreter actual constructor(model: ByteArray, options: Interpret
                 }
 
                 TensorDataType.INT64 -> {
-                    val longCount = outputByteArray.size / Long.SIZE_BYTES
-                    val buffer = outputByteArray.usePinned {
-                        it.addressOf(0).reinterpret<LongVar>().readBytes(longCount)
-                    }
-                    buffer.toLongArray()
+                    outputPtr.readBytes(outputData.length.toInt()).toLongArray()
                 }
             }
 
@@ -158,19 +150,21 @@ actual class Interpreter actual constructor(model: ByteArray, options: Interpret
                     if (outputContainer.isNotEmpty() && outputContainer[0] is Array<*>) {
                         @Suppress("UNCHECKED_CAST")
                         val outer = outputContainer as Array<Array<FloatArray>>
-                        val flat = typedOutput as FloatArray
+                        @Suppress("UNCHECKED_CAST")
+                        val reshaped = typedOutput as FloatArray
 
                         val totalSize = outer.size * outer[0].size * outer[0][0].size
-                        require(flat.size == totalSize) {
-                            println("The outer size is ${outer.size} * ${outer[0].size} * ${outer[0][0].size}")
-                            "Flat array size (${flat.size}) does not match output container size ($totalSize)"
+                        val reshapedSize = reshaped.size
+                        println("The outer size is ${outer.size} * ${outer[0].size} * ${outer[0][0].size}")
+                        require(reshapedSize == totalSize) {
+                            "Flat array size (${reshaped.size}) does not match output container size ($totalSize)"
                         }
 
                         var index = 0
                         for (i in outer.indices) {
                             for (j in outer[i].indices) {
                                 for (k in outer[i][j].indices) {
-                                    outer[i][j][k] = flat[index++]
+                                    outer[i][j][k] = reshaped[index++]
                                 }
                             }
                         }

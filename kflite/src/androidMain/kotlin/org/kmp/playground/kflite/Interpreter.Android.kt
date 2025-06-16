@@ -49,6 +49,7 @@ actual class Interpreter actual constructor(model: ByteArray, options: Interpret
      * Runs model inference if the model takes multiple inputs, or returns multiple outputs.
      */
     actual fun run(inputs: List<Any>, outputs: Map<Int, Any>) {
+        println("Input size: ${inputs.toTypedArray().take(10).joinToString()}")
         tensorFlowInterpreter.runForMultipleInputsOutputs(inputs.toTypedArray(), outputs)
     }
 
