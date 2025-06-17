@@ -18,7 +18,7 @@ internal fun ByteArray.writeToTempFile(context: Context, prefix: String = "model
     tempFile.outputStream().use { output ->
         output.write(this)
         output.flush()
-        output.fd.sync() // Ensure all bytes are flushed to disk
+        output.fd.sync()
     }
     return tempFile
 }

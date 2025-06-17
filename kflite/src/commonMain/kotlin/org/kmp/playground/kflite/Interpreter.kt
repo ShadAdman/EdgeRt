@@ -14,7 +14,7 @@ internal expect class Interpreter(model: ByteArray, options: InterpreterOptions)
     fun getOutputTensorCount(): Int
 
     /**
-     * Gets the Tensor associated with the provdied input index.
+     * Gets the Tensor associated with the provided input index.
      *
      * @throws IllegalArgumentException if [index] is negative or is not smaller than the
      * number of model inputs.
@@ -22,7 +22,7 @@ internal expect class Interpreter(model: ByteArray, options: InterpreterOptions)
     fun getInputTensor(index: Int): Tensor
 
     /**
-     * Gets the Tensor associated with the provdied output index.
+     * Gets the Tensor associated with the provided output index.
      *
      * @throws IllegalArgumentException if [index] is negative or is not smaller than the
      * number of model inputs.

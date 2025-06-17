@@ -156,9 +156,8 @@ actual class Interpreter actual constructor(model: ByteArray, options: Interpret
                         val reshaped = typedOutput as FloatArray
 
                         val totalSize = outer.size * outer[0].size * outer[0][0].size
-                        val reshapedSize = reshaped.size
                         println("The outer size is ${outer.size} * ${outer[0].size} * ${outer[0][0].size}")
-                        require(reshapedSize == totalSize) {
+                        require(reshaped.size == totalSize) {
                             "Flat array size (${reshaped.size}) does not match output container size ($totalSize)"
                         }
 

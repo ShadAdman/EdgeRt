@@ -1,14 +1,12 @@
 package org.kmp.playground.kflite
 
-import android.graphics.Bitmap
+import android.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.core.graphics.get
+import androidx.core.graphics.scale
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
-import androidx.core.graphics.scale
-import androidx.core.graphics.get
-import android.graphics.Color
-
 
 
 actual fun ImageBitmap.toScaledByteBuffer(

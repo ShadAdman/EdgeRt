@@ -32,5 +32,5 @@ object Kflite {
     }
 
     private fun interpreterOrThrow(): Interpreter =
-        interpreter ?: error("Interpreter not initialized. Call TFLite.init() first.")
+        interpreter ?: error("Interpreter not initialized. Call KfLite.init() first.")
 }

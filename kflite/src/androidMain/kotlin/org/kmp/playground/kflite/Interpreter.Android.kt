@@ -23,7 +23,7 @@ actual class Interpreter actual constructor(model: ByteArray, options: Interpret
     actual fun getOutputTensorCount(): Int = tensorFlowInterpreter.outputTensorCount
 
     /**
-     * Gets the Tensor associated with the provdied input index.
+     * Gets the Tensor associated with the provided input index.
      *
      * @throws IllegalArgumentException if [index] is negative or is not smaller than the
      * number of model inputs.
@@ -31,7 +31,7 @@ actual class Interpreter actual constructor(model: ByteArray, options: Interpret
     actual fun getInputTensor(index: Int): Tensor = tensorFlowInterpreter.getInputTensor(index).toTensor()
 
     /**
-     * Gets the Tensor associated with the provdied output index.
+     * Gets the Tensor associated with the provided output index.
      *
      * @throws IllegalArgumentException if [index] is negative or is not smaller than the
      * number of model inputs.

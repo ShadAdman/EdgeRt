@@ -220,21 +220,3 @@ fun Int.toByteList(): List<Byte> = listOf(
     ((this shr 16) and 0xFF).toByte(),
     ((this shr 24) and 0xFF).toByte()
 )
-
-
-fun FloatArray.reshape3D(shape: IntArray): Array<Array<FloatArray>> {
-    require(shape.size == 3) { "Only 3D reshaping is supported, got shape: ${shape.joinToString()}" }
-    val (d1, d2, d3) = shape
-    require(this.size == d1 * d2 * d3) {
-        "Shape mismatch: expected ${d1 * d2 * d3} elements, but got ${this.size}"
-    }
-
-    var index = 0
-    return Array(d1) {
-        Array(d2) {
-            FloatArray(d3) {
-                this[index++]
-            }
-        }
-    }
-}

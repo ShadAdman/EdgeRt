@@ -20,6 +20,7 @@ actual class Tensor @OptIn(ExperimentalForeignApi::class) constructor(
     @OptIn(ExperimentalForeignApi::class)
     actual val shape: IntArray
         get() {
+            @Suppress("UNCHECKED_CAST")
             val rawShapeArr = errorHandled { errPtr ->
                 platformTensor.shapeWithError(errPtr)
             } as List<NSNumber>

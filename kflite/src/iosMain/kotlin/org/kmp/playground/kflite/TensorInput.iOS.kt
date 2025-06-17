@@ -16,6 +16,6 @@ actual fun ImageBitmap.toScaledByteBuffer(
     checkNotNull(pixelData) { "Failed to extract RGB byte array" }
 
     println("RGB byte array size: ${pixelData.size}")
-    println("First 10 bytes: ${pixelData.take(10)}")
+    println("First 10 bytes of RGB byte array: ${pixelData.take(10)}")
     return pixelData.toNSData()
 }
