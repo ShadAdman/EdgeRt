@@ -18,14 +18,15 @@ import kotlinx.cinterop.*
 actual class Interpreter actual constructor(model: ByteArray, options: InterpreterOptions) {
 
     @OptIn(ExperimentalForeignApi::class)
-    private val tflInterpreter: PlatformInterpreter = errorHandled { errPtr ->
-        PlatformInterpreter(model.writeToTempFile(), options.tflInterpreterOptions, errPtr)
-    }!!
+    private var tflInterpreter: PlatformInterpreter? = null
 
     init {
-
+        tflInterpreter = errorHandled { errPtr ->
+            PlatformInterpreter(model.writeToTempFile(), options.tflInterpreterOptions, errPtr)
+        }!!
         errorHandled { errPtr ->
-            tflInterpreter.allocateTensorsWithError(errPtr)
+            val interpreter = requireNotNull(tflInterpreter) { "Interpreter has been closed or not initialized." }
+            interpreter.allocateTensorsWithError(errPtr)
         }
     }
 
@@ -33,14 +34,16 @@ actual class Interpreter actual constructor(model: ByteArray, options: Interpret
      * Gets the number of input tensors.
      */
     actual fun getInputTensorCount(): Int {
-        return tflInterpreter.inputTensorCount().toInt()
+        val interpreter = requireNotNull(tflInterpreter) { "Interpreter has been closed or not initialized." }
+        return interpreter.inputTensorCount().toInt()
     }
 
     /**
      * Gets the number of output Tensors.
      */
     actual fun getOutputTensorCount(): Int {
-        return tflInterpreter.outputTensorCount().toInt()
+        val interpreter = requireNotNull(tflInterpreter) { "Interpreter has been closed or not initialized." }
+        return interpreter.outputTensorCount().toInt()
     }
 
     /**
@@ -50,8 +53,9 @@ actual class Interpreter actual constructor(model: ByteArray, options: Interpret
      * number of model inputs.
      */
     actual fun getInputTensor(index: Int): Tensor {
+        val interpreter = requireNotNull(tflInterpreter) { "Interpreter has been closed or not initialized." }
         return errorHandled { errPtr ->
-            tflInterpreter.inputTensorAtIndex(index.toULong(), errPtr)
+            interpreter.inputTensorAtIndex(index.toULong(), errPtr)
         }!!.toTensor()
     }
 
@@ -62,8 +66,9 @@ actual class Interpreter actual constructor(model: ByteArray, options: Interpret
      * number of model inputs.
      */
     actual fun getOutputTensor(index: Int): Tensor {
+        val interpreter = requireNotNull(tflInterpreter) { "Interpreter has been closed or not initialized." }
         return errorHandled { errPtr ->
-            tflInterpreter.outputTensorAtIndex(index.toULong(), errPtr)
+            interpreter.outputTensorAtIndex(index.toULong(), errPtr)
         }!!.toTensor()
     }
 
@@ -71,8 +76,9 @@ actual class Interpreter actual constructor(model: ByteArray, options: Interpret
      * Resizes [index] input of the native model to the given [shape].
      */
     actual fun resizeInput(index: Int, shape: TensorShape) {
+        val interpreter = requireNotNull(tflInterpreter) { "Interpreter has been closed or not initialized." }
         errorHandled { errPtr ->
-            tflInterpreter.resizeInputTensorAtIndex(
+            interpreter.resizeInputTensorAtIndex(
                 index.toULong(),
                 shape.getNSNumberDimensionList(),
                 errPtr
@@ -82,14 +88,14 @@ actual class Interpreter actual constructor(model: ByteArray, options: Interpret
 
     /**
      * Runs model inference if the model takes multiple inputs, or returns multiple outputs.
-     *
-     * TODO: need to implement [outputs] applying.
      */
     actual fun run(
         inputs: List<Any>,
         outputs: Map<Int, Any>
     ) {
         if (inputs.size > getInputTensorCount()) throw IllegalArgumentException("Wrong inputs dimension.")
+        val interpreter = requireNotNull(tflInterpreter) { "Interpreter has been closed or not initialized." }
+
 
         println("Input size: ${(inputs[0] as NSData).length}")
         inputs.forEachIndexed { index, input ->
@@ -105,7 +111,7 @@ actual class Interpreter actual constructor(model: ByteArray, options: Interpret
 
         // Run inference
         errorHandled { errPtr ->
-            tflInterpreter.invokeWithError(errPtr)
+            interpreter.invokeWithError(errPtr)
         }
 
         // Collect outputs
@@ -125,7 +131,8 @@ actual class Interpreter actual constructor(model: ByteArray, options: Interpret
             requireNotNull(outputPtr) { "outputData.bytes was null" }
 
             val typedOutput: Any = when (outputTensor.dataType) {
-                TensorDataType.FLOAT32 -> outputPtr.readBytes(outputData.length.toInt()).toFloatArray()
+                TensorDataType.FLOAT32 -> outputPtr.readBytes(outputData.length.toInt())
+                    .toFloatArray()
 
                 TensorDataType.INT32 -> outputPtr.readBytes(outputData.length.toInt()).toIntArray()
 
@@ -144,6 +151,7 @@ actual class Interpreter actual constructor(model: ByteArray, options: Interpret
                     if (outputContainer.isNotEmpty() && outputContainer[0] is Array<*>) {
                         @Suppress("UNCHECKED_CAST")
                         val outer = outputContainer as Array<Array<FloatArray>>
+
                         @Suppress("UNCHECKED_CAST")
                         val reshaped = typedOutput as FloatArray
 
@@ -166,6 +174,7 @@ actual class Interpreter actual constructor(model: ByteArray, options: Interpret
                         error("Unsupported array shape in output container: ${outputContainer::class}")
                     }
                 }
+
                 else -> error("Unsupported output container type: ${outputContainer::class}")
             }
         }
@@ -175,6 +184,8 @@ actual class Interpreter actual constructor(model: ByteArray, options: Interpret
      * Release resources associated with the [Interpreter].
      */
     actual fun close() {
-        // TODO: ???
+        // (TFLInterpreter does not require explicit .close() in Objective-C/Swift,
+        // releasing the reference is sufficient for ARC to clean it up)
+        tflInterpreter = null
     }
 }
