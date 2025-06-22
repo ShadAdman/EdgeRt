@@ -137,7 +137,7 @@ mavenPublishing {
 
 signing {
     val keyId = System.getenv("ORG_GRADLE_PROJECT_signingInMemoryKeyId")
-    val key = System.getenv("ORG_GRADLE_PROJECT_signingInMemooryKey")
+    val key = System.getenv("ORG_GRADLE_PROJECT_signingInMemoryKey")
     val keyPassword = System.getenv("ORG_GRADLE_PROJECT_signingInMemoryKeyPassword")
 
     useInMemoryPgpKeys(
