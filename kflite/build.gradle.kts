@@ -9,7 +9,7 @@ plugins {
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.kotlinCocoapods)
     alias(libs.plugins.vanniktechPublish)
-    id(libs.versions.signing.get())
+    id("signing")
 }
 
 kotlin {
@@ -112,9 +112,9 @@ signing {
     val keyPassword = System.getenv("ORG_GRADLE_PROJECT_signingInMemoryKeyPassword")
 
     useInMemoryPgpKeys(
-        "CB56EE58",
-        File("/Users/shadmanadman/secring.gpg").readText(),
-        "Vmakmajly7"
+        keyId,
+        key,
+        keyPassword
     )
 }
 
