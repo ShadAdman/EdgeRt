@@ -18,17 +18,7 @@ kotlin {
         namespace = "org.kmp.playground.kflite"
         compileSdk = libs.versions.android.targetSdk.get().toInt()
         minSdk = libs.versions.android.minSdk.get().toInt()
-        compilations.configureEach {
-        }
     }
-
-//    androidTarget {
-//        @OptIn(ExperimentalKotlinGradlePluginApi::class)
-//        compilerOptions {
-//            jvmTarget.set(JvmTarget.JVM_11)
-//        }
-//        publishLibraryVariants("release")
-//    }
 
 
     iosX64()
@@ -79,6 +69,8 @@ kotlin {
 }
 
 mavenPublishing {
+    signAllPublications()
+
     publishToMavenCentral(CENTRAL_PORTAL)
     val tag: String? = System.getenv("GITHUB_REF")?.split("/")?.lastOrNull()
 
@@ -112,7 +104,6 @@ mavenPublishing {
             url = "https://github.com/shadmanadman/kflite"
         }
     }
-    signAllPublications()
 }
 
 signing {
@@ -121,9 +112,9 @@ signing {
     val keyPassword = System.getenv("ORG_GRADLE_PROJECT_signingInMemoryKeyPassword")
 
     useInMemoryPgpKeys(
-        keyId,
-        key,
-        keyPassword
+        "CB56EE58",
+        File("/Users/shadmanadman/secring.gpg").readText(),
+        "Vmakmajly7"
     )
 }
 
