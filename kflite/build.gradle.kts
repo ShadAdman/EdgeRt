@@ -133,15 +133,11 @@ signing {
     val keyId = System.getenv("ORG_GRADLE_PROJECT_signingInMemoryKeyId")
     val key = System.getenv("ORG_GRADLE_PROJECT_signingInMemoryKey")
     val keyPassword = System.getenv("ORG_GRADLE_PROJECT_signingInMemoryKeyPassword")
-
-    println("keyId: $keyId, keyPassword: $keyPassword")
     useInMemoryPgpKeys(
         keyId,
         key,
         keyPassword
     )
-
-    //sign(publishing.publications)
 }
 
 
