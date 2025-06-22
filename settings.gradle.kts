@@ -26,5 +26,5 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-rootProject.name = "KfliteLib"
+rootProject.name = "Kflite"
 include(":kflite")
