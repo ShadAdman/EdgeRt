@@ -91,10 +91,6 @@ android {
     }
 }
 
-dependencies {
-    debugImplementation(compose.uiTooling)
-}
-
 mavenPublishing {
     signAllPublications()
 
@@ -133,12 +129,6 @@ mavenPublishing {
     }
 }
 
-afterEvaluate {
-    signing {
-        sign(publishing.publications["androidRelease"])
-    }
-}
-
 signing {
     val keyId = System.getenv("ORG_GRADLE_PROJECT_signingInMemoryKeyId")
     val key = System.getenv("ORG_GRADLE_PROJECT_signingInMemoryKey")
@@ -149,6 +139,8 @@ signing {
         key,
         keyPassword
     )
+
+    sign(publishing.publications)
 }
 
 
