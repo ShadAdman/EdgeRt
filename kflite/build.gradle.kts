@@ -129,10 +129,6 @@ mavenPublishing {
     }
 }
 
-tasks.matching { it.name == "signAndroidReleasePublication" }.configureEach {
-    enabled = false
-}
-
 signing {
     val keyId = System.getenv("ORG_GRADLE_PROJECT_signingInMemoryKeyId")
     val key = System.getenv("ORG_GRADLE_PROJECT_signingInMemoryKey")
