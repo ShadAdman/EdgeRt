@@ -8,8 +8,8 @@ width="80" height="15" alt="WTFPL" /></a>
 
 <p align="center">kflite is a Kotlin Multiplatform library to run TensorFlow lite models on iOS and Android targets.</p>
 
-I would say kflite is a fresh and improved version of [moko tensorflow](https://github.com/icerockdev/moko-tensorflow) with better
-support. It use `composeResources` and no need for platfrom-specefic code.
+<p align="center">I would say kflite is a fresh and improved version of <a href= "https://github.com/icerockdev/moko-tensorflow">moko tensorflow</a> with better
+support. It use `composeResources` and no need for platfrom-specefic code.</p>
 
 ## Getting Started
 ### Adding dependencies
