@@ -52,7 +52,8 @@ That is a linker error. It simply means the Cocoapods framework is not linked co
 kflite uses the new compose resources. So you just place your model in the `composeResources->files` folder.
 
 ### Run model
-You don't need any platform specific code, just in commonMain.
+You don't need any platform specific code, just commonMain.
+
 1- Call init on `Kflite` and pass the model as byte array:
 ```
   Kflite.init(Res.readBytes("files/efficientdet-lite2.tflite"))
