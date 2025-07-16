@@ -7,6 +7,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import org.kmp.playground.kflite.Normalization
+import org.kmp.playground.kflite.Box
 
 
 
@@ -45,4 +46,3 @@ fun PathUsage(){
 }
 
 
-data class Box(val cx: Float, val cy: Float, val w: Float, val h: Float)
