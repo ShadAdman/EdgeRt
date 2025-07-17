@@ -114,7 +114,7 @@ val normalizedBox = Normalization(
 The `normalizedBox` will be a data class contain the new ordinations. You can use it to point the object 
 or create a bounding box.
 
-* Other supported Formats:
+**Other supported Formats:**
 - `Normalization.pascalVOC(x_min, y_min, x_max, y_max)`
 - `Normalization.coco(x, y, width, height)`
 - `Normalization.yolo(cx, cy, width, height)`
