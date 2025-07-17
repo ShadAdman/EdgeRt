@@ -38,15 +38,15 @@ fun Normalization.PascalVOC(x_min: Float, y_min: Float, x_max: Float, y_max: Flo
     val center_x = (x_max + x_min) / 2
     val center_y = (y_max + y_min) / 2
 
-    return ResizeBox(
+    return resizeBox(
         Box(
-            center_x / modelimg_width,
-            center_y / modelimg_height,
-            w / modelimg_width,
-            h / modelimg_height
+            center_x / modelImagWidth,
+            center_y / modelImageHeight,
+            w / modelImagWidth,
+            h / modelImageHeight
         ),
-        image_width,
-        image_height
+        originalImageWidth,
+        originalImageHeight
     )
 }
 
@@ -54,28 +54,28 @@ fun Normalization.PascalVOC(x_min: Float, y_min: Float, x_max: Float, y_max: Flo
 fun Normalization.COCO(x: Float, y: Float, width: Float, height: Float): Box {
     val center_x = x + width / 2
     val center_y = y + height / 2
-    return ResizeBox(
+    return resizeBox(
         Box(
-            center_x / modelimg_width,
-            center_y / modelimg_height,
-            width / modelimg_width,
-            height / modelimg_height
+            center_x / modelImagWidth,
+            center_y / modelImageHeight,
+            width / modelImagWidth,
+            height / modelImageHeight
         ),
-        image_width,
-        image_height
+        originalImageWidth,
+        originalImageHeight
     )
 }
 
 fun Normalization.YOLO(center_x: Float, center_y: Float, width: Float, height: Float): Box {
-    return ResizeBox(
+    return resizeBox(
         Box(
-            center_x / modelimg_width,
-            center_y / modelimg_height,
-            width / modelimg_width,
-            height / modelimg_height
+            center_x / modelImagWidth,
+            center_y / modelImageHeight,
+            width / modelImagWidth,
+            height / modelImageHeight
         ),
-        image_width,
-        image_height)
+        originalImageWidth,
+        originalImageHeight)
 }
 
 fun Normalization.TFObjectDetection(top: Float, left: Float, bottom: Float, right: Float): Box {
@@ -84,15 +84,15 @@ fun Normalization.TFObjectDetection(top: Float, left: Float, bottom: Float, righ
     val center_x = (right + left) / 2
     val center_y = (bottom + top) / 2
 
-    return ResizeBox(
+    return resizeBox(
         Box(
-            center_x / modelimg_width,
-            center_y / modelimg_height,
-            w / modelimg_width,
-            h / modelimg_height
+            center_x / modelImagWidth,
+            center_y / modelImageHeight,
+            w / modelImagWidth,
+            h / modelImageHeight
         ),
-        image_width,
-        image_height)
+        originalImageWidth,
+        originalImageHeight)
 }
 
 fun Normalization.TFRecordVariant(x_min: Float, y_min: Float, x_max: Float, y_max: Float): Box {
@@ -101,18 +101,18 @@ fun Normalization.TFRecordVariant(x_min: Float, y_min: Float, x_max: Float, y_ma
     val center_x = (x_max + x_min) / 2
     val center_y = (y_max + y_min) / 2
 
-    return ResizeBox(
+    return resizeBox(
         Box(
-            center_x / modelimg_width,
-            center_y / modelimg_height,
-            w / modelimg_width,
-            h / modelimg_height
+            center_x / modelImagWidth,
+            center_y / modelImageHeight,
+            w / modelImagWidth,
+            h / modelImageHeight
         ),
-        image_width,
-        image_height)
+        originalImageWidth,
+        originalImageHeight)
 }
 
-fun ResizeBox(box: Box, origW: Float, origH:Float): Box{
+private fun resizeBox(box: Box, origW: Float, origH:Float): Box{
     return Box(
         box.cx * origW,
         box.cy * origH,

@@ -9,14 +9,14 @@ width="80" height="15" alt="WTFPL" /></a>
 <p align="center">kflite is a Kotlin Multiplatform library to run TensorFlow lite models on iOS and Android targets.</p>
 
 <p align="center">I would say kflite is a fresh and improved version of <a href= "https://github.com/icerockdev/moko-tensorflow">moko tensorflow</a> with better
-support. It use `composeResources` and no need for platfrom-specefic code.</p>
+support. It use `composeResources` and no need for platform-specific code.</p>
 
 ## Getting Started
 ### Adding dependencies
 1- Add it in your `commonMain.dependencies` :
 
   ```
-  implementation("io.github.shadmanadman:kflite:0.62.10")
+  implementation("io.github.shadmanadman:kflite:0.70.0")
   ```
 2- Because KMP dos not pull the CocoaPods dependencies into your consumer project,
 you need to add tflite dependency for ios manually. Prepare your project to use cocoapods and add the following dependency:
@@ -96,13 +96,35 @@ You don't need any platform specific code, just commonMain.
 ```
   Kflite.close()
 ```
+### Normalizing
+You can normalize the model output:
+```
+val normalizedBox = Normalization(
+        originalImageHeight = 1080f, //Original input height
+        originalImageWidth = 2010f, // Original input width
+        modelImagWidth = 680f, //Model input width
+        modelImageHeight = 680f //Model input height
+    ).YOLO(
+        center_x = 20f, //CenterX of Model Output From The Model
+        center_y = 20f,//CenterY of Model Output From The Model
+        width = 100f,  //Width of Model Output From The Model
+        height = 120f //Height of Model Output From The Model
+    )
+```
+The `normalizedBox` will be a data class contain the new ordinations. You can use it to point the object 
+or create a bounding box.
 
+* Other supported Formats:
+- `Normalization.pascalVOC(x_min, y_min, x_max, y_max)`
+- `Normalization.coco(x, y, width, height)`
+- `Normalization.yolo(cx, cy, width, height)`
+- `Normalization.tfObjectDetection(top, left, bottom, right)`
+- `Normalization.tfRecordVariant(x_min, y_min, x_max, y_max)`
 
 ## What's next
 - Live detection with Camera feed
-- Normalizing bounding box
 
-### Licence
+## Licence
 ```
                DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE 
                     Version 2, December 2004 
