@@ -16,7 +16,7 @@ support. It use `composeResources` and no need for platform-specific code.</p>
 1- Add it in your `commonMain.dependencies` :
 
   ```
-  implementation("io.github.shadmanadman:kflite:0.70.0")
+  implementation("io.github.shadmanadman:kflite:0.70.1")
   ```
 2- Because KMP dos not pull the CocoaPods dependencies into your consumer project,
 you need to add tflite dependency for ios manually. Prepare your project to use cocoapods and add the following dependency:
