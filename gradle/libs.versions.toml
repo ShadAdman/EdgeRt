@@ -6,6 +6,7 @@ android-targetSdk = "36"
 androidx-activity = "1.10.1"
 androidx-lifecycle = "2.9.0"
 composeMultiplatform = "1.8.1"
+tensorflowLiteGpuApi = "1.2.2"
 tflite = "2.17.0"
 kotlin = "2.1.21"
 vanniktech-publish = "0.32.0"
@@ -18,6 +19,7 @@ androidx-lifecycle-viewmodel = { module = "org.jetbrains.androidx.lifecycle:life
 androidx-lifecycle-runtimeCompose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
 
 # tflite for Android
+tfliteGpuApi = { module = "org.tensorflow:tensorflow-lite-gpu-api", version.ref = "tflite" }
 tflite = { module = "org.tensorflow:tensorflow-lite", version.ref = "tflite" }
 tfliteGPU = { module = "org.tensorflow:tensorflow-lite-gpu", version.ref = "tflite" }
 

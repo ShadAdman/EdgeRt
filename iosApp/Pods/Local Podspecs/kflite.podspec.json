@@ -14,7 +14,9 @@
     "ios": "16.0"
   },
   "dependencies": {
-    "TensorFlowLiteObjC": []
+    "TensorFlowLiteObjC": [],
+    "TensorFlowLiteObjC/CoreML": [],
+    "TensorFlowLiteObjC/Metal": []
   },
   "xcconfig": {
     "ENABLE_USER_SCRIPT_SANDBOXING": "NO"

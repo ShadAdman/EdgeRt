@@ -1,11 +1,11 @@
 CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = NO
 ENABLE_USER_SCRIPT_SANDBOXING = NO
 EXCLUDED_ARCHS[sdk=iphonesimulator*] = i386
-FRAMEWORK_SEARCH_PATHS = $(inherited) "${PODS_CONFIGURATION_BUILD_DIR}/TensorFlowLiteObjC" "${PODS_ROOT}/../../kflite/build/cocoapods/framework" "${PODS_ROOT}/TensorFlowLiteC/Frameworks" "${PODS_XCFRAMEWORKS_BUILD_DIR}/TensorFlowLiteC/Core"
+FRAMEWORK_SEARCH_PATHS = $(inherited) "${PODS_CONFIGURATION_BUILD_DIR}/TensorFlowLiteObjC" "${PODS_ROOT}/../../kflite/build/cocoapods/framework" "${PODS_ROOT}/TensorFlowLiteC/Frameworks" "${PODS_XCFRAMEWORKS_BUILD_DIR}/TensorFlowLiteC/Core" "${PODS_XCFRAMEWORKS_BUILD_DIR}/TensorFlowLiteC/CoreML" "${PODS_XCFRAMEWORKS_BUILD_DIR}/TensorFlowLiteC/Metal"
 GCC_PREPROCESSOR_DEFINITIONS = $(inherited) COCOAPODS=1
 HEADER_SEARCH_PATHS = $(inherited) "${PODS_CONFIGURATION_BUILD_DIR}/TensorFlowLiteObjC/TFLTensorFlowLite.framework/Headers"
 LD_RUNPATH_SEARCH_PATHS = $(inherited) '@executable_path/Frameworks' '@loader_path/Frameworks'
-OTHER_LDFLAGS = $(inherited) -ObjC -l"c++" -framework "TFLTensorFlowLite" -framework "TensorFlowLiteC" -framework "kflite"
+OTHER_LDFLAGS = $(inherited) -ObjC -l"c++" -framework "TFLTensorFlowLite" -framework "TensorFlowLiteC" -framework "TensorFlowLiteCCoreML" -framework "TensorFlowLiteCMetal" -framework "kflite" -weak_framework "CoreML" -weak_framework "Metal"
 OTHER_MODULE_VERIFIER_FLAGS = $(inherited) "-F${PODS_CONFIGURATION_BUILD_DIR}/TensorFlowLiteC" "-F${PODS_CONFIGURATION_BUILD_DIR}/TensorFlowLiteObjC" "-F${PODS_CONFIGURATION_BUILD_DIR}/kflite"
 PODS_BUILD_DIR = ${BUILD_DIR}
 PODS_CONFIGURATION_BUILD_DIR = ${PODS_BUILD_DIR}/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)

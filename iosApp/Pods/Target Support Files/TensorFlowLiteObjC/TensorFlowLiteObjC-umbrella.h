@@ -17,6 +17,8 @@
 #import "TFLSignatureRunner.h"
 #import "TFLTensor.h"
 #import "TFLTensorFlowLite.h"
+#import "TFLCoreMLDelegate.h"
+#import "TFLMetalDelegate.h"
 
 FOUNDATION_EXPORT double TFLTensorFlowLiteVersionNumber;
 FOUNDATION_EXPORT const unsigned char TFLTensorFlowLiteVersionString[];

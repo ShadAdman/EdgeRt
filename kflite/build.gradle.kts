@@ -34,13 +34,17 @@ kotlin {
         ios.deploymentTarget = "16.0"
         podfile = project.file("../iosApp/Podfile")
         pod("TensorFlowLiteObjC", moduleName = "TFLTensorFlowLite")
+        pod("TensorFlowLiteObjC/Metal")
+        pod("TensorFlowLiteObjC/CoreML")
+
+
         framework {
             baseName = "kflite"
             isStatic = true
-            linkerOpts(
-                project.file("../iosApp/Pods/TensorFlowLiteC/Frameworks").path.let { "-F$it" },
-                "-framework", "TensorFlowLiteC"
-            )
+//            linkerOpts(
+//                project.file("../iosApp/Pods/TensorFlowLiteC/Frameworks").path.let { "-F$it" },
+//                "-framework", "TensorFlowLiteC"
+//            )
         }
     }
 
@@ -52,6 +56,8 @@ kotlin {
             implementation(libs.androidx.activity.compose)
             implementation(libs.tflite)
             implementation(libs.tfliteGPU)
+            implementation(libs.tfliteGpuApi)
+
         }
         commonMain.dependencies {
             implementation(compose.runtime)

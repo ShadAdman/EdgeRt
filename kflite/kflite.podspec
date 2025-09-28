@@ -10,6 +10,8 @@ Pod::Spec.new do |spec|
     spec.libraries                = 'c++'
     spec.ios.deployment_target    = '16.0'
     spec.dependency 'TensorFlowLiteObjC'
+    spec.dependency 'TensorFlowLiteObjC/CoreML'
+    spec.dependency 'TensorFlowLiteObjC/Metal'
                 
     if !Dir.exist?('build/cocoapods/framework/kflite.framework') || Dir.empty?('build/cocoapods/framework/kflite.framework')
         raise "

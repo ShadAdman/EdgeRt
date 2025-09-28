@@ -1,19 +1,35 @@
 PODS:
   - kflite (1.0):
     - TensorFlowLiteObjC
+    - TensorFlowLiteObjC/CoreML
+    - TensorFlowLiteObjC/Metal
   - TensorFlowLiteC (2.17.0):
     - TensorFlowLiteC/Core (= 2.17.0)
   - TensorFlowLiteC/Core (2.17.0)
+  - TensorFlowLiteC/CoreML (2.17.0):
+    - TensorFlowLiteC/Core
+  - TensorFlowLiteC/Metal (2.17.0):
+    - TensorFlowLiteC/Core
   - TensorFlowLiteObjC (2.17.0):
     - TensorFlowLiteObjC/Core (= 2.17.0)
   - TensorFlowLiteObjC/Core (2.17.0):
     - TensorFlowLiteC (= 2.17.0)
     - TensorFlowLiteObjC/Privacy (= 2.17.0)
+  - TensorFlowLiteObjC/CoreML (2.17.0):
+    - TensorFlowLiteC/CoreML (= 2.17.0)
+    - TensorFlowLiteObjC/Core (= 2.17.0)
+    - TensorFlowLiteObjC/Privacy (= 2.17.0)
+  - TensorFlowLiteObjC/Metal (2.17.0):
+    - TensorFlowLiteC/Metal (= 2.17.0)
+    - TensorFlowLiteObjC/Core (= 2.17.0)
+    - TensorFlowLiteObjC/Privacy (= 2.17.0)
   - TensorFlowLiteObjC/Privacy (2.17.0)
 
 DEPENDENCIES:
   - kflite (from `../kflite`)
-  - TensorFlowLiteC
+  - TensorFlowLiteObjC
+  - TensorFlowLiteObjC/CoreML
+  - TensorFlowLiteObjC/Metal
 
 SPEC REPOS:
   trunk:
@@ -25,10 +41,10 @@ EXTERNAL SOURCES:
     :path: "../kflite"
 
 SPEC CHECKSUMS:
-  kflite: 09268abb695e190b33d33f20790bb840d15166ea
+  kflite: efc3ef9661bd39b3be03e2a7cbc10e65c55fd54b
   TensorFlowLiteC: eac6d689a8d391d1b202dc59e3d9165ba64aaf73
   TensorFlowLiteObjC: 72e1fa903465cd6a8d3d614c1474c5aad7635bb7
 
-PODFILE CHECKSUM: 6121ab1f0048039faf3bd5e6a24ca515c3909fd9
+PODFILE CHECKSUM: 2d571fac26c36a342f9786c54399c4576687e40f
 
 COCOAPODS: 1.16.2
