@@ -19,8 +19,7 @@ actual class InterpreterOptions actual constructor(
         setNumberOfThreads(numThreads.toULong())
 
         when (delegateType) {
-            DelegateType.CPU -> {
-            }
+            DelegateType.CPU -> Unit
 
             DelegateType.GPU_METAL -> TFLMetalDelegateOptions().apply {
                 precisionLossAllowed = allowFp16PrecisionForFp32

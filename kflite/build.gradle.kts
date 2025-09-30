@@ -34,17 +34,21 @@ kotlin {
         ios.deploymentTarget = "16.0"
         podfile = project.file("../iosApp/Podfile")
         pod("TensorFlowLiteObjC", moduleName = "TFLTensorFlowLite")
-        pod("TensorFlowLiteObjC/Metal")
-        pod("TensorFlowLiteObjC/CoreML")
+        pod("TensorFlowLiteObjC/Metal") {
+            linkOnly = true
+        }
+        pod("TensorFlowLiteObjC/CoreML") {
+            linkOnly = true
+        }
 
 
         framework {
             baseName = "kflite"
             isStatic = true
-//            linkerOpts(
-//                project.file("../iosApp/Pods/TensorFlowLiteC/Frameworks").path.let { "-F$it" },
-//                "-framework", "TensorFlowLiteC"
-//            )
+            linkerOpts(
+                project.file("../iosApp/Pods/TensorFlowLiteObjC/Frameworks").path.let { "-F$it" },
+                "-framework", "TensorFlowLiteObjC"
+            )
         }
     }
 
@@ -106,7 +110,7 @@ mavenPublishing {
     coordinates(
         groupId = libs.versions.groupId.get(),
         artifactId = libs.versions.artifactId.get(),
-        version = tag ?: "1.42.0-SNAPSHOT"
+        version = tag ?: "1.53.0-SNAPSHOT"
     )
 
     pom {

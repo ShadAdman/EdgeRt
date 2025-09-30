@@ -5,13 +5,11 @@ width="80" height="15" alt="WTFPL" /></a>
 [![Gradle](https://img.shields.io/badge/Gradle-8.x-green.svg?style=flat-square&logo=gradle)](https://gradle.org/)
 
 ![](poster.jpg)
-
-<p align="center">kflite is a Kotlin Multiplatform library to run TensorFlow lite models on iOS and Android targets.</p>
-
 <p align="center">I would say kflite is a fresh and improved version of <a href= "https://github.com/icerockdev/moko-tensorflow">moko tensorflow</a> with better
 support. It use `composeResources` and no need for platform-specific code.</p>
 
 ## Getting Started
+Nothing explain's better then a producer. Checkout [KfliteSample](https://github.com/shadmanadman/kflite-sample) for a clear vision.
 ### Adding dependencies
 1- Add it in your `commonMain.dependencies` :
 
@@ -47,8 +45,7 @@ If you get the following error during ios build:
 ```
 clang: error: linker command failed with exit code 1 (use -v to see invocation)
 ```
-That is a linker error. It simply means the Cocoapods framework is not linked correctly to your ios app. 
-#### You can refer to [KfliteSample](https://github.com/shadmanadman/kflite-sample) for a clear vision.
+That is a linker error. It simply means the Cocoapods framework is not linked correctly to your ios app.
 
 ### Place model
 kflite uses the new compose resources. So you just place your model in the `composeResources->files` folder.
@@ -56,9 +53,17 @@ kflite uses the new compose resources. So you just place your model in the `comp
 ### Run model
 You don't need any platform specific code, just commonMain.
 
-1- Call init on `Kflite` and pass the model as byte array:
+1- Call init on `Kflite` and pass the model as byte array.
+ - options is not mandatory. Set values carefully, Make sure your model supports each one.
 ```
-  Kflite.init(Res.readBytes("files/efficientdet-lite2.tflite"))
+         Kflite.init(
+            model = Res.readBytes("files/efficientdet-lite2.tflite"),
+            options = InterpreterOptions(
+                numThreads = 4,
+                delegateType = DelegateType.NNAPI_COREML,
+                allowFp16PrecisionForFp32 = true
+            )
+        )
 ```
 2- Prepare the input data:
 ```

@@ -26,13 +26,11 @@ actual class InterpreterOptions(
     val compatList = CompatibilityList()
 
     internal val tensorFlowInterpreterOptions = AndroidPlatformInterpreterOptions()
-
+        .setNumThreads(numThreads)
         .setAllowBufferHandleOutput(allowBufferHandleOutput)
         .apply {
             when (delegateType) {
-                DelegateType.CPU -> {
-                    setNumThreads(numThreads)
-                }
+                DelegateType.CPU -> Unit
 
                 DelegateType.GPU_METAL -> {
                     if (compatList.isDelegateSupportedOnThisDevice) {
@@ -50,7 +48,8 @@ actual class InterpreterOptions(
                                 GpuDelegateFactory.Options.INFERENCE_PREFERENCE_SUSTAINED_SPEED
                         }
                         addDelegate(GpuDelegateFactory(gpuOptions).create(RuntimeFlavor.APPLICATION))
-                    }
+                    } else
+                        println("Delegation is not supported on this device, Fall back to CPU.")
                 }
 
                 DelegateType.NNAPI_COREML -> {
@@ -59,7 +58,8 @@ actual class InterpreterOptions(
                             allowFp16 = allowFp16PrecisionForFp32
                         }
                         addDelegate(NnApiDelegate(nnOptions))
-                    }
+                    } else
+                        println("Delegation is not supported on this device, Fall back to CPU.")
                 }
             }
         }
