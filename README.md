@@ -5,116 +5,148 @@ width="80" height="15" alt="WTFPL" /></a>
 [![Gradle](https://img.shields.io/badge/Gradle-8.x-green.svg?style=flat-square&logo=gradle)](https://gradle.org/)
 
 ![](poster.jpg)
-<p align="center">I would say kflite is a fresh and improved version of <a href= "https://github.com/icerockdev/moko-tensorflow">moko tensorflow</a> with better
-support. It use `composeResources` and no need for platform-specific code.</p>
+<p align="center"> Kflite is a fresh, improved version of <a href="https://github.com/icerockdev/moko-tensorflow">moko-tensorflow</a> with better support. </br>It uses `composeResources` and requires no platform-specific code.</p>
+
+## Overview
+Kflite lets you load and run TensorFlow Lite (TFLite) models directly from your shared Kotlin code.
+It abstracts platform differences, and manages model loading, tensor creation, and inference through a unified API.
+
+Key advantages:
+
+- Works seamlessly with Compose Multiplatform using `composeResources`
+- Requires **no platform-specific setup** for Android or Desktop
+- Supports model normalization (`YOLO`, `COCO`, `PascalVOC`, `TF formats`)
+- Lightweight — minimal dependencies and zero reflection overhead
 
 ## Getting Started
-Nothing explain's better then a producer. Checkout [KfliteSample](https://github.com/shadmanadman/kflite-sample) for a clear vision.
-### Adding dependencies
-1- Add it in your `commonMain.dependencies` :
+For the fastest setup and a working example, see **[KfliteSample](https://github.com/shadmanadman/kflite-sample)**. </br>
+It demonstrates a full pipeline.
 
-  ```
-  implementation("io.github.shadmanadman:kflite:0.70.1")
-  ```
-2- Because KMP dos not pull the CocoaPods dependencies into your consumer project,
-you need to add tflite dependency for ios manually. Prepare your project to use cocoapods and add the following dependency:
+## Installation
+### Step 1 - Add dependencies
+Add this to your `commonMain.dependencies` :
+
+``` gradle
+implementation("io.github.shadmanadman:kflite:0.70.1")
 ```
-    iosX64()
-    iosArm64()
-    iosSimulatorArm64()
+### Step 2 - Configure CocoaPods for iOS
+Since KMP doesn’t automatically include CocoaPods dependencies, you need to manually add TensorFlow Lite for iOS. </br>
+Configure your project for CocoaPods and include:
+``` gradle
+iosX64()
+iosArm64()
+iosSimulatorArm64()
 
 
-    cocoapods {
-        summary = "Some description for the Shared Module"
-        homepage = "Link to the Shared Module homepage"
-        version = "1.0"
-        ios.deploymentTarget = "16.0"
-        podfile = project.file("../iosApp/Podfile")
-        pod("TensorFlowLiteObjC", moduleName = "TFLTensorFlowLite")
-        framework {
-            baseName = "ComposeApp"
-            isStatic = true
-            linkerOpts(
-                project.file("../iosApp/Pods/TensorFlowLiteC/Frameworks").path.let { "-F$it" },
-                "-framework", "TensorFlowLiteC"
-            )
-        }
+cocoapods {
+    summary = "Some description for the Shared Module"
+    homepage = "Link to the Shared Module homepage"
+    version = "1.0"
+    ios.deploymentTarget = "16.0"
+    podfile = project.file("../iosApp/Podfile")
+    pod("TensorFlowLiteObjC", moduleName = "TFLTensorFlowLite")
+    framework {
+        baseName = "ComposeApp"
+        isStatic = true
+        linkerOpts(
+            project.file("../iosApp/Pods/TensorFlowLiteC/Frameworks").path.let { "-F$it" },
+            "-framework", "TensorFlowLiteC"
+        )
     }
+}
 ```
 If you get the following error during ios build:
-```
+``` bash
 clang: error: linker command failed with exit code 1 (use -v to see invocation)
 ```
 That is a linker error. It simply means the Cocoapods framework is not linked correctly to your ios app.
 
-### Place model
-kflite uses the new compose resources. So you just place your model in the `composeResources->files` folder.
 
-### Run model
-You don't need any platform specific code, just commonMain.
+## Using a Model
 
-1- Call init on `Kflite` and pass the model as byte array.
+### Step 1 - Place model
+`kflite` uses the new compose resources. So you just place your `.tflite` model in the `composeResources->files` folder. 
+
+This makes it available to both Android and iOS via `Res.readBytes()`.
+
+
+### Step 2 - Initialize the model
+No platform-specific code needed — everything runs in `commonMain`.
+
+Kflite loads and prepares your model for inference with optional performance parameters. </br>
+Call init on `Kflite` and pass the model as byte array.
  - options is not mandatory. Set values carefully, Make sure your model supports each one.
-```
-         Kflite.init(
-            model = Res.readBytes("files/efficientdet-lite2.tflite"),
-            options = InterpreterOptions(
-                numThreads = 4,
-                delegateType = DelegateType.NNAPI_COREML,
-                allowFp16PrecisionForFp32 = true
-            )
-        )
-```
-2- Prepare the input data:
-```
-  // Prepare input data: Example model takes 4D array as an input, an image with 480x480 pixels
-  val inputImageWidth = Kflite.getInputTensor(0).shape[1]
-  val inputImageHeight = Kflite.getInputTensor(0).shape[2]
-  val modelInputSize =
-      FLOAT_TYPE_SIZE * inputImageWidth * inputImageHeight * PIXEL_SIZE
-      
-  // Creates ByteBuffer to hold the image data    
-  val inputImage =  imageResource(Res.drawable.example_model_input).toScaledByteBuffer(
-                    inputWidth = inputImageWidth,
-                    inputHeight = inputImageHeight,
-                    inputAllocateSize = modelInputSize
-                )   
-```
-3- Prepare the output data:
-```
-   // Prepare output data: Example model has 3D array as an output
-   val firstOutputShape = Kflite.getOutputTensor(0).shape[0]
-   val secondOutputShape = Kflite.getOutputTensor(0).shape[1]
-   val thirdOutputShape = Kflite.getOutputTensor(0).shape[2]
-
-   val modelOutputContainer = Array(firstOutputShape) {
-       Array(secondOutputShape) {
-           FloatArray(thirdOutputShape)
-       }
-   }
-```
-4- Run the model:
-```
-  Kflite.run(listOf(inputImage), mapOf(Pair(0,modelOutputContainer)))
-```
-5- Close the model after use:
-```
-  Kflite.close()
-```
-### Normalizing
-You can normalize the model output:
-```
-val normalizedBox = Normalization(
-        originalImageHeight = 1080f, //Original input height
-        originalImageWidth = 2010f, // Original input width
-        modelImagWidth = 680f, //Model input width
-        modelImageHeight = 680f //Model input height
-    ).YOLO(
-        center_x = 20f, //CenterX of Model Output From The Model
-        center_y = 20f,//CenterY of Model Output From The Model
-        width = 100f,  //Width of Model Output From The Model
-        height = 120f //Height of Model Output From The Model
+``` kotlin
+Kflite.init(
+    model = Res.readBytes("files/efficientdet-lite2.tflite"),
+    options = InterpreterOptions(
+        numThreads = 4,
+        delegateType = DelegateType.NNAPI_COREML, // Uses NNAPI on Android, CoreML on iOS
+        allowFp16PrecisionForFp32 = true
     )
+)
+```
+- `numThreads`: controls CPU parallelism
+- `delegateType`: selects hardware acceleration backend
+- `allowFp16PrecisionForFp32`: speeds up inference if supported by hardware
+
+### Step 3 - Prepare the input data
+Kflite works with direct `ByteBuffer` input, so you can feed preprocessed images or tensors directly.
+``` kotlin
+// Prepare input data: Example model takes 4D array as an input, an image with 480x480 pixels
+val inputImageWidth = Kflite.getInputTensor(0).shape[1]
+val inputImageHeight = Kflite.getInputTensor(0).shape[2]
+val modelInputSize =
+    FLOAT_TYPE_SIZE * inputImageWidth * inputImageHeight * PIXEL_SIZE
+      
+// Creates ByteBuffer to hold the image data    
+val inputImage =  imageResource(Res.drawable.example_model_input)
+    .toScaledByteBuffer(
+        inputWidth = inputImageWidth,
+        inputHeight = inputImageHeight,
+        inputAllocateSize = modelInputSize
+    )   
+```
+This example scales an image to match model input size and converts it into a normalized float array.
+
+### Step 4 - Prepare the output data
+``` kotlin
+// Prepare output data: Example model has 3D array as an output
+val firstOutputShape = Kflite.getOutputTensor(0).shape[0]
+val secondOutputShape = Kflite.getOutputTensor(0).shape[1]
+val thirdOutputShape = Kflite.getOutputTensor(0).shape[2]
+
+val modelOutputContainer = Array(firstOutputShape) {
+    Array(secondOutputShape) {
+        FloatArray(thirdOutputShape)
+    }
+}
+```
+This container will hold the model’s inference output (e.g., object coordinates, class scores, etc.).
+
+### Step 5 - Run and close the model:
+``` kotlin
+Kflite.run(listOf(inputImage), mapOf(Pair(0,modelOutputContainer)))
+// Close the model after use
+Kflite.close()
+```
+Once closed, all underlying TFLite interpreters are released.
+
+## Normalizing Model Output
+Most detection models output bounding boxes in model-scaled coordinates. </br>
+Use Kflite’s Normalization utility to convert them back to the original image scale.
+``` kotlin
+val normalizedBox = Normalization(
+    originalImageHeight = 1080f, //Original input height
+    originalImageWidth = 2010f, // Original input width
+    modelImagWidth = 680f, //Model input width
+    modelImageHeight = 680f //Model input height
+).YOLO(
+    center_x = 20f, //CenterX of Model Output From The Model
+    center_y = 20f,//CenterY of Model Output From The Model
+    width = 100f,  //Width of Model Output From The Model
+    height = 120f //Height of Model Output From The Model
+)
 ```
 The `normalizedBox` will be a data class contain the new ordinations. You can use it to point the object 
 or create a bounding box.
