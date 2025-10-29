@@ -12,6 +12,7 @@ actual class InterpreterOptions(
     allowFp16PrecisionForFp32: Boolean = false,
     allowBufferHandleOutput: Boolean = true,
 ) {
+
     actual constructor(
         numThreads: Int,
         delegateType: DelegateType,

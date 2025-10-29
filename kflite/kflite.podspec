@@ -1,14 +1,14 @@
 Pod::Spec.new do |spec|
     spec.name                     = 'kflite'
-    spec.version                  = '1.0'
-    spec.homepage                 = 'Link to the Shared Module homepage'
+    spec.version                  = '1.20'
+    spec.homepage                 = 'kflite'
     spec.source                   = { :http=> ''}
     spec.authors                  = ''
     spec.license                  = ''
-    spec.summary                  = 'Some description for the Shared Module'
+    spec.summary                  = 'Kotlin Multipltform to run tflite models'
     spec.vendored_frameworks      = 'build/cocoapods/framework/kflite.framework'
     spec.libraries                = 'c++'
-    spec.ios.deployment_target    = '16.0'
+    spec.ios.deployment_target    = '26.0'
     spec.dependency 'TensorFlowLiteObjC'
     spec.dependency 'TensorFlowLiteObjC/CoreML'
     spec.dependency 'TensorFlowLiteObjC/Metal'

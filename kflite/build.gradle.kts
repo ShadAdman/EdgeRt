@@ -28,10 +28,10 @@ kotlin {
 
 
     cocoapods {
-        summary = "Some description for the Shared Module"
-        homepage = "Link to the Shared Module homepage"
-        version = "1.0"
-        ios.deploymentTarget = "16.0"
+        homepage = "kflite"
+        summary = "Kotlin Multipltform to run tflite models"
+        version = "1.20"
+        ios.deploymentTarget = "26.0"
         podfile = project.file("../iosApp/Podfile")
         pod("TensorFlowLiteObjC", moduleName = "TFLTensorFlowLite")
         pod("TensorFlowLiteObjC/Metal") {
@@ -40,8 +40,6 @@ kotlin {
         pod("TensorFlowLiteObjC/CoreML") {
             linkOnly = true
         }
-
-
         framework {
             baseName = "kflite"
             isStatic = true
@@ -61,6 +59,8 @@ kotlin {
             implementation(libs.tflite)
             implementation(libs.tfliteGPU)
             implementation(libs.tfliteGpuApi)
+
+            implementation(libs.litert)
 
         }
         commonMain.dependencies {

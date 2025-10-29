@@ -1,17 +1,17 @@
 {
   "name": "kflite",
-  "version": "1.0",
-  "homepage": "Link to the Shared Module homepage",
+  "version": "1.20",
+  "homepage": "kflite",
   "source": {
     "http": ""
   },
   "authors": "",
   "license": "",
-  "summary": "Some description for the Shared Module",
+  "summary": "Kotlin Multipltform to run tflite models",
   "vendored_frameworks": "build/cocoapods/framework/kflite.framework",
   "libraries": "c++",
   "platforms": {
-    "ios": "16.0"
+    "ios": "26.0"
   },
   "dependencies": {
     "TensorFlowLiteObjC": [],

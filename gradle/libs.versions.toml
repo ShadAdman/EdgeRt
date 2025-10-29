@@ -8,10 +8,11 @@ androidx-lifecycle = "2.9.0"
 composeMultiplatform = "1.8.1"
 tensorflowLiteGpuApi = "1.2.2"
 tflite = "2.17.0"
-kotlin = "2.1.21"
+kotlin = "2.2.20"
 vanniktech-publish = "0.32.0"
 groupId = "io.github.shadmanadman"
 artifactId = "kflite"
+litert = "2.0.2"
 
 [libraries]
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity" }
@@ -22,6 +23,8 @@ androidx-lifecycle-runtimeCompose = { module = "org.jetbrains.androidx.lifecycle
 tfliteGpuApi = { module = "org.tensorflow:tensorflow-lite-gpu-api", version.ref = "tflite" }
 tflite = { module = "org.tensorflow:tensorflow-lite", version.ref = "tflite" }
 tfliteGPU = { module = "org.tensorflow:tensorflow-lite-gpu", version.ref = "tflite" }
+
+litert = {module = "com.google.ai.edge.litert:litert",version.ref = "litert"}
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
