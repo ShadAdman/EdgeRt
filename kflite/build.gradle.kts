@@ -65,7 +65,7 @@ kotlin {
 }
 
 android {
-    namespace = "org.kmp.playground.kflite"
+    namespace = providers.gradleProperty("ANDROID_NAMESPACE").get()
     compileSdk = libs.versions.android.compileSdk.get().toInt()
     defaultConfig {
         minSdk = libs.versions.android.minSdk.get().toInt()
