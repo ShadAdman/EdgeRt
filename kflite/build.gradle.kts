@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.kotlinCocoapods)
     alias(libs.plugins.vanniktechPublish)
     id("signing")
@@ -55,10 +56,14 @@ kotlin {
 
     sourceSets {
         androidMain.dependencies {
+            implementation(compose.ui)
+            implementation(libs.androidx.activity.compose)
             implementation(libs.tflite)
             implementation(libs.tfliteGPU)
             implementation(libs.tfliteGpuApi)
-
+        }
+        commonMain.dependencies {
+            implementation(compose.ui)
         }
     }
 
