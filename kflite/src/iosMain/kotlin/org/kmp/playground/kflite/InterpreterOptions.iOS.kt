@@ -11,6 +11,7 @@ import kotlinx.cinterop.ExperimentalForeignApi
 actual class InterpreterOptions actual constructor(
     numThreads: Int,
     delegateType: DelegateType,
+    allowQuantizedModels: Boolean,
     allowFp16PrecisionForFp32: Boolean
 ) {
 
@@ -23,9 +24,10 @@ actual class InterpreterOptions actual constructor(
 
             DelegateType.GPU_METAL -> TFLMetalDelegateOptions().apply {
                 precisionLossAllowed = allowFp16PrecisionForFp32
-                //TODO can be a feature update for consumer
-                // quantizationEnabled
+                quantizationEnabled = allowQuantizedModels
+                //waitType = TFLMetalDelegateT
 
+                // support all devices. even emulators
                 TFLMetalDelegate(options = this)
             }
 
@@ -34,7 +36,7 @@ actual class InterpreterOptions actual constructor(
                 enabledDevices =
                     TFLCoreMLDelegateEnabledDevices.TFLCoreMLDelegateEnabledDevicesAll
 
-                TFLCoreMLDelegate(this)
+                TFLCoreMLDelegate(options = this)
             }
         }
 

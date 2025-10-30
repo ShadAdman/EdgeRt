@@ -9,16 +9,19 @@ import org.kmp.playground.kflite.PlatformInterpreterOptions as AndroidPlatformIn
 actual class InterpreterOptions(
     numThreads: Int = 4,
     delegateType: DelegateType = DelegateType.CPU,
+    allowQuantizedModels: Boolean = true,
     allowFp16PrecisionForFp32: Boolean = false,
     allowBufferHandleOutput: Boolean = true,
 ) {
     actual constructor(
         numThreads: Int,
         delegateType: DelegateType,
+        allowQuantizedModels: Boolean,
         allowFp16PrecisionForFp32: Boolean
     ) : this(
         numThreads = numThreads,
         delegateType = delegateType,
+        allowQuantizedModels = allowQuantizedModels,
         allowFp16PrecisionForFp32 = allowFp16PrecisionForFp32,
         allowBufferHandleOutput = true
     )
@@ -37,6 +40,8 @@ actual class InterpreterOptions(
                         val gpuOptions = GpuDelegateFactory.Options().apply {
                             isPrecisionLossAllowed =
                                 allowFp16PrecisionForFp32
+
+                            setQuantizedModelsAllowed(allowQuantizedModels)
                             /*
                             - Can be a feature to set by consumer
                             telling TensorFlow Lite how to balance speed ,battery and latency when running model on the GPU.
@@ -44,8 +49,8 @@ actual class InterpreterOptions(
                                 INFERENCE_PREFERENCE_FAST_SINGLE_ANSWER → Optimize for a single, fast inference.
                                 INFERENCE_PREFERENCE_LOW_POWER → Prioritize energy efficiency.
                              */
-                            inferencePreference =
-                                GpuDelegateFactory.Options.INFERENCE_PREFERENCE_SUSTAINED_SPEED
+//                            inferencePreference =
+//                                GpuDelegateFactory.Options.INFERENCE_PREFERENCE_SUSTAINED_SPEED
                         }
                         addDelegate(GpuDelegateFactory(gpuOptions).create(RuntimeFlavor.APPLICATION))
                     } else
