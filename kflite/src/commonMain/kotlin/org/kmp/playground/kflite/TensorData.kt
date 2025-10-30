@@ -15,7 +15,7 @@ enum class TensorDataType(val value: Int) {
     }
 }
 
-inline class TensorShape(
+value class TensorShape(
     val dimensions: IntArray
 ) {
     val rank: Int
