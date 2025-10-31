@@ -1,38 +1,51 @@
-<a href="http://www.wtfpl.net/"><img
-src="http://www.wtfpl.net/wp-content/uploads/2012/12/wtfpl-badge-4.png"
-width="80" height="15" alt="WTFPL" /></a>
+[![License](https://img.shields.io/badge/License-0BSD-informational.svg)](https://opensource.org/licenses/0BSD)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.1.21-blue.svg?style=flat-square&logo=kotlin)](https://kotlinlang.org/)
 [![Gradle](https://img.shields.io/badge/Gradle-8.x-green.svg?style=flat-square&logo=gradle)](https://gradle.org/)
 
 ![](poster.jpg)
-<p align="center"> Kflite is a fresh, improved version of <a href="https://github.com/icerockdev/moko-tensorflow">moko-tensorflow</a> with better support. </br>It uses `composeResources` and requires no platform-specific code.</p>
+<p align="center"> kflite is a fresh and improved version of <a href="https://github.com/icerockdev/moko-tensorflow">moko-tensorflow</a></p>
 
 ## Overview
-Kflite lets you load and run TensorFlow Lite (TFLite) models directly from your shared Kotlin code.
-It abstracts platform differences, and manages model loading, tensor creation, and inference through a unified API.
 
-Key advantages:
+kflite runs TensorFlow Lite (tflite) models directly from shared Kotlin code.
+It abstracts platform differences, and manages model loading, tensor creation, and inference through
+a unified API.
 
-- Works seamlessly with Compose Multiplatform using `composeResources`
-- Requires **no platform-specific setup** for Android or Desktop
+Key features:
+
+- Works with Compose Multiplatform `composeResources`
 - Supports model normalization (`YOLO`, `COCO`, `PascalVOC`, `TF formats`)
-- Lightweight — minimal dependencies and zero reflection overhead
+- Enable/Disable
+  quantization <a href="https://huggingface.co/docs/optimum/en/concept_guides/quantization">What's
+  quantization?</a>
+- Image input models (Suport for text input models are on the
+  way [FollowUp](https://github.com/shadmanadman/kflite/issues/8))
+- Select Delegation (GPU and NNAPI on Android, METAL and CoreML on iOS)
+- Whether to allow inference with float16 precision for FP32 models. `allowFp16PrecisionForFp32`
+- The preference for inference speed and accuracy. `SUSTAINED_SPEED` `FAST_SINGLE_ANSWER`
 
 ## Getting Started
-For the fastest setup and a working example, see **[KfliteSample](https://github.com/shadmanadman/kflite-sample)**. </br>
+
+For a fastest setup and a working example,
+see [KfliteSample](https://github.com/shadmanadman/kflite-sample).</br>
 It demonstrates a full pipeline.
 
 ## Installation
+
 ### Step 1 - Add dependencies
+
 Include the dependency in your shared `commonMain.dependencies` </br>
-This allows you to use TensorFlow Lite functionality directly in shared Kotlin code, keeping platform logic unified.
 
 ``` gradle
 implementation("io.github.shadmanadman:kflite:0.70.1")
 ```
-### Step 2 - Configure CocoaPods for iOS
-Since KMP doesn’t automatically include CocoaPods dependencies, you need to manually add TensorFlow Lite for iOS. </br>
+
+### Step 2 - Configure CocoaPods for iOS (This section shouldn't be exists. Will be removed later)
+
+Since KMP doesn’t automatically include CocoaPods dependencies, you need to manually add TensorFlow
+Lite for iOS. </br>
 Add the TensorFlow Lite CocoaPod to your shared module and link it correctly:
+
 ``` gradle
 iosX64()
 iosArm64()
@@ -56,90 +69,156 @@ cocoapods {
     }
 }
 ```
-This ensures your iOS build can access TensorFlow Lite’s native libraries when running models. </br>
-You can also check implemeted [build.gradle.kts](https://github.com/shadmanadman/kflite-sample/blob/main/composeApp/build.gradle.kts) on Kflite Sample.
 
-**note:** If you get the following error during ios build:
+You can also check [build.gradle.kts](https://github.com/shadmanadman/kflite-sample/blob/main/composeApp/build.gradle.kts)
+on kflite Sample.
+
+**note:** If you get the following errors during ios build:
+
 ``` bash
 clang: error: linker command failed with exit code 1 (use -v to see invocation)
 ```
-That is a linker error. It simply means the Cocoapods framework is not linked correctly to your ios app.
+That is a linker error. It simply means the Cocoapods framework is not linked correctly to your ios
+app. See
 
-
-## Using a Model
+## Run a Model
 
 ### Step 1 - Place model
-Put your `.tflite` model file in `composeResources/files`. </br>
-You can view an example model placement on **[Kflite Sample](https://github.com/shadmanadman/kflite-sample/tree/main/composeApp/src/commonMain/composeResources/files)**.
 
-Kflite uses `Compose Resources` to manage assets in a platform-independent way, so your model becomes available to all targets automatically. This makes it available to both Android and iOS via `Res.readBytes()`.
+Put your `.tflite` model file in `composeResources/files`.</br>
+You can view an example model placement on *
+*[Kflite Sample](https://github.com/shadmanadman/kflite-sample/tree/main/composeApp/src/commonMain/composeResources/files)
+**.
 
-You can also visit **[RunModelWithInputImageExample.kt](https://github.com/shadmanadman/kflite-sample/blob/main/composeApp/src/commonMain/kotlin/org/kmp/playground/kflite/sample/RunModelWithInputImageExample.kt)** on Kflite Sample. It includes the whole pipeline, including initialization, preparing input and output, and other samples.
+kflite uses `Compose Resources` to manage assets in a platform-independent way.Your model becomes
+available to all targets by converting it into a byte array.
 
+### Step 2 - init the model
 
-### Step 2 - Initialize the model
-No platform-specific code needed — everything runs in `commonMain`.
+kflite loads and prepares your model for inference with optional performance parameters. </br>
+Call `Kflite.init()` and load your model as a byte array. This creates an interpreter instance in
+memory.
 
-Kflite loads and prepares your model for inference with optional performance parameters. </br>
-Call `Kflite.init()` and load your model as a byte array. This creates an interpreter instance in memory that can run inference with optional performance tuning.
- - `options` is... optional. Set values carefully, Make sure your model supports each one.
 ``` kotlin
 Kflite.init(
     model = Res.readBytes("files/efficientdet-lite2.tflite"),
     options = InterpreterOptions(
-        numThreads = 4,
-        delegateType = DelegateType.NNAPI_COREML, // Uses NNAPI on Android, CoreML on iOS
-        allowFp16PrecisionForFp32 = true
+        numThreads: Int = 4,
+        delegateType: DelegateType = DelegateType.CPU,
+        inferencePreferenceType: TFLiteInferencePreference = TFLiteInferencePreference.PLATFORM_DEFAULT,
+        allowQuantizedModels: Boolean = true,
+        allowFp16PrecisionForFp32: Boolean = false,
     )
 )
 ```
-- `numThreads`: controls CPU parallelism
-- `delegateType`: selects hardware acceleration backend
+
+- `numThreads`: number of threads allocate to CPU. Defualt is 4
+- `delegateType`: selects hardware acceleration backend.(GPU and NNAPI on Android, METAL and CoreML
+  on iOS)
 - `allowFp16PrecisionForFp32`: speeds up inference if supported by hardware
+- `inferencePreferenceType` The preference for inference speed and accuracy.(Platform default on
+  Android is FAST_SINGLE_ANSWER and on iOS WaitTypePassive)
+- `allowQuantizedModels` Whether to allow inference with quantized models.
 
 ### Step 3 - Prepare the input data
-Kflite works with direct `ByteBuffer` input, so you can feed preprocessed images or tensors directly. </br>
 
-Fetch the model’s input tensor shape and scale an image to match. TensorFlow Lite models expect data in a specific shape and type — this ensures compatibility.
+Kflite works with direct `ByteBuffer` as input, so you can feed preprocessed inputs or tensors
+directly.</br>
+
+[Netron](https://netron.app/) is a great tool for visualizing your model. You can see your model
+input/output details.
+
+You can see input tensor shape of your model by calling `getInputTensor`. Checkout your model
+metadata or use [Netron](https://netron.app/)</br>
+to check input dimensions and each shape represents.
+
+- To see the number of input tensor that your model has, you can call [`getInputTensorCount`](https://github.com/shadmanadman/kflite-sample/blob/8cb1175576a2b3dcf7bd30d400528c5a38e92714/composeApp/src/commonMain/kotlin/org/kmp/playground/kflite/sample/RunModelWithInputImageExample.kt#L30).
+
+Following example shows how to prepare input data for a model that takes an image as input and the
+input have a 4D matrix.
+
+Our model has 4 shape. The batch size,image width,
+image height and the pixel size.
+
+If you now the amount of each shape, just hard code them in a const, since each shape is constant.
+
 ``` kotlin
-// Prepare input data: Example model takes 4D array as an input, an image with 480x480 pixels
-val inputImageWidth = Kflite.getInputTensor(0).shape[1]
-val inputImageHeight = Kflite.getInputTensor(0).shape[2]
+val pixcelSize = Kflite.getInputTensor(0).shape[0] = 1
+val inputImageWidth = Kflite.getInputTensor(0).shape[1] = 448
+val inputImageHeight = Kflite.getInputTensor(0).shape[2] = 448
+val floatTypeSize = Kflite.getInputTensor(0).shape[3] = 3
+```
+
+Calculate the input size.This will be used to allocate the size of byte buffer.
+
+```
 val modelInputSize =
-    FLOAT_TYPE_SIZE * inputImageWidth * inputImageHeight * PIXEL_SIZE
-      
-// Creates ByteBuffer to hold the image data    
+    floatTypeSize * inputImageWidth * inputImageHeight * pixcelSize
+```
+
+Create a ByteBuffer from your input data.
+This is for image inputs. (Text inputs will be supported soon.)
+Following example scales an image to match model input size and converts it into a normalized float
+array.</br>
+
+- When the normalize is true, the code performs Image Normalization and Data Type Conversion on the
+  pixel data before feeding it into the byte buffer.
+  This changes the data type of the input in the buffer from an 8-bit integer to 32-bit floating
+  point.True this only for models that supports input data in a range of [0.0,1.0].
+
+```
 val inputImage =  imageResource(Res.drawable.example_model_input)
     .toScaledByteBuffer(
         inputWidth = inputImageWidth,
         inputHeight = inputImageHeight,
-        inputAllocateSize = modelInputSize
+        inputAllocateSize = modelInputSize,
+        normalize: Boolean = false
     )   
 ```
-This example scales an image to match model input size and converts it into a normalized float array.
 
 ### Step 4 - Prepare the output data
-Create a container that matches the model’s output tensor shape. This gives you a correctly sized structure to hold inference results.
-``` kotlin
-// Prepare output data: Example model has 3D array as an output
-val firstOutputShape = Kflite.getOutputTensor(0).shape[0]
-val secondOutputShape = Kflite.getOutputTensor(0).shape[1]
-val thirdOutputShape = Kflite.getOutputTensor(0).shape[2]
 
-val modelOutputContainer = Array(firstOutputShape) {
-    Array(secondOutputShape) {
-        FloatArray(thirdOutputShape)
+Create a container that matches the model’s output tensor shape. This gives you a correctly sized
+structure to hold the results.
+
+You can see output tensor shape of your model by calling `getOutputTensor`, Checkout your model
+metadata or use [Netron](https://netron.app/)</br>
+
+- To see the number of input tensor that your model has, you can call [`getOutputTensorCount`](https://github.com/shadmanadman/kflite-sample/blob/8cb1175576a2b3dcf7bd30d400528c5a38e92714/composeApp/src/commonMain/kotlin/org/kmp/playground/kflite/sample/RunModelWithInputImageExample.kt#L31).
+
+Following example shows how to prepare output data for a object detection model that outputs a 3D matrix. 
+
+Our example model has 3 shape. The batch size (number of input), number of results and the bounding box location.</br>
+If you now the amount of each shape, just hard code them in a const, since each shape is constant.
+
+``` kotlin
+val batchSize = Kflite.getOutputTensor(0).shape[0] = 1
+val numberOfResults = Kflite.getOutputTensor(0).shape[1] = 25
+val detailsPerResult = Kflite.getOutputTensor(0).shape[2] = 4
+```
+
+We then create a matrix to hold the model output.
+
+``` kotlin
+val modelOutputContainer = Array(batchSize) {
+    Array(numberOfResults) {
+        FloatArray(detailsPerResult)
     }
 }
 ```
-This container will hold the model’s inference output (e.g., object coordinates, class scores, etc.).
+
 
 ### Step 5 - Running the model:
-Call `Kflite.run()` and pass two parameters:
-- `inputs`: A list of input tensors (typically images or numerical arrays).
+
+Call `Kflite.run()` and pass the input and output containers:
+
+[`Kflite.run()`](https://github.com/shadmanadman/kflite-sample/blob/8cb1175576a2b3dcf7bd30d400528c5a38e92714/composeApp/src/commonMain/kotlin/org/kmp/playground/kflite/sample/RunModelWithInputImageExample.kt#L51) performs inference on the model. You feed it the inputs and provide a container for
+outputs, and it returns predictions, detections, or classifications depending on your model type.
+
+- `inputs`: List of input tensors.
 - `outputs`: A map linking output tensor indices to the containers you created earlier.
 
-`Kflite.run()` performs inference on the model. You feed it the inputs and provide a container for outputs, and it returns predictions, detections, or classifications depending on your model type.
+If your model supports multiple input/output, add them to the list.
 
 ``` kotlin
 Kflite.run(
@@ -149,24 +228,31 @@ Kflite.run(
 ```
 
 ### Step 6: Close the model:
-Once inference is complete, you call `close()` to free up resources and safely release the interpreter to avoid memory leaks.
+
+Once inference is complete, you call `close()` to free up resources and safely release the
+interpreter to avoid memory leaks.
+
 ``` kotlin
 Kflite.close()
 ```
+
 Once closed, all underlying TFLite interpreters are released.
 
-## Code sample
-You can see a full run example in sample repo: **[Kflite Sample](https://github.com/shadmanadman/kflite-sample/blob/main/composeApp/src/commonMain/kotlin/org/kmp/playground/kflite/sample/RunModelWithInputImageExample.kt)** including all steps that we went through.
-
 ## Normalizing Model Output
-Most detection models output bounding boxes in model-scaled coordinates. </br>
-Use Kflite’s Normalization utility to convert them back to the original image scale. Model outputs are often relative to resized input dimensions. Normalizing restores coordinates to real-world image scale.
+Most detection models output is in model-scaled coordinates.</br>
+When you resize your image to match the model input, you need to normalize the output data into the original size.</br>
+This normalization is not necessary unless you want to match the original to the model output. For example putting a bounding box on the original image or</br>
+modify the original data based on the model output.
+
+You can use this normalizing extensions to rescale object detection bounding boxes into the original image.
+The `normalizedBox` will be a data class contain the new ordinations.
+
 ``` kotlin
 val normalizedBox = Normalization(
     originalImageHeight = 1080f, //Original input height
     originalImageWidth = 2010f, // Original input width
-    modelImagWidth = 680f, //Model input width
-    modelImageHeight = 680f //Model input height
+    modelImagWidth = 448f, //Model input width
+    modelImageHeight = 448f //Model input height
 ).YOLO(
     center_x = 20f, //CenterX of Model Output From The Model
     center_y = 20f,//CenterY of Model Output From The Model
@@ -174,10 +260,9 @@ val normalizedBox = Normalization(
     height = 120f //Height of Model Output From The Model
 )
 ```
-The `normalizedBox` will be a data class contain the new ordinations. You can use it to point the object 
-or create a bounding box.
 
-**Other supported Formats:**
+**Other supported normalizing:**
+
 - `Normalization.pascalVOC(x_min, y_min, x_max, y_max)`
 - `Normalization.coco(x, y, width, height)`
 - `Normalization.yolo(cx, cy, width, height)`
@@ -185,23 +270,27 @@ or create a bounding box.
 - `Normalization.tfRecordVariant(x_min, y_min, x_max, y_max)`
 
 ## What's next
+
+- Support for text input models
+- Migrate to [litert](https://github.com/google-ai-edge/LiteRT)
+- Support Kotlin/Native
 - Live detection with Camera feed
 
 ## Licence
+
 ```
-               DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE 
-                    Version 2, December 2004 
+Copyright (c) 2025 kflite
 
- Copyright (C) 2025 Shadman Adman <adman.shadman@gmail.com> 
+Permission to use, copy, modify, and/or distribute this software for any purpose
+with or without fee is hereby granted.
 
- Everyone is permitted to copy and distribute kflite or modified 
- copies of this license document, and changing it is allowed as long 
- as the name is changed. 
-
-            DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE 
-   TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION 
-
-0. You just DO WHAT THE FUCK YOU WANT TO.
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ```
 
 
