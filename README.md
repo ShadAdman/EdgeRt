@@ -18,7 +18,7 @@ Key features:
 - Enable/Disable
   quantization <a href="https://huggingface.co/docs/optimum/en/concept_guides/quantization">What's
   quantization?</a>
-- Image input models (Suport for text input models are on the
+- Image input models (Support for NLP models are on the
   way [FollowUp](https://github.com/shadmanadman/kflite/issues/8))
 - Select Delegation (GPU and NNAPI on Android, METAL and CoreML on iOS)
 - Whether to allow inference with float16 precision for FP32 models. `allowFp16PrecisionForFp32`
@@ -271,7 +271,7 @@ val normalizedBox = Normalization(
 
 ## What's next
 
-- Support for text input models
+- Support for NLP models
 - Migrate to [litert](https://github.com/google-ai-edge/LiteRT)
 - Support Kotlin/Native
 - Live detection with Camera feed
