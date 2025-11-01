@@ -27,8 +27,7 @@ Key features:
 ## Getting Started
 
 For a fastest setup and a working example,
-see [KfliteSample](https://github.com/shadmanadman/kflite-sample).</br>
-It demonstrates a full pipeline.
+see [KfliteSample](https://github.com/shadmanadman/kflite-sample). It demonstrates a full pipeline.
 
 ## Installation
 
@@ -37,7 +36,7 @@ It demonstrates a full pipeline.
 Include the dependency in your shared `commonMain.dependencies` </br>
 
 ``` gradle
-implementation("io.github.shadmanadman:kflite:0.70.1")
+implementation("io.github.shadmanadman:kflite:1.1.35")
 ```
 
 ### Step 2 - Configure CocoaPods for iOS (This section shouldn't be exists. Will be removed later)
@@ -86,9 +85,7 @@ app. See
 ### Step 1 - Place model
 
 Put your `.tflite` model file in `composeResources/files`.</br>
-You can view an example model placement on *
-*[Kflite Sample](https://github.com/shadmanadman/kflite-sample/tree/main/composeApp/src/commonMain/composeResources/files)
-**.
+You can view an example model placement on[Kflite Sample](https://github.com/shadmanadman/kflite-sample/tree/main/composeApp/src/commonMain/composeResources/files).
 
 kflite uses `Compose Resources` to manage assets in a platform-independent way.Your model becomes
 available to all targets by converting it into a byte array.
@@ -124,13 +121,10 @@ Kflite.init(
 
 Kflite works with direct `ByteBuffer` as input, so you can feed preprocessed inputs or tensors
 directly.</br>
-
 [Netron](https://netron.app/) is a great tool for visualizing your model. You can see your model
-input/output details.
-
-You can see input tensor shape of your model by calling `getInputTensor`. Checkout your model
-metadata or use [Netron](https://netron.app/)</br>
-to check input dimensions and each shape represents.
+input/output details.</br>
+You can see input tensor shape of your model by calling `getInputTensor`, Checkout your model
+metadata or use [Netron](https://netron.app/) to check input dimensions and each shape represents.
 
 - To see the number of input tensor that your model has, you can call [`getInputTensorCount`](https://github.com/shadmanadman/kflite-sample/blob/8cb1175576a2b3dcf7bd30d400528c5a38e92714/composeApp/src/commonMain/kotlin/org/kmp/playground/kflite/sample/RunModelWithInputImageExample.kt#L30).
 
@@ -139,8 +133,7 @@ input have a 4D matrix.
 
 Our model has 4 shape. The batch size,image width,
 image height and the pixel size.
-
-If you now the amount of each shape, just hard code them in a const, since each shape is constant.
+- If you know the amount of each shape, just hard code them in a const, since each shape is constant.
 
 ``` kotlin
 val pixcelSize = Kflite.getInputTensor(0).shape[0] = 1
@@ -161,7 +154,7 @@ This is for image inputs. (Text inputs will be supported soon.)
 Following example scales an image to match model input size and converts it into a normalized float
 array.</br>
 
-- When the normalize is true, the code performs Image Normalization and Data Type Conversion on the
+- When the `normalize` is true, the code performs Image Normalization and Data Type Conversion on the
   pixel data before feeding it into the byte buffer.
   This changes the data type of the input in the buffer from an 8-bit integer to 32-bit floating
   point.True this only for models that supports input data in a range of [0.0,1.0].
@@ -180,16 +173,14 @@ val inputImage =  imageResource(Res.drawable.example_model_input)
 
 Create a container that matches the model’s output tensor shape. This gives you a correctly sized
 structure to hold the results.
-
 You can see output tensor shape of your model by calling `getOutputTensor`, Checkout your model
 metadata or use [Netron](https://netron.app/)</br>
 
 - To see the number of input tensor that your model has, you can call [`getOutputTensorCount`](https://github.com/shadmanadman/kflite-sample/blob/8cb1175576a2b3dcf7bd30d400528c5a38e92714/composeApp/src/commonMain/kotlin/org/kmp/playground/kflite/sample/RunModelWithInputImageExample.kt#L31).
 
 Following example shows how to prepare output data for a object detection model that outputs a 3D matrix. 
-
 Our example model has 3 shape. The batch size (number of input), number of results and the bounding box location.</br>
-If you now the amount of each shape, just hard code them in a const, since each shape is constant.
+- If you know the amount of each shape, just hard code them in a const, since each shape is constant.
 
 ``` kotlin
 val batchSize = Kflite.getOutputTensor(0).shape[0] = 1
