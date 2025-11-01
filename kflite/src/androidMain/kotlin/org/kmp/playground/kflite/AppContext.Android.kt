@@ -3,7 +3,7 @@ package org.kmp.playground.kflite
 import android.app.Application
 import android.content.Context
 
-internal actual object AppContext {
+internal object AppContext {
     private lateinit var application: Application
 
     fun setUp(context: Context) {

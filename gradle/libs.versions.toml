@@ -10,11 +10,13 @@ kotlin = "2.2.21"
 vanniktech-publish = "0.32.0"
 groupId = "io.github.shadmanadman"
 artifactId = "kflite"
-snapshotVersion = "1.53.0-SNAPSHOT"
+snapshotVersion = "1.63.0-SNAPSHOT"
 iosDeploymentTarget = "16.0"
+startup = "1.2.0"
 
 [libraries]
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity" }
+androidx-startup = { module = "androidx.startup:startup-runtime", version.ref = "startup" }
 
 # tflite for Android
 tfliteGpuApi = { module = "org.tensorflow:tensorflow-lite-gpu-api", version.ref = "tflite" }

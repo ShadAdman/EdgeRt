@@ -1,5 +1,5 @@
 PODS:
-  - kflite (1.53.0-SNAPSHOT):
+  - kflite (1.63.0-SNAPSHOT):
     - TensorFlowLiteObjC
     - TensorFlowLiteObjC/CoreML
     - TensorFlowLiteObjC/Metal
@@ -38,7 +38,7 @@ EXTERNAL SOURCES:
     :path: "../kflite"
 
 SPEC CHECKSUMS:
-  kflite: 26bf1d3af8f41b22bcd377c6128121a946981f75
+  kflite: 4df29278d340d331247381352697218e2255fdcf
   TensorFlowLiteC: eac6d689a8d391d1b202dc59e3d9165ba64aaf73
   TensorFlowLiteObjC: 72e1fa903465cd6a8d3d614c1474c5aad7635bb7
 

@@ -58,6 +58,7 @@ kotlin {
         androidMain.dependencies {
             implementation(compose.ui)
             implementation(libs.androidx.activity.compose)
+            implementation(libs.androidx.startup)
             implementation(libs.tflite)
             implementation(libs.tfliteGPU)
             implementation(libs.tfliteGpuApi)
@@ -79,6 +80,11 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
+    }
+    buildTypes {
+        getByName("release") {
+            isMinifyEnabled = false
         }
     }
     compileOptions {
