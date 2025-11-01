@@ -1,5 +1,7 @@
 package org.kmp.playground.kflite
 
+import kotlin.jvm.JvmInline
+
 @Suppress("MagicNumber")
 enum class TensorDataType(val value: Int) {
     FLOAT32(1),
@@ -15,6 +17,7 @@ enum class TensorDataType(val value: Int) {
     }
 }
 
+@JvmInline
 value class TensorShape(
     val dimensions: IntArray
 ) {
