@@ -31,7 +31,7 @@ see [KfliteSample](https://github.com/shadmanadman/kflite-sample). It demonstrat
 
 ## Installation
 
-### Step 1 - Add dependencies
+### Add dependencies
 
 Include the dependency in your shared `commonMain.dependencies` </br>
 
@@ -39,46 +39,21 @@ Include the dependency in your shared `commonMain.dependencies` </br>
 implementation("io.github.shadmanadman:kflite:1.1.35")
 ```
 
-### Step 2 - Configure CocoaPods for iOS (This section shouldn't be exists. Will be removed later)
+#### Configure for iOS
 
-Since KMP doesn’t automatically include CocoaPods dependencies, you need to manually add TensorFlow
+Since KMP doesn’t automatically include CocoaPods dependencies in the consumer's `iosApp`, you need to manually add TensorFlow
 Lite for iOS. </br>
-Add the TensorFlow Lite CocoaPod to your shared module and link it correctly:
+Create a `Podfile` inside your `iosApp` with following pods:
 
-``` gradle
-iosX64()
-iosArm64()
-iosSimulatorArm64()
-
-
-cocoapods {
-    summary = "Some description for the Shared Module"
-    homepage = "Link to the Shared Module homepage"
-    version = "1.0"
-    ios.deploymentTarget = "16.0"
-    podfile = project.file("../iosApp/Podfile")
-    pod("TensorFlowLiteObjC", moduleName = "TFLTensorFlowLite")
-    framework {
-        baseName = "ComposeApp"
-        isStatic = true
-        linkerOpts(
-            project.file("../iosApp/Pods/TensorFlowLiteC/Frameworks").path.let { "-F$it" },
-            "-framework", "TensorFlowLiteC"
-        )
-    }
-}
 ```
-
-You can also check [build.gradle.kts](https://github.com/shadmanadman/kflite-sample/blob/main/composeApp/build.gradle.kts)
-on kflite Sample.
-
-**note:** If you get the following errors during ios build:
-
-``` bash
-clang: error: linker command failed with exit code 1 (use -v to see invocation)
+target 'iosApp' do
+  use_frameworks!
+  platform :ios, '16.0'
+  pod 'TensorFlowLiteObjC'
+  pod 'TensorFlowLiteObjC/Metal'
+  pod 'TensorFlowLiteObjC/CoreML'
+end
 ```
-That is a linker error. It simply means the Cocoapods framework is not linked correctly to your ios
-app. See
 
 ## Run a Model
 
