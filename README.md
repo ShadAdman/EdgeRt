@@ -119,7 +119,7 @@ val floatTypeSize = Kflite.getInputTensor(0).shape[3] = 3
 
 Calculate the input size.This will be used to allocate the size of byte buffer.
 
-```
+``` kotlin
 val modelInputSize =
     floatTypeSize * inputImageWidth * inputImageHeight * pixcelSize
 ```
@@ -134,7 +134,7 @@ array.</br>
   This changes the data type of the input in the buffer from an 8-bit integer to 32-bit floating
   point.True this only for models that supports input data in a range of [0.0,1.0].
 
-```
+``` kotlin
 val inputImage =  imageResource(Res.drawable.example_model_input)
     .toScaledByteBuffer(
         inputWidth = inputImageWidth,
