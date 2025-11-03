@@ -106,20 +106,20 @@ mavenPublishing {
     )
 
     pom {
-        name.set(providers.gradleProperty("POM_NAME"))
-        description.set(providers.gradleProperty("POM_DESCRIPTION"))
-        url.set(providers.gradleProperty("POM_URL"))
+        name.set(providers.gradleProperty("POM_NAME").get())
+        description.set(providers.gradleProperty("POM_DESCRIPTION").get())
+        url.set(providers.gradleProperty("POM_URL").get())
         licenses {
             license {
-                name.set(providers.gradleProperty("POM_LICENSE_NAME"))
-                url.set(providers.gradleProperty("POM_LICENSE_URL"))
+                name.set(providers.gradleProperty("POM_LICENSE_NAME").get())
+                url.set(providers.gradleProperty("POM_LICENSE_URL").get())
             }
         }
         developers {
             developer {
-                id.set(providers.gradleProperty("POM_DEVELOPER_ID"))
-                name.set(providers.gradleProperty("POM_DEVELOPER_NAME"))
-                email.set(providers.gradleProperty("POM_DEVELOPER_EMAIL"))
+                id.set(providers.gradleProperty("POM_DEVELOPER_ID").get())
+                name.set(providers.gradleProperty("POM_DEVELOPER_NAME").get())
+                email.set(providers.gradleProperty("POM_DEVELOPER_EMAIL").get())
             }
         }
     }
