@@ -36,7 +36,7 @@ see [KfliteSample](https://github.com/shadmanadman/kflite-sample). It demonstrat
 Include the dependency in your shared `commonMain.dependencies` </br>
 
 ``` gradle
-implementation("io.github.shadmanadman:kflite:1.1.35")
+implementation("io.github.shadmanadman:kflite:1.1.37")
 ```
 
 #### Configure for iOS
