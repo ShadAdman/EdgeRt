@@ -115,6 +115,11 @@ mavenPublishing {
                 url.set(providers.gradleProperty("POM_LICENSE_URL").get())
             }
         }
+        scm {
+            connection.set("scm:git:git://github.com/shadmanadman/kflite.git")
+            developerConnection.set("scm:git:ssh://git@github.com/shadmanadman/kflite.git")
+            url.set(providers.gradleProperty("POM_URL").get())
+        }
         developers {
             developer {
                 id.set(providers.gradleProperty("POM_DEVELOPER_ID").get())
