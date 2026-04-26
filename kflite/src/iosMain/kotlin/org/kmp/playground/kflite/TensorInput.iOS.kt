@@ -1,13 +1,15 @@
 package org.kmp.playground.kflite
 
 import androidx.compose.ui.graphics.ImageBitmap
+import kotlinx.cinterop.BetaInteropApi
+import kotlinx.cinterop.ExperimentalForeignApi
 import platform.UIKit.UIImage
 import platform.Foundation.NSData
 import platform.Foundation.create
 import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.usePinned
 
-actual fun ImageBitmap.toScaledByteBuffer(
+actual fun ImageBitmap.imageToScaledByteBuffer(
     inputWidth: Int,
     inputHeight: Int,
     inputAllocateSize: Int,
@@ -16,9 +18,7 @@ actual fun ImageBitmap.toScaledByteBuffer(
     val uiImage = this.toUIImage()
     checkNotNull(uiImage) { "Failed to convert ImageBitmap to UIImage" }
     val scaledImage = uiImage.scaleTo(inputWidth, inputHeight)
-    checkNotNull(scaledImage) { "Failed to scale UIImage" }
     val pixelData = scaledImage.toRGBByteArray(normalize)
-    checkNotNull(pixelData) { "Failed to extract RGB byte array" }
 
     println("RGB byte array size: ${pixelData.size}")
     println("First 10 bytes of RGB byte array: ${pixelData.take(10)}")
@@ -27,7 +27,8 @@ actual fun ImageBitmap.toScaledByteBuffer(
 
 
 
-actual fun ByteArray.toScaledByteBuffer(
+@OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
+actual fun ByteArray.bytesToScaledByteBuffer(
     inputWidth: Int,
     inputHeight: Int,
     inputAllocateSize: Int,
@@ -38,11 +39,9 @@ actual fun ByteArray.toScaledByteBuffer(
         UIImage.imageWithData(data)
     } ?: throw IllegalArgumentException("Could not decode ByteArray to UIImage")
 
-    val scaledImage = uiImage.scaleTo(inputWidth, inputHeight) // Using your existing extension
-        ?: throw IllegalStateException("Failed to scale UIImage")
+    val scaledImage = uiImage.scaleTo(inputWidth, inputHeight)
 
-    val pixelData = scaledImage.toRGBByteArray(normalize) // Using your existing extension
-        ?: throw IllegalStateException("Failed to extract RGB byte array")
+    val pixelData = scaledImage.toRGBByteArray(normalize)
 
     return pixelData.toNSData()
 }

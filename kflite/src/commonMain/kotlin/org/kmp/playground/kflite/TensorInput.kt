@@ -5,7 +5,7 @@ import kotlin.Any
 
 typealias TensorBuffer = Any
 
-expect fun ImageBitmap.toScaledByteBuffer(
+expect fun ImageBitmap.imageToScaledByteBuffer(
     inputWidth: Int,
     inputHeight: Int,
     inputAllocateSize: Int,
@@ -13,7 +13,7 @@ expect fun ImageBitmap.toScaledByteBuffer(
 ): TensorBuffer
 
 
-expect fun ByteArray.toScaledByteBuffer(
+expect fun ByteArray.bytesToScaledByteBuffer(
     inputWidth: Int,
     inputHeight: Int,
     inputAllocateSize: Int,
