@@ -19,3 +19,25 @@ actual fun ImageBitmap.toScaledByteBuffer(
     println("First 10 bytes of RGB byte array: ${pixelData.take(10)}")
     return pixelData.toNSData()
 }
+
+
+
+actual fun ByteArray.toScaledByteBuffer(
+    inputWidth: Int,
+    inputHeight: Int,
+    inputAllocateSize: Int,
+    normalize: Boolean
+): TensorBuffer {
+    val uiImage = this.usePinned { pinned ->
+        val data = NSData.create(bytes = pinned.addressOf(0), length = this.size.toULong())
+        UIImage.imageWithData(data)
+    } ?: throw IllegalArgumentException("Could not decode ByteArray to UIImage")
+
+    val scaledImage = uiImage.scaleTo(inputWidth, inputHeight) // Using your existing extension
+        ?: throw IllegalStateException("Failed to scale UIImage")
+
+    val pixelData = scaledImage.toRGBByteArray(normalize) // Using your existing extension
+        ?: throw IllegalStateException("Failed to extract RGB byte array")
+
+    return pixelData.toNSData()
+}
