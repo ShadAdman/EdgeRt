@@ -1,6 +1,11 @@
 package org.kmp.playground.kflite
 
 import androidx.compose.ui.graphics.ImageBitmap
+import platform.UIKit.UIImage
+import platform.Foundation.NSData
+import platform.Foundation.create
+import kotlinx.cinterop.addressOf
+import kotlinx.cinterop.usePinned
 
 actual fun ImageBitmap.toScaledByteBuffer(
     inputWidth: Int,
