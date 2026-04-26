@@ -7,6 +7,8 @@ import androidx.core.graphics.get
 import androidx.core.graphics.scale
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import android.graphics.BitmapFactory
+import android.graphics.Bitmap
 
 
 actual fun ImageBitmap.toScaledByteBuffer(
