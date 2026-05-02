@@ -28,3 +28,4 @@ dependencyResolutionManagement {
 }
 rootProject.name = "KfliteLib"
 include(":kflite")
+include(":kflitetestapp")
