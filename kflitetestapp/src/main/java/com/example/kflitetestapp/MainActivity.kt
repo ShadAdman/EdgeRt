@@ -4,44 +4,32 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.example.kflitetestapp.ui.theme.KfliteLibTheme
+import org.kmp.playground.kflite.KfliteClass
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContent {
-            KfliteLibTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
-            }
+
+        var modelByteArray: ByteArray? = null
+        val modelName = "celsius_to_fahrenheit.tflite"
+        assets.open(modelName).use { inputStream ->
+            modelByteArray = inputStream.readBytes()
         }
-    }
-}
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
+        modelByteArray ?: return
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    KfliteLibTheme {
-        Greeting("Android")
+        val tfClass = KfliteClass(modelByteArray)
+        val output = mapOf(0 to arrayOf(FloatArray(1)))
+        val input = listOf(arrayOf(floatArrayOf(100f)))
+        tfClass.run(input, output)
+        tfClass.close()
+
+        println("model result: ${output[0]?.get(0).contentToString()}")
+
+        setContent {
+            Text(text = "testApp")
+        }
     }
 }
