@@ -31,6 +31,11 @@ enum class TFLiteInferencePreference {
     PLATFORM_DEFAULT
 }
 
+enum class Runtime {
+    TFLITE,
+    LITERT
+}
+
 /**
  * Encapsulates settings for configuring an interpreters.
  * @param numThreads The number of threads to be used for ops that support multi-threading. Only for CPU
@@ -38,6 +43,7 @@ enum class TFLiteInferencePreference {
  * @param inferencePreferenceType The preference for inference speed and accuracy.
  * @param allowQuantizedModels Whether to allow inference with quantized models.
  * @param allowFp16PrecisionForFp32 Whether to allow inference with float16 precision for FP32 models.
+ * @param runtime The runtime to be used for inference.
  */
 expect class InterpreterOptions(
     numThreads: Int = 4,
@@ -45,4 +51,5 @@ expect class InterpreterOptions(
     inferencePreferenceType: TFLiteInferencePreference = TFLiteInferencePreference.PLATFORM_DEFAULT,
     allowQuantizedModels: Boolean = true,
     allowFp16PrecisionForFp32: Boolean = false,
+    runtime: Runtime = Runtime.TFLITE,
 )
