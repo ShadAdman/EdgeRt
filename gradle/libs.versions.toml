@@ -6,6 +6,8 @@ android-targetSdk = "36"
 androidx-activity = "1.10.1"
 composeMultiplatform = "1.8.1"
 tflite = "2.17.0"
+litert = "2.1.5"
+litert-support = "1.4.2"
 kotlin = "2.2.21"
 vanniktech-publish = "0.32.0"
 groupId = "io.github.shadmanadman"
@@ -22,6 +24,12 @@ androidx-startup = { module = "androidx.startup:startup-runtime", version.ref = 
 tfliteGpuApi = { module = "org.tensorflow:tensorflow-lite-gpu-api", version.ref = "tflite" }
 tflite = { module = "org.tensorflow:tensorflow-lite", version.ref = "tflite" }
 tfliteGPU = { module = "org.tensorflow:tensorflow-lite-gpu", version.ref = "tflite" }
+
+# litert for Android
+litert = { module = "com.google.ai.edge.litert:litert", version.ref = "litert" }
+litert-gpu = { module = "com.google.ai.edge.litert:litert-gpu", version.ref = "litert-support" }
+litert-api = { module = "com.google.ai.edge.litert:litert-api", version.ref = "litert-support" }
+# litert-nnapi is bundled in litert
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
