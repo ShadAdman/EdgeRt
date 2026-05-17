@@ -4,14 +4,16 @@ import org.tensorflow.lite.RuntimeFlavor
 import org.tensorflow.lite.gpu.CompatibilityList
 import org.tensorflow.lite.gpu.GpuDelegateFactory
 import org.tensorflow.lite.nnapi.NnApiDelegate
-import org.kmp.playground.kflite.PlatformInterpreterOptions as AndroidPlatformInterpreterOptions
+import org.kmp.playground.kflite.PlatformTFLiteInterpreterOptions as AndroidPlatformInterpreterOptions
+import com.google.ai.edge.litert.Accelerator
 
 actual class InterpreterOptions(
-    numThreads: Int = 4,
+    val numThreads: Int = 4,
     val delegateType: DelegateType = DelegateType.CPU,
     val inferencePreferenceType: TFLiteInferencePreference = TFLiteInferencePreference.PLATFORM_DEFAULT,
     val allowQuantizedModels: Boolean = true,
     val allowFp16PrecisionForFp32: Boolean = false,
+    val runtime: Runtime = Runtime.TFLITE,
     val allowBufferHandleOutput: Boolean = true,
 ) {
     actual constructor(
@@ -19,13 +21,15 @@ actual class InterpreterOptions(
         delegateType: DelegateType,
         inferencePreferenceType: TFLiteInferencePreference,
         allowQuantizedModels: Boolean,
-        allowFp16PrecisionForFp32: Boolean
+        allowFp16PrecisionForFp32: Boolean,
+        runtime: Runtime
     ) : this(
         numThreads = numThreads,
         delegateType = delegateType,
         inferencePreferenceType = inferencePreferenceType,
         allowQuantizedModels = allowQuantizedModels,
         allowFp16PrecisionForFp32 = allowFp16PrecisionForFp32,
+        runtime = runtime,
         allowBufferHandleOutput = true
     )
 
@@ -49,6 +53,13 @@ actual class InterpreterOptions(
                     }
                 }
             }
+        }
+
+    internal val liteRTAccelerator: Accelerator
+        get() = when (delegateType) {
+            DelegateType.CPU -> Accelerator.CPU
+            DelegateType.GPU_METAL -> Accelerator.GPU
+            DelegateType.NNAPI_COREML -> Accelerator.NPU
         }
 
     private fun setGpuDelegation() : GpuDelegateFactory.Options? {
