@@ -1,10 +1,11 @@
 package org.kmp.playground.kflite
 
-import org.tensorflow.lite.Delegate
-import org.tensorflow.lite.Interpreter
-import org.tensorflow.lite.Tensor
+import com.google.ai.edge.litert.CompiledModel as LiteRTCompiledModel
+import org.tensorflow.lite.Interpreter as TFLiteInterpreter
+import org.tensorflow.lite.Tensor as TFLiteTensor
 
-internal typealias PlatformInterpreter = Interpreter
-internal typealias PlatformInterpreterOptions = Interpreter.Options
-internal typealias PlatformTensorFlowDelegate = Delegate
-internal typealias PlatformTensor = Tensor
+internal typealias PlatformTFLiteInterpreter = TFLiteInterpreter
+internal typealias PlatformTFLiteInterpreterOptions = TFLiteInterpreter.Options
+internal typealias PlatformTFLiteTensor = TFLiteTensor
+
+internal typealias PlatformLiteRTCompiledModel = LiteRTCompiledModel
