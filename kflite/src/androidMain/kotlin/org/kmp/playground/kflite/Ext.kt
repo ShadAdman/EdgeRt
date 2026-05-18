@@ -4,7 +4,7 @@ import android.content.Context
 import org.tensorflow.lite.DataType
 import java.io.File
 
-internal fun PlatformTensor.toTensor() = Tensor(this)
+internal fun PlatformTFLiteTensor.toTensor() = Tensor(this)
 
 internal fun TensorDataType.toTensorDataType() = when(this){
     TensorDataType.FLOAT32 -> DataType.FLOAT32
