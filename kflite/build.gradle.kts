@@ -66,7 +66,7 @@ kotlin {
             // LiteRT
             implementation(libs.litert)
             implementation(libs.litert.gpu)
-            implementation(libs.litert.api)
+            //implementation(libs.litert.api)
         }
         commonMain.dependencies {
             implementation(compose.ui)
