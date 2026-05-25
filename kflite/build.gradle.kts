@@ -60,9 +60,9 @@ kotlin {
             implementation(libs.androidx.activity.compose)
             implementation(libs.androidx.startup)
             // TFLite
-            implementation(libs.tflite)
-            implementation(libs.tfliteGPU)
-            implementation(libs.tfliteGpuApi)
+//            implementation(libs.tflite)
+//            implementation(libs.tfliteGPU)
+//            implementation(libs.tfliteGpuApi)
             // LiteRT
             implementation(libs.litert)
             implementation(libs.litert.gpu)
