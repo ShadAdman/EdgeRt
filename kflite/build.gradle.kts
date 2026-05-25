@@ -65,7 +65,7 @@ kotlin {
 //            implementation(libs.tfliteGpuApi)
             // LiteRT
             implementation(libs.litert)
-            implementation(libs.litert.gpu)
+            //implementation(libs.litert.gpu)
             //implementation(libs.litert.api)
         }
         commonMain.dependencies {
