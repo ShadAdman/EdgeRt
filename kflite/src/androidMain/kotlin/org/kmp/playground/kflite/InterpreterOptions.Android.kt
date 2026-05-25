@@ -4,7 +4,8 @@ import org.tensorflow.lite.RuntimeFlavor
 import org.tensorflow.lite.gpu.CompatibilityList
 import org.tensorflow.lite.gpu.GpuDelegateFactory
 import org.tensorflow.lite.nnapi.NnApiDelegate
-import org.kmp.playground.kflite.PlatformTFLiteInterpreterOptions as AndroidPlatformInterpreterOptions
+import org.kmp.playground.kflite.PlatformLiteRTInterpreterOptions as AndroidLiteRTInterpreterOptions
+import org.kmp.playground.kflite.PlatformTFLiteInterpreterOptions as AndroidTFLiteInterpreterOptions
 import com.google.ai.edge.litert.Accelerator
 
 actual class InterpreterOptions(
@@ -35,25 +36,30 @@ actual class InterpreterOptions(
 
     val compatList = CompatibilityList()
 
-    internal val tensorFlowInterpreterOptions = AndroidPlatformInterpreterOptions()
+    internal val tensorFlowInterpreterOptions = AndroidTFLiteInterpreterOptions()
         .setNumThreads(numThreads)
-        .setAllowBufferHandleOutput(allowBufferHandleOutput)
-        .apply {
-            when (delegateType) {
-                DelegateType.CPU -> Unit
-                DelegateType.GPU_METAL -> {
-                    setGpuDelegation()?.let {
-                        addDelegate(GpuDelegateFactory(it).create(RuntimeFlavor.APPLICATION))
-                    }
-                }
+    //TODO FIX ME
 
-                DelegateType.NNAPI_COREML -> {
-                    setNnApiDelegation()?.let {
-                        addDelegate(NnApiDelegate(it))
-                    }
-                }
-            }
-        }
+//        .setAllowBufferHandleOutput(allowBufferHandleOutput)
+//        .apply {
+//            when (delegateType) {
+//                DelegateType.CPU -> Unit
+//                DelegateType.GPU_METAL -> {
+//                    setGpuDelegation()?.let {
+//                        addDelegate(GpuDelegateFactory(it).create(RuntimeFlavor.APPLICATION))
+//                    }
+//                }
+//
+//                DelegateType.NNAPI_COREML -> {
+//                    setNnApiDelegation()?.let {
+//                        addDelegate(NnApiDelegate(it))
+//                    }
+//                }
+//            }
+//        }
+
+    internal val liteRTInterpreterOptions = AndroidLiteRTInterpreterOptions(liteRTAccelerator)
+
 
     internal val liteRTAccelerator: Accelerator
         get() = when (delegateType) {
