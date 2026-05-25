@@ -28,7 +28,7 @@ tfliteGPU = { module = "org.tensorflow:tensorflow-lite-gpu", version.ref = "tfli
 # litert for Android
 litert = { module = "com.google.ai.edge.litert:litert", version.ref = "litert" }
 litert-gpu = { module = "com.google.ai.edge.litert:litert-gpu", version.ref = "litert-support" }
-litert-api = { module = "com.google.ai.edge.litert:litert-api", version.ref = "litert-support" }
+#litert-api = { module = "com.google.ai.edge.litert:litert-api", version.ref = "litert-support" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
