@@ -9,3 +9,5 @@ internal typealias PlatformTFLiteInterpreterOptions = TFLiteInterpreter.Options
 internal typealias PlatformTFLiteTensor = TFLiteTensor
 
 internal typealias PlatformLiteRTCompiledModel = LiteRTCompiledModel
+internal typealias PlatformLiteRTInterpreterOptions = LiteRTCompiledModel.Options
+
