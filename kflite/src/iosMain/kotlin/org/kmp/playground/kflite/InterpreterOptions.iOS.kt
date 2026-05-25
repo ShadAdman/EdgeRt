@@ -14,8 +14,9 @@ actual class InterpreterOptions actual constructor(
     val delegateType: DelegateType,
     val inferencePreferenceType: TFLiteInferencePreference,
     val allowQuantizedModels: Boolean,
-    val allowFp16PrecisionForFp32: Boolean
-) {
+    val allowFp16PrecisionForFp32: Boolean,
+    val runtime: Runtime = Runtime.TFLITE
+    ) {
 
     @OptIn(ExperimentalForeignApi::class)
     internal val tflInterpreterOptions = TFLInterpreterOptions().apply {
