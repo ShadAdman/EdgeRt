@@ -82,7 +82,8 @@ actual class Interpreter actual constructor(model: ByteArray, options: Interpret
                     copyToLiteRTBuffer(inputBuffers[index], input)
                 }
             }
-
+            println("LiteRT: Running inference...")
+            println("LiteRT: Input buffers: ${inputBuffers.size}")
             compiledModel.run(inputBuffers, outputBuffers)
 
             outputs.forEach { (index, outputContainer) ->
