@@ -94,6 +94,7 @@ actual class Interpreter actual constructor(model: ByteArray, options: Interpret
         }
 
         private fun copyToLiteRTBuffer(buffer: com.google.ai.edge.litert.TensorBuffer, input: Any) {
+            println("LiteRT: Copying to buffer: $input")
             when (input) {
                 is FloatArray -> buffer.writeFloat(input)
                 is IntArray -> buffer.writeInt(input)
