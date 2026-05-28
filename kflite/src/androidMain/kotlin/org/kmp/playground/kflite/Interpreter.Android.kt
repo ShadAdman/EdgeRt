@@ -77,20 +77,26 @@ actual class Interpreter actual constructor(model: ByteArray, options: Interpret
         }
 
         override fun run(inputs: List<Any>, outputs: Map<Int, Any>) {
+            // Inject input data into the input buffers.
             inputs.forEachIndexed { index, input ->
-                if (index < inputBuffers.size) {
+                if (index < inputBuffers.size - 1) {
                     copyToLiteRTBuffer(inputBuffers[index], input)
                 }
             }
+
             println("LiteRT: Running inference...")
             println("LiteRT: Input buffers: ${inputBuffers.size}")
             compiledModel.run(inputBuffers, outputBuffers)
 
+            // Extract output data from the output buffers.
             outputs.forEach { (index, outputContainer) ->
                 if (index < outputBuffers.size) {
                     copyFromLiteRTBuffer(outputBuffers[index], outputContainer)
                 }
             }
+
+            inputBuffers.forEach { it.close() }
+            outputBuffers.forEach { it.close() }
         }
 
         private fun copyToLiteRTBuffer(buffer: com.google.ai.edge.litert.TensorBuffer, input: Any) {
