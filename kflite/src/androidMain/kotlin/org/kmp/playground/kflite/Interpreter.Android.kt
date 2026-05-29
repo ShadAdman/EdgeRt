@@ -77,6 +77,7 @@ actual class Interpreter actual constructor(model: ByteArray, options: Interpret
         }
 
         override fun run(inputs: List<Any>, outputs: Map<Int, Any>) {
+            println("LiteRT: Running inference...")
             // Inject input data into the input buffers.
             inputs.forEachIndexed { index, input ->
                 if (index < inputBuffers.size - 1) {
@@ -84,7 +85,6 @@ actual class Interpreter actual constructor(model: ByteArray, options: Interpret
                 }
             }
 
-            println("LiteRT: Running inference...")
             println("LiteRT: Input buffers: ${inputBuffers.size}")
             compiledModel.run(inputBuffers, outputBuffers)
 
