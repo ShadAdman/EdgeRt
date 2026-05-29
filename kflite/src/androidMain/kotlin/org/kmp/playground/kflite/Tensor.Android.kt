@@ -21,7 +21,7 @@ actual class Tensor(
     actual val shape: IntArray
         get() = when (platformTensor) {
             is org.tensorflow.lite.Tensor -> platformTensor.shape()
-            is TensorBuffer -> IntArray(0) // FIXME: need to get from buffer
+            is TensorBuffer -> platformTensor.readInt()
             else -> throw IllegalArgumentException("Unknown tensor type: ${platformTensor::class.java.name}")
         }
 }
