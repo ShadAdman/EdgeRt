@@ -80,7 +80,7 @@ actual class Interpreter actual constructor(model: ByteArray, options: Interpret
             println("LiteRT: Running inference...")
             // Inject input data into the input buffers.
             inputs.forEachIndexed { index, input ->
-                if (index < inputBuffers.size - 1) {
+                if (index <= inputBuffers.size - 1) {
                     copyToLiteRTBuffer(inputBuffers[index], input)
                 }
             }
