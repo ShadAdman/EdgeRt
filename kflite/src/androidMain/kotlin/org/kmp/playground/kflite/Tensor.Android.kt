@@ -9,7 +9,7 @@ actual class Tensor(
     actual val dataType: TensorDataType
         get() = when (platformTensor) {
             is org.tensorflow.lite.Tensor -> platformTensor.dataType().toTensorDataType()
-            is TensorBuffer -> TensorDataType.FLOAT32 // FIXME: need to get from buffer
+            is TensorBuffer -> TensorDataType.FLOAT32 // FIXME: need to get tensor type
             else -> throw IllegalArgumentException("Unknown tensor type: ${platformTensor::class.java.name}")
         }
     actual val name: String
@@ -21,7 +21,7 @@ actual class Tensor(
     actual val shape: IntArray
         get() = when (platformTensor) {
             is org.tensorflow.lite.Tensor -> platformTensor.shape()
-            is TensorBuffer -> platformTensor.readInt()
+            is TensorBuffer -> platformTensor.readInt() // FIXME: need to get tensor shape
             else -> throw IllegalArgumentException("Unknown tensor type: ${platformTensor::class.java.name}")
         }
 }

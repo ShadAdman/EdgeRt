@@ -47,6 +47,8 @@ actual class Interpreter actual constructor(model: ByteArray, options: Interpret
         override fun getOutputTensor(index: Int): Tensor = Tensor(interpreter.getOutputTensor(index))
         override fun resizeInput(index: Int, shape: IntArray) = interpreter.resizeInput(index, shape)
         override fun run(inputs: List<Any>, outputs: Map<Int, Any>) {
+            println("TFLite: Running inference...")
+
             interpreter.runForMultipleInputsOutputs(inputs.toTypedArray(), outputs)
         }
         override fun close() = interpreter.close()
@@ -78,6 +80,7 @@ actual class Interpreter actual constructor(model: ByteArray, options: Interpret
 
         override fun run(inputs: List<Any>, outputs: Map<Int, Any>) {
             println("LiteRT: Running inference...")
+
             // Inject input data into the input buffers.
             inputs.forEachIndexed { index, input ->
                 if (index < inputBuffers.size) {
@@ -85,7 +88,6 @@ actual class Interpreter actual constructor(model: ByteArray, options: Interpret
                 }
             }
 
-            println("LiteRT: Input buffers: ${inputBuffers.size}")
             compiledModel.run(inputBuffers, outputBuffers)
 
             // Extract output data from the output buffers.
@@ -100,7 +102,6 @@ actual class Interpreter actual constructor(model: ByteArray, options: Interpret
         }
 
         private fun copyToLiteRTBuffer(buffer: com.google.ai.edge.litert.TensorBuffer, input: Any) {
-            println("LiteRT: Copying to buffer: $input")
             when (input) {
                 is FloatArray -> buffer.writeFloat(input)
                 is IntArray -> buffer.writeInt(input)
