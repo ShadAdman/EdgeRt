@@ -21,9 +21,9 @@ Key features:
   quantization?</a>
 - Image input models (Support for NLP models are on the
   way [FollowUp](https://github.com/shadmanadman/kflite/issues/8))
-- Select Delegation (GPU and NNAPI on Android, METAL and CoreML on iOS)
+- Select Delegation (GPU and NNAPI on Android, METAL and CoreML on iOS) 
 - Whether to allow inference with float16 precision for FP32 models. `allowFp16PrecisionForFp32`
-- The preference for inference speed and accuracy. `SUSTAINED_SPEED` `FAST_SINGLE_ANSWER`
+- Change preference for inference speed and accuracy. `SUSTAINED_SPEED` `FAST_SINGLE_ANSWER`
 
 ## Quick Sample
 
