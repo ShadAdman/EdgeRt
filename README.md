@@ -5,15 +5,16 @@
 ![](poster.jpg)
 <p align="center"> kflite is a fresh and improved version of <a href="https://github.com/icerockdev/moko-tensorflow">moko-tensorflow</a></p>
 
-## Overview
+## About
 
-kflite runs TensorFlow Lite (tflite) models directly from shared Kotlin code.
+`kflite` runs ml models such as TensorFlow, PyTorch, and JAX models on mobile device (support for all edge devices is the goal) with help of Kotlin Multiplatform.
 It abstracts platform differences, and manages model loading, tensor creation, and inference through
-a unified API.
+a unified API without any performance change & compliantly native. 
 
 Key features:
 
 - Works with Compose Multiplatform `composeResources`
+- Ability to switch between TFLite and LiteRT runtimes
 - Supports model normalization (`YOLO`, `COCO`, `PascalVOC`, `TF formats`)
 - Enable/Disable
   quantization <a href="https://huggingface.co/docs/optimum/en/concept_guides/quantization">What's
@@ -24,25 +25,26 @@ Key features:
 - Whether to allow inference with float16 precision for FP32 models. `allowFp16PrecisionForFp32`
 - The preference for inference speed and accuracy. `SUSTAINED_SPEED` `FAST_SINGLE_ANSWER`
 
-## Getting Started
+## Quick Sample
 
-For a fastest setup and a working example,
-see [KfliteSample](https://github.com/shadmanadman/kflite-sample). It demonstrates a full pipeline.
+For a Compose example to run with TFLite checkout here:
+
+For a Compose example ro tun with LiteRT checkout here:
 
 ## Installation
 
 ### Add dependencies
 
-Include the dependency in your shared `commonMain.dependencies` </br>
+Include the dependency in your shared `commonMain.dependencies`
 
 ``` gradle
 implementation("io.github.shadmanadman:kflite:1.1.40")
 ```
 
-#### Configure for iOS
+#### Configure for iOS (Using SPM should remove this necesserity)
 
 Since KMP doesn’t automatically include CocoaPods dependencies in the consumer's `iosApp`, you need to manually add TensorFlow
-Lite for iOS. </br>
+Lite for iOS.
 Create a `Podfile` inside your `iosApp` with following pods:
 
 ```
@@ -57,19 +59,18 @@ end
 
 ## Run a Model
 
-### Step 1 - Place model
+### Step 1 - Place the model
 
-Put your `.tflite` model file in `composeResources/files`.</br>
-You can view an example model placement on[Kflite Sample](https://github.com/shadmanadman/kflite-sample/tree/main/composeApp/src/commonMain/composeResources/files).
+Put your `.tflite` model file in `composeResources/files`
+You can view an example model placement on [Kflite Sample](https://github.com/shadmanadman/kflite-sample/tree/main/composeApp/src/commonMain/composeResources/files).
 
-kflite uses `Compose Resources` to manage assets in a platform-independent way.Your model becomes
+kflite uses `Compose Resources` to manage assets in a platform independent way.Your model becomes
 available to all targets by converting it into a byte array.
 
 ### Step 2 - init the model
 
-kflite loads and prepares your model for inference with optional performance parameters. </br>
-Call `Kflite.init()` and load your model as a byte array. This creates an interpreter instance in
-memory.
+`kflite` can be used via a global singleton (`Kflite`) for simple use cases or by instantiating a Class (`KfliteClass`) when you need to manage multiple models simultaneously or control their lifecycles independently.
+
 
 ``` kotlin
 Kflite.init(
@@ -92,23 +93,36 @@ Kflite.init(
   Android is FAST_SINGLE_ANSWER and on iOS WaitTypePassive)
 - `allowQuantizedModels` Whether to allow inference with quantized models.
 
+[!IMPORTANT]
+The following properties are not customizable in LiteRT(Android), so setting them will have no effect. Maybe in feature updates:
+- `delegateType`
+- `inferencePreferenceType`
+- `allowQuantizedModels`
+- `allowFp16PrecisionForFp32`
+
 ### Step 3 - Prepare the input data
 
 Kflite works with direct `ByteBuffer` as input, so you can feed preprocessed inputs or tensors
 directly.</br>
+
+
+[!IMPORTANT]
 [Netron](https://netron.app/) is a great tool for visualizing your model. You can see your model
 input/output details.</br>
-You can see input tensor shape of your model by calling `getInputTensor`, Checkout your model
-metadata or use [Netron](https://netron.app/) to check input dimensions and each shape represents.
 
-- To see the number of input tensor that your model has, you can call [`getInputTensorCount`](https://github.com/shadmanadman/kflite-sample/blob/8cb1175576a2b3dcf7bd30d400528c5a38e92714/composeApp/src/commonMain/kotlin/org/kmp/playground/kflite/sample/RunModelWithInputImageExample.kt#L30).
+- You can see input tensor shape of your model by calling `getInputTensor` or Checkout your model
+metadata or use [Netron](https://netron.app/) to check input dimensions and what each shape represents.
 
-Following example shows how to prepare input data for a model that takes an image as input and the
-input have a 4D matrix.
+- To see the number of input tensor that your model has, you can call [`getInputTensorCount`](https://github.com/shadmanadman/kflite-sample/blob/8cb1175576a2b3dcf7bd30d400528c5a38e92714/composeApp/src/commonMain/kotlin/org/kmp/playground/kflite/sample/RunModelWithInputImageExample.kt#L30) or Checkout your model
+  metadata or use [Netron](https://netron.app/) to check input dimensions.
+
+Following example shows how to prepare input data for a model that takes an image as input.
 
 Our model has 4 shape. The batch size,image width,
 image height and the pixel size.
-- If you know the amount of each shape, just hard code them in a const, since each shape is constant.
+
+[!IMPORTANT]
+If you know the amount of each shape, just hard code them in a const, since each shape is constant.
 
 ``` kotlin
 val pixcelSize = Kflite.getInputTensor(0).shape[0] = 1
@@ -117,7 +131,7 @@ val inputImageHeight = Kflite.getInputTensor(0).shape[2] = 448
 val floatTypeSize = Kflite.getInputTensor(0).shape[3] = 3
 ```
 
-Calculate the input size.This will be used to allocate the size of byte buffer.
+Calculate the input size.This will be used to allocate the size of input data.
 
 ``` kotlin
 val modelInputSize =
@@ -129,7 +143,8 @@ This is for image inputs. (Text inputs will be supported soon.)
 Following example scales an image to match model input size and converts it into a normalized float
 array.</br>
 
-- When the `normalize` is true, the code performs Image Normalization and Data Type Conversion on the
+[!IMPORTANT]
+When the `normalize` is true, the code performs Image Normalization and Data Type Conversion on the
   pixel data before feeding it into the byte buffer.
   This changes the data type of the input in the buffer from an 8-bit integer to 32-bit floating
   point.True this only for models that supports input data in a range of [0.0,1.0].
@@ -148,14 +163,18 @@ val inputImage =  imageResource(Res.drawable.example_model_input)
 
 Create a container that matches the model’s output tensor shape. This gives you a correctly sized
 structure to hold the results.
-You can see output tensor shape of your model by calling `getOutputTensor`, Checkout your model
+
+- You can see output tensor shape of your model by calling `getOutputTensor` or Checkout your model
 metadata or use [Netron](https://netron.app/)</br>
 
-- To see the number of input tensor that your model has, you can call [`getOutputTensorCount`](https://github.com/shadmanadman/kflite-sample/blob/8cb1175576a2b3dcf7bd30d400528c5a38e92714/composeApp/src/commonMain/kotlin/org/kmp/playground/kflite/sample/RunModelWithInputImageExample.kt#L31).
+- To see the number of input tensor that your model has, you can call [`getOutputTensorCount`](https://github.com/shadmanadman/kflite-sample/blob/8cb1175576a2b3dcf7bd30d400528c5a38e92714/composeApp/src/commonMain/kotlin/org/kmp/playground/kflite/sample/RunModelWithInputImageExample.kt#L31) or Checkout your model
+  metadata or use [Netron](https://netron.app/)</br>
 
-Following example shows how to prepare output data for a object detection model that outputs a 3D matrix. 
-Our example model has 3 shape. The batch size (number of input), number of results and the bounding box location.</br>
-- If you know the amount of each shape, just hard code them in a const, since each shape is constant.
+Our example shows how to prepare output data for an object detection model that outputs a 3D matrix. 
+Our example model has 3 shape. The batch size (number of input), number of results and the bounding box locations (x,y,w,h).</br>
+
+[!IMPORTANT]
+If you know the amount of each shape, just hard code them in a const, since each shape is constant.
 
 ``` kotlin
 val batchSize = Kflite.getOutputTensor(0).shape[0] = 1
@@ -176,15 +195,16 @@ val modelOutputContainer = Array(batchSize) {
 
 ### Step 5 - Running the model:
 
-Call `Kflite.run()` and pass the input and output containers:
-
 [`Kflite.run()`](https://github.com/shadmanadman/kflite-sample/blob/8cb1175576a2b3dcf7bd30d400528c5a38e92714/composeApp/src/commonMain/kotlin/org/kmp/playground/kflite/sample/RunModelWithInputImageExample.kt#L51) performs inference on the model. You feed it the inputs and provide a container for
 outputs, and it returns predictions, detections, or classifications depending on your model type.
+
+[!IMPORTANT]
+By default we assume the model have multiple inputs and outputs.
 
 - `inputs`: List of input tensors.
 - `outputs`: A map linking output tensor indices to the containers you created earlier.
 
-If your model supports multiple input/output, add them to the list.
+If your model supports multiple input/output, add them to the list. The example model supports only one input and one output.
 
 ``` kotlin
 Kflite.run(
@@ -202,10 +222,9 @@ interpreter to avoid memory leaks.
 Kflite.close()
 ```
 
-Once closed, all underlying TFLite interpreters are released.
-
 ## Normalizing Model Output
-Most detection models output is in model-scaled coordinates.</br>
+
+Most detection models output is in model scaled coordinates.</br>
 When you resize your image to match the model input, you need to normalize the output data into the original size.</br>
 This normalization is not necessary unless you want to match the original to the model output. For example putting a bounding box on the original image or</br>
 modify the original data based on the model output.
