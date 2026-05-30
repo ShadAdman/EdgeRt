@@ -25,11 +25,12 @@ Key features:
 - Whether to allow inference with float16 precision for FP32 models. `allowFp16PrecisionForFp32`
 - Change preference for inference speed and accuracy. `SUSTAINED_SPEED` `FAST_SINGLE_ANSWER`
 
-## Quick Sample
+## Quick Intro
 
 For a Compose example to run with TFLite checkout here:
 
-For a Compose example ro tun with LiteRT checkout here:
+
+For a Compose example to run with LiteRT checkout here:
 
 ## Installation
 
