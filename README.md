@@ -38,7 +38,7 @@ For a Compose example ro tun with LiteRT checkout here:
 Include the dependency in your shared `commonMain.dependencies`
 
 ``` gradle
-implementation("io.github.shadmanadman:kflite:1.1.40")
+implementation("io.github.shadadman:kflite:1.1.40")
 ```
 
 #### Configure for iOS (Using SPM should remove this necesserity)
