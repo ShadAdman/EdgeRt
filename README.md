@@ -93,12 +93,12 @@ Kflite.init(
   Android is FAST_SINGLE_ANSWER and on iOS WaitTypePassive)
 - `allowQuantizedModels` Whether to allow inference with quantized models.
 
-[!IMPORTANT]
-The following properties are not customizable in LiteRT(Android), so setting them will have no effect. Maybe in feature updates:
-- `delegateType`
-- `inferencePreferenceType`
-- `allowQuantizedModels`
-- `allowFp16PrecisionForFp32`
+> [!IMPORTANT]
+> The following properties are not customizable in LiteRT(Android), so setting them will have no effect. Maybe in feature updates:
+> - `delegateType`
+> - `inferencePreferenceType`
+> - `allowQuantizedModels`
+> - `allowFp16PrecisionForFp32`
 
 ### Step 3 - Prepare the input data
 
@@ -106,9 +106,9 @@ Kflite works with direct `ByteBuffer` as input, so you can feed preprocessed inp
 directly.</br>
 
 
-[!IMPORTANT]
-[Netron](https://netron.app/) is a great tool for visualizing your model. You can see your model
-input/output details.</br>
+> [!IMPORTANT]
+> [Netron](https://netron.app/) is a great tool for visualizing your model. You can see your model
+input/output details.
 
 - You can see input tensor shape of your model by calling `getInputTensor` or Checkout your model
 metadata or use [Netron](https://netron.app/) to check input dimensions and what each shape represents.
@@ -121,8 +121,8 @@ Following example shows how to prepare input data for a model that takes an imag
 Our model has 4 shape. The batch size,image width,
 image height and the pixel size.
 
-[!IMPORTANT]
-If you know the amount of each shape, just hard code them in a const, since each shape is constant.
+> [!IMPORTANT]
+> If you know the amount of each shape, just hard code them in a const, since each shape is constant.
 
 ``` kotlin
 val pixcelSize = Kflite.getInputTensor(0).shape[0] = 1
@@ -143,8 +143,8 @@ This is for image inputs. (Text inputs will be supported soon.)
 Following example scales an image to match model input size and converts it into a normalized float
 array.</br>
 
-[!IMPORTANT]
-When the `normalize` is true, the code performs Image Normalization and Data Type Conversion on the
+> [!IMPORTANT]
+> When the `normalize` is true, the code performs Image Normalization and Data Type Conversion on the
   pixel data before feeding it into the byte buffer.
   This changes the data type of the input in the buffer from an 8-bit integer to 32-bit floating
   point.True this only for models that supports input data in a range of [0.0,1.0].
@@ -173,8 +173,8 @@ metadata or use [Netron](https://netron.app/)</br>
 Our example shows how to prepare output data for an object detection model that outputs a 3D matrix. 
 Our example model has 3 shape. The batch size (number of input), number of results and the bounding box locations (x,y,w,h).</br>
 
-[!IMPORTANT]
-If you know the amount of each shape, just hard code them in a const, since each shape is constant.
+> [!IMPORTANT]
+> If you know the amount of each shape, just hard code them in a const, since each shape is constant.
 
 ``` kotlin
 val batchSize = Kflite.getOutputTensor(0).shape[0] = 1
@@ -198,8 +198,8 @@ val modelOutputContainer = Array(batchSize) {
 [`Kflite.run()`](https://github.com/shadmanadman/kflite-sample/blob/8cb1175576a2b3dcf7bd30d400528c5a38e92714/composeApp/src/commonMain/kotlin/org/kmp/playground/kflite/sample/RunModelWithInputImageExample.kt#L51) performs inference on the model. You feed it the inputs and provide a container for
 outputs, and it returns predictions, detections, or classifications depending on your model type.
 
-[!IMPORTANT]
-By default we assume the model have multiple inputs and outputs.
+> [!IMPORTANT]
+> By default we assume the model have multiple inputs and outputs.
 
 - `inputs`: List of input tensors.
 - `outputs`: A map linking output tensor indices to the containers you created earlier.
