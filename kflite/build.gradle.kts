@@ -59,14 +59,9 @@ kotlin {
             implementation(compose.ui)
             implementation(libs.androidx.activity.compose)
             implementation(libs.androidx.startup)
-            // TFLite
-//            implementation(libs.tflite)
-//            implementation(libs.tfliteGPU)
-//            implementation(libs.tfliteGpuApi)
+
             // LiteRT
             implementation(libs.litert)
-            //implementation(libs.litert.gpu)
-            //implementation(libs.litert.api)
         }
         commonMain.dependencies {
             implementation(compose.ui)
@@ -121,8 +116,8 @@ mavenPublishing {
             }
         }
         scm {
-            connection.set("scm:git:git://github.com/shadmanadman/kflite.git")
-            developerConnection.set("scm:git:ssh://git@github.com/shadmanadman/kflite.git")
+            connection.set("scm:git:git://github.com/ShadAdman/kflite.git")
+            developerConnection.set("scm:git:ssh://git@github.com/ShadAdman/kflite.git")
             url.set(providers.gradleProperty("POM_URL").get())
         }
         developers {
