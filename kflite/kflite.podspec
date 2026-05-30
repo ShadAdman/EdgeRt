@@ -1,7 +1,7 @@
 Pod::Spec.new do |spec|
     spec.name                     = 'kflite'
     spec.version                  = '1.73.0-SNAPSHOT'
-    spec.homepage                 = 'https://github.com/shadmanadman/kflite'
+    spec.homepage                 = 'https://github.com/ShadAdman/kflite'
     spec.source                   = { :http=> ''}
     spec.authors                  = ''
     spec.license                  = ''

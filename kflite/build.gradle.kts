@@ -32,7 +32,6 @@ kotlin {
         homepage = providers.gradleProperty("POM_URL").get()
         version = libs.versions.snapshotVersion.get()
         ios.deploymentTarget = libs.versions.iosDeploymentTarget.get()
-        podfile = project.file("../iosApp/Podfile")
 
         pod("TensorFlowLiteObjC", moduleName = "TFLTensorFlowLite")
         pod("TensorFlowLiteObjC/Metal") {
@@ -42,14 +41,9 @@ kotlin {
             linkOnly = true
         }
 
-
         framework {
             baseName = "kflite"
             isStatic = true
-            linkerOpts(
-                project.file("../iosApp/Pods/TensorFlowLiteObjC/Frameworks").path.let { "-F$it" },
-                "-framework", "TensorFlowLiteObjC"
-            )
         }
     }
 
