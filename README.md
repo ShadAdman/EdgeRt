@@ -27,10 +27,10 @@ Key features:
 
 ## Quick Intro
 
-For a Compose example to run with TFLite checkout here:
+[For a Compose example to run with TFLite checkout here](https://github.com/ShadAdman/kflite-sample/blob/fc6bf39ce51928ee2e89480ad31b441fba9c296f/composeApp/src/commonMain/kotlin/org/kmp/playground/kflite/sample/RunModelWithInputImageExample.kt#L72)
 
 
-For a Compose example to run with LiteRT checkout here:
+[For a Compose example to run with LiteRT checkout here](https://github.com/ShadAdman/kflite-sample/blob/fc6bf39ce51928ee2e89480ad31b441fba9c296f/composeApp/src/commonMain/kotlin/org/kmp/playground/kflite/sample/RunModelWithInputImageExample.kt#L17)
 
 ## Installation
 
