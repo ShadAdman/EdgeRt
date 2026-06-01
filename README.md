@@ -2,8 +2,8 @@
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.2.21-blue.svg?style=flat-square&logo=kotlin)](https://kotlinlang.org/)
 [![Gradle](https://img.shields.io/badge/Gradle-8.x-green.svg?style=flat-square&logo=gradle)](https://gradle.org/)
 
-![](poster.jpg)
-<p align="center"> kflite is a fresh and improved version of <a href="https://github.com/icerockdev/moko-tensorflow">moko-tensorflow</a></p>
+![](poster.png)
+<p align="center"> kflite is a fresh and improved version of <a href="https://github.com/icerockdev/moko-tensorflow">moko-tensorflow</a> with litert support</p>
 
 ## About
 
@@ -39,7 +39,7 @@ Key features:
 Include the dependency in your shared `commonMain.dependencies`
 
 ``` gradle
-implementation("io.github.shadadman:kflite:1.1.40")
+implementation("io.github.shadadman:kflite:2.3.5")
 ```
 
 #### Configure for iOS (Using SPM should remove this necesserity)
