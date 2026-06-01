@@ -9,7 +9,7 @@
 
 `kflite` runs ml models such as TensorFlow, PyTorch, and JAX models on mobile device (support for all edge devices is the goal) with help of Kotlin Multiplatform.
 It abstracts platform differences, and manages model loading, tensor creation, and inference through
-a unified API without any performance change & compliantly native. 
+a unified API without any performance change & completely native. 
 
 Key features:
 
