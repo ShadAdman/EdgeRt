@@ -3,8 +3,11 @@ package org.kmp.playground.kflite
 object Kflite {
     private var interpreter: Interpreter? = null
 
+    val isInitialized: Boolean
+        get() = interpreter != null
+
     fun init(model: ByteArray, options: InterpreterOptions = InterpreterOptions()) {
-        check(interpreter == null) { "Interpreter already initialized." }
+        interpreter?.close()
         interpreter = Interpreter(model, options)
     }
 
