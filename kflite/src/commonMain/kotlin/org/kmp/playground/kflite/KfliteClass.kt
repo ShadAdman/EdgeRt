@@ -18,6 +18,7 @@ class KfliteClass {
     fun run(inputs: List<Any>, outputs: Map<Int, Any>) = interpreterOrThrow().run(inputs, outputs)
     fun close() {
         interpreterOrThrow().close()
+        interpreter = null
     }
     private fun interpreterOrThrow(): Interpreter =
         interpreter ?: error("Interpreter not initialized. Call KfLite.init() first.")
