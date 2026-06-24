@@ -39,7 +39,7 @@ Key features:
 Include the dependency in your shared `commonMain.dependencies`
 
 ``` gradle
-implementation("io.github.shadadman:kflite:2.3.5")
+implementation("io.github.shadadman:kflite:2.3.7")
 ```
 
 #### Configure for iOS (Using SPM should remove this necesserity)
@@ -96,7 +96,6 @@ Kflite.init(
 
 > [!IMPORTANT]
 > The following properties are not customizable in LiteRT(Android), so setting them will have no effect. Maybe in feature updates:
-> - `delegateType`
 > - `inferencePreferenceType`
 > - `allowQuantizedModels`
 > - `allowFp16PrecisionForFp32`
