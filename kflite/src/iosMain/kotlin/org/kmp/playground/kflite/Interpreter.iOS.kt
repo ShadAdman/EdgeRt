@@ -15,14 +15,27 @@ import kotlinx.cinterop.*
 
 
 @OptIn(ExperimentalForeignApi::class)
-actual class Interpreter actual constructor(model: ByteArray, options: InterpreterOptions) {
+actual class Interpreter actual constructor(modelSource: ModelSource, options: InterpreterOptions) {
 
     @OptIn(ExperimentalForeignApi::class)
     private var tflInterpreter: PlatformInterpreter? = null
 
+    actual constructor(model: ByteArray, options: InterpreterOptions) : this(ByteArraySource(model), options)
+
     init {
         tflInterpreter = errorHandled { errPtr ->
-            PlatformInterpreter(model.writeToTempFile(), options.tflInterpreterOptions, errPtr)
+            when (modelSource) {
+                is ByteArraySource -> PlatformInterpreter(
+                    modelSource.bytes.writeToTempFile(),
+                    options.tflInterpreterOptions,
+                    errPtr
+                )
+                is FileSource -> PlatformInterpreter(
+                    modelSource.path,
+                    options.tflInterpreterOptions,
+                    errPtr
+                )
+            }
         }!!
         errorHandled { errPtr ->
             val interpreter = requireNotNull(tflInterpreter) { "Interpreter has been closed or not initialized." }

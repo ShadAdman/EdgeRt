@@ -1,7 +1,8 @@
 package org.kmp.playground.kflite
 
-internal expect class Interpreter(model: ByteArray, options: InterpreterOptions) {
+internal expect class Interpreter(modelSource: ModelSource, options: InterpreterOptions) {
 
+    constructor(model: ByteArray, options: InterpreterOptions)
 
     /**
      * Gets the number of input tensors.
