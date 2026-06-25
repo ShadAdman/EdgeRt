@@ -72,17 +72,21 @@ available to all targets by converting it into a byte array.
 
 `kflite` can be used via a global singleton (`Kflite`) for simple use cases or by instantiating a Class (`KfliteClass`) when you need to manage multiple models simultaneously or control their lifecycles independently.
 
-
+#### Load from Bytes (Standard)
 ``` kotlin
 Kflite.init(
     model = Res.readBytes("files/efficientdet-lite2.tflite"),
-    options = InterpreterOptions(
-        numThreads: Int = 4,
-        delegateType: DelegateType = DelegateType.CPU,
-        inferencePreferenceType: TFLiteInferencePreference = TFLiteInferencePreference.PLATFORM_DEFAULT,
-        allowQuantizedModels: Boolean = true,
-        allowFp16PrecisionForFp32: Boolean = false,
-    )
+    options = InterpreterOptions(...)
+)
+```
+
+#### Load from File (Memory Mapped / High Performance)
+To avoid reading large models into memory, you can load them directly from a file path. This uses memory-mapping on Android/JVM and native file-based loading on iOS.
+
+``` kotlin
+Kflite.init(
+    modelSource = KFliteModel.fromFile(modelPath),
+    options = InterpreterOptions(...)
 )
 ```
 
