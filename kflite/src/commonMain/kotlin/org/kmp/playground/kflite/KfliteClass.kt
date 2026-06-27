@@ -6,9 +6,13 @@ class KfliteClass {
     val isInitialized: Boolean
         get() = interpreter != null
 
-    fun init(model: ByteArray,options: InterpreterOptions = InterpreterOptions()) {
+    fun init(model: ByteArray, options: InterpreterOptions = InterpreterOptions()) {
+        init(KFliteModel.fromBytes(model), options)
+    }
+
+    fun init(modelSource: ModelSource, options: InterpreterOptions = InterpreterOptions()) {
         interpreter?.close()
-        interpreter = Interpreter(model,options)
+        interpreter = Interpreter(modelSource, options)
     }
     fun getInputTensorCount(): Int = interpreterOrThrow().getOutputTensorCount()
     fun getOutputTensorCount(): Int = interpreterOrThrow().getOutputTensorCount()
