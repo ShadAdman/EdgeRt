@@ -3,10 +3,15 @@ package org.kmp.playground.kflite
 import android.content.Context
 import com.google.ai.edge.litert.CompiledModel
 import com.google.ai.edge.litert.Environment
+import java.io.File
+import java.io.FileInputStream
 import java.nio.ByteBuffer
+import java.nio.channels.FileChannel
 
-actual class Interpreter actual constructor(model: ByteArray, options: InterpreterOptions) {
+actual class Interpreter actual constructor(modelSource: ModelSource, options: InterpreterOptions) {
     private val context: Context by lazy { AppContext.get() }
+
+    actual constructor(model: ByteArray, options: InterpreterOptions) : this(ByteArraySource(model), options)
 
     private interface PlatformInterpreterWrapper {
         val inputTensorCount: Int
@@ -19,8 +24,8 @@ actual class Interpreter actual constructor(model: ByteArray, options: Interpret
     }
 
     private val wrapper: PlatformInterpreterWrapper = when (options.runtime) {
-        Runtime.TFLITE -> TFLiteInterpreterWrapper(model, options, context)
-        Runtime.LITERT -> LiteRTInterpreterWrapper(model, options, context)
+        Runtime.TFLITE -> TFLiteInterpreterWrapper(modelSource, options, context)
+        Runtime.LITERT -> LiteRTInterpreterWrapper(modelSource, options, context)
     }
 
     actual fun getInputTensorCount(): Int = wrapper.inputTensorCount
@@ -32,14 +37,26 @@ actual class Interpreter actual constructor(model: ByteArray, options: Interpret
     actual fun close() = wrapper.close()
 
     private class TFLiteInterpreterWrapper(
-        model: ByteArray,
+        modelSource: ModelSource,
         options: InterpreterOptions,
         context: Context
     ) : PlatformInterpreterWrapper {
-        private val interpreter = org.tensorflow.lite.Interpreter(
-            model.writeToTempFile(context),
-            options.tensorFlowInterpreterOptions
-        )
+        private val interpreter: org.tensorflow.lite.Interpreter = when (modelSource) {
+            is ByteArraySource -> org.tensorflow.lite.Interpreter(
+                modelSource.bytes.writeToTempFile(context),
+                options.tensorFlowInterpreterOptions
+            )
+            is FileSource -> {
+                val file = File(modelSource.path)
+                val inputStream = FileInputStream(file)
+                val modelBuffer = inputStream.channel.map(
+                    FileChannel.MapMode.READ_ONLY,
+                    0,
+                    file.length()
+                )
+                org.tensorflow.lite.Interpreter(modelBuffer, options.tensorFlowInterpreterOptions)
+            }
+        }
 
         override val inputTensorCount: Int get() = interpreter.inputTensorCount
         override val outputTensorCount: Int get() = interpreter.outputTensorCount
@@ -47,25 +64,34 @@ actual class Interpreter actual constructor(model: ByteArray, options: Interpret
         override fun getOutputTensor(index: Int): Tensor = Tensor(interpreter.getOutputTensor(index))
         override fun resizeInput(index: Int, shape: IntArray) = interpreter.resizeInput(index, shape)
         override fun run(inputs: List<Any>, outputs: Map<Int, Any>) {
-            println("TFLite: Running inference...")
-
             interpreter.runForMultipleInputsOutputs(inputs.toTypedArray(), outputs)
         }
         override fun close() = interpreter.close()
     }
 
     private class LiteRTInterpreterWrapper(
-        model: ByteArray,
+        modelSource: ModelSource,
         options: InterpreterOptions,
         context: Context
     ) : PlatformInterpreterWrapper {
         private val env = Environment.create()
-        private val modelFile = model.writeToTempFile(context)
-        private val compiledModel = CompiledModel.create(
-            modelFile.absolutePath,
-            options.liteRTInterpreterOptions,
-            env
-        )
+        private val compiledModel: CompiledModel = when (modelSource) {
+            is ByteArraySource -> {
+                val modelFile = modelSource.bytes.writeToTempFile(context)
+                CompiledModel.create(
+                    modelFile.absolutePath,
+                    options.liteRTInterpreterOptions,
+                    env
+                )
+            }
+            is FileSource -> {
+                CompiledModel.create(
+                    modelSource.path,
+                    options.liteRTInterpreterOptions,
+                    env
+                )
+            }
+        }
 
         private val inputBuffers = compiledModel.createInputBuffers()
         private val outputBuffers = compiledModel.createOutputBuffers()
@@ -79,9 +105,6 @@ actual class Interpreter actual constructor(model: ByteArray, options: Interpret
         }
 
         override fun run(inputs: List<Any>, outputs: Map<Int, Any>) {
-            println("LiteRT: Running inference...")
-
-            // Inject input data into the input buffers.
             inputs.forEachIndexed { index, input ->
                 if (index < inputBuffers.size) {
                     copyToLiteRTBuffer(inputBuffers[index], input)
@@ -90,15 +113,11 @@ actual class Interpreter actual constructor(model: ByteArray, options: Interpret
 
             compiledModel.run(inputBuffers, outputBuffers)
 
-            // Extract output data from the output buffers.
             outputs.forEach { (index, outputContainer) ->
                 if (index < outputBuffers.size) {
                     copyFromLiteRTBuffer(outputBuffers[index], outputContainer)
                 }
             }
-
-            inputBuffers.forEach { it.close() }
-            outputBuffers.forEach { it.close() }
         }
 
         private fun copyToLiteRTBuffer(buffer: com.google.ai.edge.litert.TensorBuffer, input: Any) {
@@ -116,8 +135,7 @@ actual class Interpreter actual constructor(model: ByteArray, options: Interpret
                     buffer.writeInt8(array)
                 }
                 is Array<*> -> {
-                    val flatArray = flattenArray(input)
-                    when (flatArray) {
+                    when (val flatArray = flattenArray(input)) {
                         is FloatArray -> buffer.writeFloat(flatArray)
                         is IntArray -> buffer.writeInt(flatArray)
                         is ByteArray -> buffer.writeInt8(flatArray)
@@ -141,15 +159,13 @@ actual class Interpreter actual constructor(model: ByteArray, options: Interpret
                 }
                 is Array<*> -> {
                     val flatArray = when {
-                        output.isArrayOf<FloatArray>() || (output.isNotEmpty() && output[0] is FloatArray) -> buffer.readFloat()
-                        output.isArrayOf<IntArray>() || (output.isNotEmpty() && output[0] is IntArray) -> buffer.readInt()
-                        output.isArrayOf<ByteArray>() || (output.isNotEmpty() && output[0] is ByteArray) -> buffer.readInt8()
-                        output.isArrayOf<LongArray>() || (output.isNotEmpty() && output[0] is LongArray) -> buffer.readLong()
-                        output.isArrayOf<BooleanArray>() || (output.isNotEmpty() && output[0] is BooleanArray) -> buffer.readBoolean()
-                        output.isNotEmpty() && output[0] is Array<*> -> {
-                             // Deeply nested - need to look further down for the type
-                             val leaf = getFirstElement(output)
-                             when (leaf) {
+                        output.isArrayOf<FloatArray>() || (output.isNotEmpty() && (output[0] is FloatArray)) -> buffer.readFloat()
+                        output.isArrayOf<IntArray>() || (output.isNotEmpty() && (output[0] is IntArray)) -> buffer.readInt()
+                        output.isArrayOf<ByteArray>() || (output.isNotEmpty() && (output[0] is ByteArray)) -> buffer.readInt8()
+                        output.isArrayOf<LongArray>() || (output.isNotEmpty() && (output[0] is LongArray)) -> buffer.readLong()
+                        output.isArrayOf<BooleanArray>() || (output.isNotEmpty() && (output[0] is BooleanArray)) -> buffer.readBoolean()
+                        output.isNotEmpty() && (output[0] is Array<*>) -> {
+                             when (getFirstElement(output)) {
                                  is IntArray -> buffer.readInt()
                                  is ByteArray -> buffer.readInt8()
                                  is LongArray -> buffer.readLong()
@@ -166,8 +182,7 @@ actual class Interpreter actual constructor(model: ByteArray, options: Interpret
 
         private fun flattenArray(input: Array<*>): Any {
             val totalSize = calculateTotalSize(input)
-            val first = getFirstElement(input)
-            val flat = when (first) {
+            val flat = when (getFirstElement(input)) {
                 is FloatArray -> FloatArray(totalSize)
                 is IntArray -> IntArray(totalSize)
                 is ByteArray -> ByteArray(totalSize)
@@ -178,7 +193,9 @@ actual class Interpreter actual constructor(model: ByteArray, options: Interpret
             var offset = 0
             fun doFlatten(arr: Any) {
                 if (arr is Array<*>) {
-                    for (item in arr) if (item != null) doFlatten(item)
+                    for (item in arr) {
+                        if (item != null) doFlatten(item)
+                    }
                 } else {
                     val len = java.lang.reflect.Array.getLength(arr)
                     System.arraycopy(arr, 0, flat, offset, len)
@@ -192,7 +209,9 @@ actual class Interpreter actual constructor(model: ByteArray, options: Interpret
         private fun calculateTotalSize(input: Any): Int {
             return if (input is Array<*>) {
                 var s = 0
-                for (i in input) if (i != null) s += calculateTotalSize(i)
+                for (i in input) {
+                    if (i != null) s += calculateTotalSize(i)
+                }
                 s
             } else {
                 java.lang.reflect.Array.getLength(input)
@@ -208,22 +227,24 @@ actual class Interpreter actual constructor(model: ByteArray, options: Interpret
         }
 
         private fun unflattenArray(src: Any, dest: Any, offset: Int = 0): Int {
+            var currentOffset = offset
             if (dest is Array<*>) {
-                var currentOffset = offset
                 for (item in dest) {
                     if (item != null) {
                         currentOffset = unflattenArray(src, item, currentOffset)
                     }
                 }
-                return currentOffset
             } else {
                 val len = java.lang.reflect.Array.getLength(dest)
                 System.arraycopy(src, offset, dest, 0, len)
-                return offset + len
+                currentOffset += len
             }
+            return currentOffset
         }
 
         override fun close() {
+            inputBuffers.forEach { it.close() }
+            outputBuffers.forEach { it.close() }
             compiledModel.close()
             env.close()
         }

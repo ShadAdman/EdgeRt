@@ -7,8 +7,12 @@ object Kflite {
         get() = interpreter != null
 
     fun init(model: ByteArray, options: InterpreterOptions = InterpreterOptions()) {
+        init(KFliteModel.fromBytes(model), options)
+    }
+
+    fun init(modelSource: ModelSource, options: InterpreterOptions = InterpreterOptions()) {
         interpreter?.close()
-        interpreter = Interpreter(model, options)
+        interpreter = Interpreter(modelSource, options)
     }
 
     fun getInputTensorCount(): Int =
