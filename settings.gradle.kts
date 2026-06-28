@@ -21,4 +21,11 @@ dependencyResolutionManagement {
     }
 }
 rootProject.name = "KfliteLib"
-include(":kflite")
+include(":core")
+include(":preprocessing:image")
+include(":preprocessing:audio")
+include(":preprocessing:text")
+include(":postprocessing:nms")
+include(":postprocessing:coco")
+include(":postprocessing:image")
+include(":sample")
