@@ -10,7 +10,7 @@
             tools:node="merge">
 
             <meta-data
-                android:name="org.kmp.playground.kflite.core.AppContextInject"
+                android:name="org.kmp.playground.kflite.AppContextInject"
                 android:value="androidx.startup" />
         </provider>
     </application>
