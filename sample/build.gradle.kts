@@ -53,7 +53,7 @@ kotlin {
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
-            implementation(project(":core"))
+            implementation(project(":kflite"))
             implementation(project(":preprocessing:image"))
             implementation(project(":postprocessing:image"))
         }
