@@ -1,4 +1,4 @@
-package org.kmp.playground.kflite.core
+package org.kmp.playground.kflite
 
 import android.content.Context
 import androidx.startup.Initializer

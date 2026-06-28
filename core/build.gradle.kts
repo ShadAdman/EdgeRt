@@ -36,14 +36,16 @@ kotlin {
         }
         androidMain.dependencies {
             api(libs.litert)
-            api(libs.litert.gpu)
+            api("com.google.ai.edge.litert:litert-gpu:1.4.2") {
+                exclude(group = "com.google.ai.edge.litert", module = "litert-api")
+            }
             implementation(libs.androidx.startup)
         }
     }
 }
 
 android {
-    namespace = "org.kmp.playground.kflite.core"
+    namespace = "org.kmp.playground.kflite"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
     defaultConfig {
         minSdk = libs.versions.android.minSdk.get().toInt()
