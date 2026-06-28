@@ -1,7 +1,7 @@
 package org.kmp.playground.kflite.postprocessing.image
 
-import org.kmp.playground.kflite.core.model.Normalization
-import org.kmp.playground.kflite.core.model.Box
+import org.kmp.playground.kflite.model.Normalization
+import org.kmp.playground.kflite.model.Box
 
 fun Normalization.PascalVOC(x_min: Float, y_min: Float, x_max: Float, y_max: Float): Box{
     val w = x_max - x_min
@@ -91,3 +91,4 @@ private fun resizeBox(box: Box, origW: Float, origH:Float): Box{
         box.h * origH
     )
 }
+
