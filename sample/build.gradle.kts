@@ -54,8 +54,8 @@ kotlin {
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
             implementation(project(":kflite"))
-            implementation(project(":preprocessing:image"))
-            implementation(project(":postprocessing:image"))
+            implementation(project(":preprocessing"))
+            implementation(project(":postprocessing"))
         }
         commonTest.dependencies {
             implementation(kotlin("test"))
