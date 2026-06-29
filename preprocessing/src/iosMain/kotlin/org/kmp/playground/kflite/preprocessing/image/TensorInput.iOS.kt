@@ -8,6 +8,7 @@ import platform.Foundation.NSData
 import platform.Foundation.create
 import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.usePinned
+import org.kmp.playground.kflite.kflite.toNSData
 
 actual fun ImageBitmap.imageToScaledByteBuffer(
     inputWidth: Int,
