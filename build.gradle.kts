@@ -10,7 +10,6 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform) apply false
     alias(libs.plugins.kotlinCocoapods) apply false
     alias(libs.plugins.vanniktechPublish) apply false
-    id("signing")
 }
 
 subprojects {
