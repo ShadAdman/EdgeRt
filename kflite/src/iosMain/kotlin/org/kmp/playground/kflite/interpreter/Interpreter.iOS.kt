@@ -48,8 +48,8 @@ actual class Interpreter actual constructor(modelSource: ModelSource, options: I
         init {
             tflInterpreter = errorHandled { errPtr ->
                 when (modelSource) {
-                    is ByteArraySource -> TFLInterpreter(modelSource.bytes.toNSData(), null, errPtr)
-                    is FileSource -> TFLInterpreter(modelSource.path, null, errPtr)
+                    is ByteArraySource -> TFLInterpreter(modelData = modelSource.bytes.toNSData(), options = options.tflInterpreterOptions, error = errPtr)
+                    is FileSource -> TFLInterpreter(modelPath = modelSource.path, options = options.tflInterpreterOptions, error = errPtr)
                     is ResourceSource, is AssetSource -> {
                         val bundle = platform.Foundation.NSBundle.mainBundle
                         val fullPath = (modelSource as? ResourceSource)?.path ?: (modelSource as AssetSource).path
@@ -60,7 +60,7 @@ actual class Interpreter actual constructor(modelSource: ModelSource, options: I
                         val path = bundle.pathForResource(resourceName, extension, subDir)
                             ?: bundle.pathForResource(fileName, null)
                             ?: error("Resource not found: $fullPath")
-                        TFLInterpreter(path, null, errPtr)
+                        TFLInterpreter(modelPath = path, options = options.tflInterpreterOptions, error = errPtr)
                     }
                 }
             }
