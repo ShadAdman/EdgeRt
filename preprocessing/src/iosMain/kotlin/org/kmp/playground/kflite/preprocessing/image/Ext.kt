@@ -13,7 +13,6 @@ import platform.CoreGraphics.CGSizeMake
 import platform.CoreGraphics.kCGBitmapByteOrder32Big
 import platform.CoreGraphics.CGContextDrawImage
 import platform.CoreGraphics.CGBitmapContextCreate
-import platform.CoreGraphics.CGColorRenderingIntent
 import platform.Foundation.*
 import platform.UIKit.UIGraphicsBeginImageContextWithOptions
 import platform.UIKit.UIGraphicsEndImageContext
@@ -80,7 +79,7 @@ internal fun ImageBitmap.toUIImage(): UIImage? {
         (bytesPerPixel * bitsPerComponent).toULong(),
         bytesPerRow.toULong(),
         colorSpace,
-        bitmapInfo.toUInt(),
+        bitmapInfo,
         provider,
         null,
         false,
@@ -109,6 +108,8 @@ fun UIImage.toRGBByteArray(normalize: Boolean): ByteArray {
 
     val colorSpace = CGColorSpaceCreateDeviceRGB()
     val rawData = ByteArray(byteCount)
+    val bitmapInfo =
+        kCGBitmapByteOrder32Big or CGImageAlphaInfo.kCGImageAlphaPremultipliedLast.value
     rawData.usePinned { pinned ->
         val context = CGBitmapContextCreate(
             pinned.addressOf(0),
@@ -117,7 +118,7 @@ fun UIImage.toRGBByteArray(normalize: Boolean): ByteArray {
             8.toULong(),
             (bytesPerPixel * width).toULong(),
             colorSpace,
-            CGImageAlphaInfo.kCGImageAlphaPremultipliedLast.toUInt()
+            bitmapInfo
         ) ?: error("Could not create context")
 
         CGContextDrawImage(context, CGRectMake(0.0, 0.0, width.toDouble(), height.toDouble()), this.CGImage())
