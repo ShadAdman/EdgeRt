@@ -51,28 +51,28 @@ actual class Interpreter actual constructor(modelSource: ModelSource, options: I
         options: InterpreterOptions,
         context: Context
     ) : PlatformInterpreterWrapper {
-        private val interpreter: org.tensorflow.lite.Interpreter = when (modelSource) {
-            is ByteArraySource -> org.tensorflow.lite.Interpreter(
+        private val interpreter: PlatformTFLiteInterpreter = when (modelSource) {
+            is ByteArraySource -> PlatformTFLiteInterpreter(
                 modelSource.bytes.writeToTempFile(context),
-                org.tensorflow.lite.Interpreter.Options().setNumThreads(options.numThreads)
+                options.tensorFlowInterpreterOptions
             )
             is FileSource -> {
                 val file = File(modelSource.path)
                 val inputStream = FileInputStream(file)
                 val modelBuffer = inputStream.channel.map(FileChannel.MapMode.READ_ONLY, 0, file.length())
-                org.tensorflow.lite.Interpreter(modelBuffer, org.tensorflow.lite.Interpreter.Options().setNumThreads(options.numThreads))
+                PlatformTFLiteInterpreter(modelBuffer, options.tensorFlowInterpreterOptions)
             }
             is AssetSource -> {
                 val fileDescriptor = context.assets.openFd(modelSource.path)
                 val inputStream = FileInputStream(fileDescriptor.fileDescriptor)
                 val modelBuffer = inputStream.channel.map(FileChannel.MapMode.READ_ONLY, fileDescriptor.startOffset, fileDescriptor.declaredLength)
-                org.tensorflow.lite.Interpreter(modelBuffer, org.tensorflow.lite.Interpreter.Options().setNumThreads(options.numThreads))
+                PlatformTFLiteInterpreter(modelBuffer, options.tensorFlowInterpreterOptions)
             }
             is ResourceSource -> {
                 val fileDescriptor = context.assets.openFd(modelSource.path)
                 val inputStream = FileInputStream(fileDescriptor.fileDescriptor)
                 val modelBuffer = inputStream.channel.map(FileChannel.MapMode.READ_ONLY, fileDescriptor.startOffset, fileDescriptor.declaredLength)
-                org.tensorflow.lite.Interpreter(modelBuffer, org.tensorflow.lite.Interpreter.Options().setNumThreads(options.numThreads))
+                PlatformTFLiteInterpreter(modelBuffer, options.tensorFlowInterpreterOptions)
             }
         }
 
@@ -97,7 +97,7 @@ actual class Interpreter actual constructor(modelSource: ModelSource, options: I
         }
         override fun close() = interpreter.close()
 
-        private class TfliteRuntimeTensor(private val tflTensor: org.tensorflow.lite.Tensor) : RuntimeTensor {
+        private class TfliteRuntimeTensor(private val tflTensor: PlatformTFLiteTensor) : RuntimeTensor {
             override val dataType: TensorDataType get() = tflTensor.dataType().toCoreTensorDataType()
             override val name: String get() = tflTensor.name()
             override val shape: IntArray get() = tflTensor.shape()
@@ -110,14 +110,14 @@ actual class Interpreter actual constructor(modelSource: ModelSource, options: I
         context: Context
     ) : PlatformInterpreterWrapper {
         private val env = Environment.create()
-        private val compiledModel: CompiledModel = when (modelSource) {
+        private val compiledModel: PlatformLiteRTCompiledModel = when (modelSource) {
             is ByteArraySource -> {
                 val modelFile = modelSource.bytes.writeToTempFile(context)
-                CompiledModel.create(modelFile.absolutePath, CompiledModel.Options(getAccelerator(options.delegateType)), env)
+                PlatformLiteRTCompiledModel.create(modelFile.absolutePath, options.liteRTInterpreterOptions, env)
             }
-            is FileSource -> CompiledModel.create(modelSource.path, CompiledModel.Options(getAccelerator(options.delegateType)), env)
-            is AssetSource -> CompiledModel.create(context.assets, modelSource.path, CompiledModel.Options(getAccelerator(options.delegateType)), env)
-            is ResourceSource -> CompiledModel.create(context.assets, modelSource.path, CompiledModel.Options(getAccelerator(options.delegateType)), env)
+            is FileSource -> PlatformLiteRTCompiledModel.create(modelSource.path, options.liteRTInterpreterOptions, env)
+            is AssetSource -> PlatformLiteRTCompiledModel.create(context.assets, modelSource.path, options.liteRTInterpreterOptions, env)
+            is ResourceSource -> PlatformLiteRTCompiledModel.create(context.assets, modelSource.path, options.liteRTInterpreterOptions, env)
         }
 
         private val inputBuffers by lazy { compiledModel.createInputBuffers() }

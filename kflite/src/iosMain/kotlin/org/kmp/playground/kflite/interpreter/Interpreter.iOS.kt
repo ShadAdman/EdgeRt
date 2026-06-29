@@ -6,7 +6,6 @@ import org.kmp.playground.kflite.kflite.*
 import org.kmp.playground.kflite.model.*
 import org.kmp.playground.kflite.tensor.*
 
-import cocoapods.TFLTensorFlowLite.TFLInterpreter
 import kotlinx.cinterop.*
 
 @OptIn(ExperimentalForeignApi::class)
@@ -43,13 +42,13 @@ actual class Interpreter actual constructor(modelSource: ModelSource, options: I
         modelSource: ModelSource,
         options: InterpreterOptions
     ) : PlatformInterpreterWrapper {
-        private var tflInterpreter: TFLInterpreter? = null
+        private var tflInterpreter: PlatformInterpreter? = null
 
         init {
             tflInterpreter = errorHandled { errPtr ->
                 when (modelSource) {
-                    is ByteArraySource -> TFLInterpreter(modelData = modelSource.bytes.toNSData(), options = options.tflInterpreterOptions, error = errPtr)
-                    is FileSource -> TFLInterpreter(modelPath = modelSource.path, options = options.tflInterpreterOptions, error = errPtr)
+                    is ByteArraySource -> PlatformInterpreter(modelSource.bytes.writeToTempFile(), options = options.tflInterpreterOptions, error = errPtr)
+                    is FileSource -> PlatformInterpreter(modelSource.path, options = options.tflInterpreterOptions, error = errPtr)
                     is ResourceSource, is AssetSource -> {
                         val bundle = platform.Foundation.NSBundle.mainBundle
                         val fullPath = (modelSource as? ResourceSource)?.path ?: (modelSource as AssetSource).path
@@ -60,11 +59,14 @@ actual class Interpreter actual constructor(modelSource: ModelSource, options: I
                         val path = bundle.pathForResource(resourceName, extension, subDir)
                             ?: bundle.pathForResource(fileName, null)
                             ?: error("Resource not found: $fullPath")
-                        TFLInterpreter(modelPath = path, options = options.tflInterpreterOptions, error = errPtr)
+                        PlatformInterpreter(path, options = options.tflInterpreterOptions, error = errPtr)
                     }
                 }
+            }!!
+            errorHandled { errPtr ->
+                val interpreter = requireNotNull(tflInterpreter) { "Interpreter has been closed or not initialized." }
+                interpreter.allocateTensorsWithError(errPtr)
             }
-            tflInterpreter?.allocateTensorsWithError(null)
         }
 
         override val inputTensorCount: Int get() = tflInterpreter?.inputTensorCount()?.toInt() ?: 0
@@ -99,9 +101,9 @@ actual class Interpreter actual constructor(modelSource: ModelSource, options: I
             tflInterpreter = null
         }
 
-        private class TfliteRuntimeTensor(private val tflTensor: cocoapods.TFLTensorFlowLite.TFLTensor) : RuntimeTensor {
+        private class TfliteRuntimeTensor(private val tflTensor: PlatformTensor) : RuntimeTensor {
             override val dataType: TensorDataType get() = TensorDataType.FLOAT32 // FIXME
-            override val name: String get() = tflTensor.name() ?: ""
+            override val name: String get() = tflTensor.name ?: ""
             override val shape: IntArray get() = IntArray(0) // FIXME
         }
     }

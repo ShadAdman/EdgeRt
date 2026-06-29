@@ -25,7 +25,7 @@ actual class InterpreterOptions actual constructor(
     actual val allowBufferHandleOutput: Boolean,
 ){
     @OptIn(ExperimentalForeignApi::class)
-    internal val tflInterpreterOptions = TFLInterpreterOptions().apply {
+    internal val tflInterpreterOptions = PlatformInterpreterOptions().apply {
         setNumberOfThreads(numThreads.toULong())
 
         when (delegateType) {
