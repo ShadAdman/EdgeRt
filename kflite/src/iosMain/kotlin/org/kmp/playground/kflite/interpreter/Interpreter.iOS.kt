@@ -74,12 +74,12 @@ actual class Interpreter actual constructor(modelSource: ModelSource, options: I
 
         override fun getInputTensor(index: Int): Tensor {
             val t = tflInterpreter?.inputTensorAtIndex(index.toULong(), null)!!
-            return Tensor(TfliteRuntimeTensor(t))
+            return Tensor(t)
         }
 
         override fun getOutputTensor(index: Int): Tensor {
             val t = tflInterpreter?.outputTensorAtIndex(index.toULong(), null)!!
-            return Tensor(TfliteRuntimeTensor(t))
+            return Tensor(t)
         }
 
         override fun resizeInput(index: Int, shape: IntArray) { /* Logic */ }
@@ -99,12 +99,6 @@ actual class Interpreter actual constructor(modelSource: ModelSource, options: I
 
         override fun close() {
             tflInterpreter = null
-        }
-
-        private class TfliteRuntimeTensor(private val tflTensor: PlatformTensor) : RuntimeTensor {
-            override val dataType: TensorDataType get() = TensorDataType.FLOAT32 // FIXME
-            override val name: String get() = tflTensor.name ?: ""
-            override val shape: IntArray get() = IntArray(0) // FIXME
         }
     }
 
