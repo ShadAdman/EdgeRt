@@ -1,18 +1,13 @@
 package org.kmp.playground.kflite.kflite
 
-import org.kmp.playground.kflite.delegation.*
-import org.kmp.playground.kflite.interpreter.*
-import org.kmp.playground.kflite.kflite.*
-import org.kmp.playground.kflite.model.*
-import org.kmp.playground.kflite.tensor.*
-
-import kotlinx.cinterop.*
+import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.addressOf
+import kotlinx.cinterop.usePinned
 import platform.Foundation.NSData
-import platform.Foundation.create
 import platform.Foundation.NSTemporaryDirectory
-import platform.Foundation.writeToURL
-import platform.Foundation.NSURL
-import platform.Foundation.URLWithString
+import platform.Foundation.create
+import platform.Foundation.timeIntervalSince1970
+import platform.Foundation.writeToFile
 
 @OptIn(ExperimentalForeignApi::class)
 fun ByteArray.toNSData(): NSData = usePinned {

@@ -25,10 +25,20 @@ kotlin {
         homepage = "https://github.com/ShadAdman/kflite"
         version = "1.0"
         ios.deploymentTarget = "16.0"
+        podfile = project.file("../sample/iosApp/Podfile")
 
         pod("TensorFlowLiteObjC", moduleName = "TFLTensorFlowLite")
         pod("TensorFlowLiteObjC/Metal") { linkOnly = true }
         pod("TensorFlowLiteObjC/CoreML") { linkOnly = true }
+
+        framework {
+            baseName = "kflite"
+            isStatic = true
+            linkerOpts(
+                project.file("../sample/iosApp/Pods/TensorFlowLiteObjC/Frameworks").path.let { "-F$it" },
+                "-framework", "TensorFlowLiteObjC"
+            )
+        }
     }
 
     sourceSets {
