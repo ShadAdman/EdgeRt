@@ -8,8 +8,6 @@ import org.kmp.playground.kflite.tensor.*
 
 import cocoapods.TFLTensorFlowLite.TFLInterpreter
 import kotlinx.cinterop.*
-import platform.Foundation.NSData
-import platform.Foundation.NSErrorVar
 
 @OptIn(ExperimentalForeignApi::class)
 actual class Interpreter actual constructor(modelSource: ModelSource, options: InterpreterOptions) {

@@ -1,25 +1,26 @@
 package org.kmp.playground.kflite.kflite
 
-import org.kmp.playground.kflite.delegation.*
-import org.kmp.playground.kflite.interpreter.*
-import org.kmp.playground.kflite.kflite.*
-import org.kmp.playground.kflite.model.*
-import org.kmp.playground.kflite.tensor.*
+import kotlinx.cinterop.BetaInteropApi
+import kotlinx.cinterop.CPointer
+import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.ObjCObjectVar
+import kotlinx.cinterop.alloc
+import kotlinx.cinterop.memScoped
+import kotlinx.cinterop.ptr
+import kotlinx.cinterop.value
+import platform.Foundation.NSError
 
-import kotlinx.cinterop.*
-import platform.Foundation.NSErrorVar
-
-@OptIn(ExperimentalForeignApi::class)
-fun <T> errorHandled(block: (CPointer<CPointerVar<NSErrorVar>>?) -> T): T {
-    memScoped {
-        val errorPtr = alloc<CPointerVar<NSErrorVar>>()
-        val result = block(errorPtr.ptr)
-        val error = errorPtr.value
-        if (error != null) {
-            throw Exception(error.localizedDescription)
-        }
-        return result
+@OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
+@Suppress("TooGenericExceptionThrown")
+internal fun <T> errorHandled(block: (CPointer<ObjCObjectVar<NSError?>>) -> T?): T? {
+    val (result, error) = memScoped {
+        val errorPtr = alloc<ObjCObjectVar<NSError?>>()
+        runCatching {
+            block(errorPtr.ptr)
+        }.getOrNull() to errorPtr.value
     }
+    if (error != null) throw Exception(error.description)
+    return result
 }
 
 
