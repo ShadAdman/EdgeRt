@@ -31,10 +31,12 @@ Key features:
 
 ## Quick Intro
 
-[For a Compose example to run with TFLite checkout here](https://github.com/ShadAdman/kflite-sample/blob/fc6bf39ce51928ee2e89480ad31b441fba9c296f/composeApp/src/commonMain/kotlin/org/kmp/playground/kflite/sample/RunModelWithInputImageExample.kt#L72)
+[For a Compose example to run with TFLite checkout here](https://github.com/ShadAdman/kflite/blob/c8b65b3caab66f5eca5a08d92962ef50459c9ae8/sample/src/commonMain/kotlin/org/kmp/playground/kflite/sample/RunModelWithInputImageExample.kt#L84)
 
 
-[For a Compose example to run with LiteRT checkout here](https://github.com/ShadAdman/kflite-sample/blob/fc6bf39ce51928ee2e89480ad31b441fba9c296f/composeApp/src/commonMain/kotlin/org/kmp/playground/kflite/sample/RunModelWithInputImageExample.kt#L17)
+[For a Compose example to run with LiteRT checkout here](https://github.com/ShadAdman/kflite/blob/c8b65b3caab66f5eca5a08d92962ef50459c9ae8/sample/src/commonMain/kotlin/org/kmp/playground/kflite/sample/RunModelWithInputImageExample.kt#L18)
+
+[For a memmory mapped example to run with TFLite checkout here](https://github.com/ShadAdman/kflite/blob/c8b65b3caab66f5eca5a08d92962ef50459c9ae8/sample/src/commonMain/kotlin/org/kmp/playground/kflite/sample/RunModelWithInputImageExample.kt#L56)
 
 ## Installation
 
