@@ -1,9 +1,6 @@
 package org.kmp.playground.kflite.coldstart
 
-import org.kmp.playground.kflite.kflite.Kflite
 import org.kmp.playground.kflite.kflite.KfliteClass
-import org.kmp.playground.kflite.model.ModelSource
-import org.kmp.playground.kflite.interpreter.InterpreterOptions
 import org.kmp.playground.kflite.tensor.TensorDataType
 
 /**
@@ -54,79 +51,46 @@ data class ColdStartConfig(
 
 /**
  * Engine for performing configurable dry runs (warm-ups) on a model.
+ *
+ * Example usage:
+ * ```kotlin
+ * val kflite = KfliteClass()
+ * kflite.init(modelSource, InterpreterOptions())
+ *
+ * ColdStartEngine(kflite).warmUp()
+ * ```
  */
 class ColdStartEngine(
-    private val modelSource: ModelSource,
-    private val options: InterpreterOptions = InterpreterOptions(),
+    private val kflite: KfliteClass,
     private val config: ColdStartConfig = ColdStartConfig()
 ) {
-    private var kfliteClass: KfliteClass? = null
-
     /**
-     * Performs the warm-up runs on a new [KfliteClass] instance.
-     * Returns the engine instance for chaining.
+     * Performs the warm-up runs as configured and returns the engine instance.
+     * Assumes the supplied [KfliteClass] is already initialized.
      */
     fun warmUp(): ColdStartEngine {
-        val current = kfliteClass ?: KfliteClass().also { kfliteClass = it }
-        if (!current.isInitialized) {
-            current.init(modelSource, options)
+        if (!kflite.isInitialized) {
+            error("KfliteClass must be initialized before calling warmUp().")
         }
 
-        val inputs = (0 until current.getInputTensorCount()).map {
-            val tensor = current.getInputTensor(it)
+        val inputs = (0 until kflite.getInputTensorCount()).map {
+            val tensor = kflite.getInputTensor(it)
             config.inputProvider.createInput(tensor.dataType, tensor.shape)
         }
 
-        val outputs = (0 until current.getOutputTensorCount()).associateWith {
-            val tensor = current.getOutputTensor(it)
+        val outputs = (0 until kflite.getOutputTensorCount()).associateWith {
+            val tensor = kflite.getOutputTensor(it)
             config.inputProvider.createOutput(tensor.dataType, tensor.shape)
         }
 
         repeat(config.iterations) {
-            current.run(inputs, outputs)
+            kflite.run(inputs, outputs)
         }
 
         if (config.closeInterpreter) {
-            current.close()
-            kfliteClass = null
+            kflite.close()
         }
+
         return this
     }
-
-    /**
-     * Performs the warm-up runs on the global [Kflite] singleton.
-     */
-    fun warmUpSingleton() {
-        Kflite.init(modelSource, options)
-
-        val inputs = (0 until Kflite.getInputTensorCount()).map {
-            val tensor = Kflite.getInputTensor(it)
-            config.inputProvider.createInput(tensor.dataType, tensor.shape)
-        }
-
-        val outputs = (0 until Kflite.getOutputTensorCount()).associateWith {
-            val tensor = Kflite.getOutputTensor(it)
-            config.inputProvider.createOutput(tensor.dataType, tensor.shape)
-        }
-
-        repeat(config.iterations) {
-            Kflite.run(inputs, outputs)
-        }
-
-        if (config.closeInterpreter) {
-            Kflite.close()
-        }
-    }
-
-    /**
-     * Executes the dry runs using the [warmUp] logic.
-     */
-    fun run() {
-        warmUp()
-    }
-
-    /**
-     * Returns the [KfliteClass] instance if [ColdStartConfig.closeInterpreter] was false during [warmUp].
-     */
-    fun getKflite(): KfliteClass? = kfliteClass
 }
