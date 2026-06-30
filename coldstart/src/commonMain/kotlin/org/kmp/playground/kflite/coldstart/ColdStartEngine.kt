@@ -1,5 +1,6 @@
 package org.kmp.playground.kflite.coldstart
 
+import org.kmp.playground.kflite.kflite.Kflite
 import org.kmp.playground.kflite.kflite.KfliteClass
 import org.kmp.playground.kflite.model.ModelSource
 import org.kmp.playground.kflite.interpreter.InterpreterOptions
@@ -53,68 +54,79 @@ data class ColdStartConfig(
 
 /**
  * Engine for performing configurable dry runs (warm-ups) on a model.
- *
- * Example usage:
- * ```kotlin
- * val engine = ColdStartEngine(
- *     modelSource = model,
- *     options = InterpreterOptions(),
- *     config = ColdStartConfig(
- *         iterations = 5,
- *         inputProvider = ZeroInputProvider,
- *         closeInterpreter = true
- *     )
- * ).warmUp()
- * ```
  */
 class ColdStartEngine(
     private val modelSource: ModelSource,
     private val options: InterpreterOptions = InterpreterOptions(),
     private val config: ColdStartConfig = ColdStartConfig()
 ) {
-    private var kflite: KfliteClass? = null
+    private var kfliteClass: KfliteClass? = null
 
     /**
-     * Performs the warm-up runs as configured and returns the engine instance.
+     * Performs the warm-up runs on a new [KfliteClass] instance.
+     * Returns the engine instance for chaining.
      */
     fun warmUp(): ColdStartEngine {
-        run()
+        val current = kfliteClass ?: KfliteClass().also { kfliteClass = it }
+        if (!current.isInitialized) {
+            current.init(modelSource, options)
+        }
+
+        val inputs = (0 until current.getInputTensorCount()).map {
+            val tensor = current.getInputTensor(it)
+            config.inputProvider.createInput(tensor.dataType, tensor.shape)
+        }
+
+        val outputs = (0 until current.getOutputTensorCount()).associateWith {
+            val tensor = current.getOutputTensor(it)
+            config.inputProvider.createOutput(tensor.dataType, tensor.shape)
+        }
+
+        repeat(config.iterations) {
+            current.run(inputs, outputs)
+        }
+
+        if (config.closeInterpreter) {
+            current.close()
+            kfliteClass = null
+        }
         return this
     }
 
     /**
-     * Executes the dry runs.
+     * Performs the warm-up runs on the global [Kflite] singleton.
      */
-    fun run() {
-        val currentKflite = kflite ?: KfliteClass().also { kflite = it }
-        if (!currentKflite.isInitialized) {
-            currentKflite.init(modelSource, options)
+    fun warmUpSingleton() {
+        Kflite.init(modelSource, options)
+
+        val inputs = (0 until Kflite.getInputTensorCount()).map {
+            val tensor = Kflite.getInputTensor(it)
+            config.inputProvider.createInput(tensor.dataType, tensor.shape)
         }
 
-        val inputs = mutableListOf<Any>()
-        for (i in 0 until currentKflite.getInputTensorCount()) {
-            val tensor = currentKflite.getInputTensor(i)
-            inputs.add(config.inputProvider.createInput(tensor.dataType, tensor.shape))
-        }
-
-        val outputs = mutableMapOf<Int, Any>()
-        for (i in 0 until currentKflite.getOutputTensorCount()) {
-            val tensor = currentKflite.getOutputTensor(i)
-            outputs[i] = config.inputProvider.createOutput(tensor.dataType, tensor.shape)
+        val outputs = (0 until Kflite.getOutputTensorCount()).associateWith {
+            val tensor = Kflite.getOutputTensor(it)
+            config.inputProvider.createOutput(tensor.dataType, tensor.shape)
         }
 
         repeat(config.iterations) {
-            currentKflite.run(inputs, outputs)
+            Kflite.run(inputs, outputs)
         }
 
         if (config.closeInterpreter) {
-            currentKflite.close()
-            kflite = null
+            Kflite.close()
         }
     }
 
     /**
-     * Returns the [KfliteClass] instance if [ColdStartConfig.closeInterpreter] was false.
+     * Executes the dry runs using the [warmUp] logic.
      */
-    fun getKflite(): KfliteClass? = kflite
+    fun run() {
+        warmUp()
+    }
+
+    /**
+     * Returns the [KfliteClass] instance if [ColdStartConfig.closeInterpreter] was false during [warmUp].
+     */
+    fun getKflite(): KfliteClass? = kfliteClass
 }
