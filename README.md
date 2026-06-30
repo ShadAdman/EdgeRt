@@ -4,6 +4,11 @@
 
 ![](poster.png)
 
+`kflite` is now split into 3 main artifacts for better flexibility:
+- **`kflite`**: The main runtime and model management.
+- **`preprocessing`**: Image preprocessing utilities (Audio and Text coming soon).
+- **`postprocessing`**: NMS, COCO helpers, and image normalization.
+
 ## About
 
 `kflite` runs ml models such as TensorFlow, PyTorch, and JAX models on mobile device (support for all edge devices is the goal) with help of Kotlin Multiplatform.
@@ -14,12 +19,11 @@ Key features:
 
 - Works with Compose Multiplatform `composeResources`
 - Ability to switch between TFLite and LiteRT runtimes
-- Supports model normalization (`YOLO`, `COCO`, `PascalVOC`, `TF formats`)
+- Supports model normalization (`YOLO`, `COCO`, `PascalVOC`, `TF formats`) via the `postprocessing` module
 - Enable/Disable
   quantization <a href="https://huggingface.co/docs/optimum/en/concept_guides/quantization">What's
   quantization?</a>
-- Image input models (Support for NLP models are on the
-  way [FollowUp](https://github.com/shadmanadman/kflite/issues/8))
+- Image preprocessing via the `preprocessing` module (Audio and Text support are on the way)
 - Select Delegation (GPU and NNAPI on Android, METAL and CoreML on iOS) 
 - Whether to allow inference with float16 precision for FP32 models. `allowFp16PrecisionForFp32`
 - Change preference for inference speed and accuracy. `SUSTAINED_SPEED` `FAST_SINGLE_ANSWER`
@@ -35,10 +39,13 @@ Key features:
 
 ### Add dependencies
 
-Include the dependency in your shared `commonMain.dependencies`
+Include the required dependencies in your shared `commonMain.dependencies`. You can choose only what you need:
 
 ``` gradle
-implementation("io.github.shadadman:kflite:2.3.7")
+val version = "3.4.0-alpha"
+implementation("io.github.shadadman:kflite:$version")
+implementation("io.github.shadadman:preprocessing:$version")
+implementation("io.github.shadadman:postprocessing:$version")
 ```
 
 #### Configure for iOS (Using SPM should remove this necesserity)
@@ -142,7 +149,7 @@ val modelInputSize =
 ```
 
 Create a ByteBuffer from your input data.
-This is for image inputs. (Text inputs will be supported soon.)
+This is for image inputs using the **`preprocessing`** module.
 Following example scales an image to match model input size and converts it into a normalized float
 array.</br>
 
@@ -232,7 +239,7 @@ When you resize your image to match the model input, you need to normalize the o
 This normalization is not necessary unless you want to match the original to the model output. For example putting a bounding box on the original image or</br>
 modify the original data based on the model output.
 
-You can use this normalizing extensions to rescale object detection bounding boxes into the original image.
+You can use the normalizing extensions from the **`postprocessing`** module to rescale object detection bounding boxes into the original image.
 The `normalizedBox` will be a data class contain the new ordinations.
 
 ``` kotlin

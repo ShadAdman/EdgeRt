@@ -1,0 +1,4 @@
+${PODS_ROOT}/Target Support Files/TensorFlowLiteC/TensorFlowLiteC-xcframeworks.sh
+${PODS_ROOT}/TensorFlowLiteC/Frameworks/TensorFlowLiteC.xcframework
+${PODS_ROOT}/TensorFlowLiteC/Frameworks/TensorFlowLiteCCoreML.xcframework
+${PODS_ROOT}/TensorFlowLiteC/Frameworks/TensorFlowLiteCMetal.xcframework
