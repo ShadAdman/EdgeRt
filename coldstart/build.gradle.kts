@@ -12,6 +12,9 @@ kotlin {
         commonMain.dependencies {
             implementation(project(":kflite"))
         }
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+        }
     }
 }
 
