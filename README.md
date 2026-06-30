@@ -4,11 +4,6 @@
 
 ![](poster.png)
 
-`kflite` is now split into 3 main artifacts for better flexibility:
-- **`kflite`**: The main runtime and model management.
-- **`preprocessing`**: Image preprocessing utilities (Audio and Text coming soon).
-- **`postprocessing`**: NMS, COCO helpers, and image normalization.
-
 ## About
 
 `kflite` runs ml models such as TensorFlow, PyTorch, and JAX models on mobile device (support for all edge devices is the goal) with help of Kotlin Multiplatform.
@@ -17,7 +12,7 @@ a unified API without any performance change & completely native.
 
 Key features:
 
-- Works with Compose Multiplatform `composeResources`
+- Load models directly from `composeResources` or load from File (Memory Mapped)
 - Ability to switch between TFLite and LiteRT runtimes
 - Supports model normalization (`YOLO`, `COCO`, `PascalVOC`, `TF formats`) via the `postprocessing` module
 - Enable/Disable
@@ -27,6 +22,12 @@ Key features:
 - Select Delegation (GPU and NNAPI on Android, METAL and CoreML on iOS) 
 - Whether to allow inference with float16 precision for FP32 models. `allowFp16PrecisionForFp32`
 - Change preference for inference speed and accuracy. `SUSTAINED_SPEED` `FAST_SINGLE_ANSWER`
+
+
+`kflite` is now split into 3 main artifacts for better flexibility:
+- **`kflite`**: The main runtime and model management.
+- **`preprocessing`**: Image preprocessing utilities (Audio and Text coming soon).
+- **`postprocessing`**: NMS, COCO helpers, reshaping, and image normalization.
 
 ## Quick Intro
 
@@ -42,7 +43,7 @@ Key features:
 Include the required dependencies in your shared `commonMain.dependencies`. You can choose only what you need:
 
 ``` gradle
-val version = "3.4.0-alpha"
+val version = "3.4.0"
 implementation("io.github.shadadman:kflite:$version")
 implementation("io.github.shadadman:preprocessing:$version")
 implementation("io.github.shadadman:postprocessing:$version")
