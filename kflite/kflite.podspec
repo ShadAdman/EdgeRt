@@ -1,11 +1,11 @@
 Pod::Spec.new do |spec|
     spec.name                     = 'kflite'
-    spec.version                  = '1.73.0-SNAPSHOT'
+    spec.version                  = '1.0'
     spec.homepage                 = 'https://github.com/ShadAdman/kflite'
     spec.source                   = { :http=> ''}
     spec.authors                  = ''
     spec.license                  = ''
-    spec.summary                  = 'A Kotlin Multiplatform library for running TensorFlow Lite models on Android and iOS.'
+    spec.summary                  = 'Core abstractions and native dependencies for KFlite'
     spec.vendored_frameworks      = 'build/cocoapods/framework/kflite.framework'
     spec.libraries                = 'c++'
     spec.ios.deployment_target    = '16.0'
@@ -52,5 +52,5 @@ Pod::Spec.new do |spec|
             SCRIPT
         }
     ]
-    spec.resources = ['build\compose\cocoapods\compose-resources']
+                
 end

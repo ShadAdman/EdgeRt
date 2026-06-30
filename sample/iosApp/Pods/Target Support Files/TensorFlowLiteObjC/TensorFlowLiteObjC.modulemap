@@ -1,0 +1,6 @@
+framework module TFLTensorFlowLite {
+  umbrella header "TensorFlowLiteObjC-umbrella.h"
+
+  export *
+  module * { export * }
+}
