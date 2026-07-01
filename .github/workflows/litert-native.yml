@@ -2,7 +2,7 @@ name: Build LiteRT Native Libraries
 
 on:
   push:
-    branches: [ main, feat/native ]
+    branches: [ feat/native ]
     paths:
       - 'core/native/**'
   workflow_dispatch:
