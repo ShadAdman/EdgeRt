@@ -5,10 +5,11 @@
 ![](poster.png)
 <p align="center"> kflite is a fresh and improved version of <a href="https://github.com/icerockdev/moko-tensorflow">moko-tensorflow</a> with litert support</p>
 
-`kflite` is now split into 3 main artifacts for better flexibility:
+`kflite` is now split into 4 main artifacts for better flexibility:
 - **`kflite`**: The main runtime and model management.
 - **`preprocessing`**: Image preprocessing utilities (Audio and Text coming soon).
 - **`postprocessing`**: NMS, COCO helpers, and image normalization.
+- **`coldstart`**: Configurable dry run engine for model warm-up.
 
 ## About
 
@@ -35,6 +36,8 @@ Key features:
 
 
 [For a Compose example to run with LiteRT checkout here](https://github.com/ShadAdman/kflite-sample/blob/fc6bf39ce51928ee2e89480ad31b441fba9c296f/composeApp/src/commonMain/kotlin/org/kmp/playground/kflite/sample/RunModelWithInputImageExample.kt#L17)
+
+[For a Live Detection example checkout the kamera library](https://github.com/Kashif-E/Kamera/blob/main/Sample/src/mobileMain/kotlin/org/company/app/Util.mobile.kt)
 
 ## Installation
 
@@ -265,12 +268,12 @@ val normalizedBox = Normalization(
 - `Normalization.tfObjectDetection(top, left, bottom, right)`
 - `Normalization.tfRecordVariant(x_min, y_min, x_max, y_max)`
 
+
 ## What's next
 
 - Support for NLP models
-- Migrate to [litert](https://github.com/google-ai-edge/LiteRT)
+- Model Warm-up (Cold Start)
 - Support Kotlin/Native
-- Live detection with Camera feed
 
 ## Licence
 
