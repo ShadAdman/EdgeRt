@@ -10,7 +10,7 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(project(":kflite"))
+            implementation(project(":core"))
         }
         commonTest.dependencies {
             implementation(kotlin("test"))

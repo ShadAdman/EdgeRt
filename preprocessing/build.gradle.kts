@@ -12,7 +12,7 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(project(":kflite"))
+            implementation(project(":core"))
             implementation(compose.ui)
         }
     }
