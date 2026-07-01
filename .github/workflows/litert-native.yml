@@ -16,10 +16,10 @@ jobs:
         run: |
           cmake -S core/native/LiteRT/litert -B build-release \
                 -DCMAKE_BUILD_TYPE=Release \
-                -DLITERT_AUTO_BUILD_TFLITE=ON \
-                -DLITERT_ENABLE_GPU=ON \
-                -DLITERT_ENABLE_NPU=ON \
-                -DLITERT_DISABLE_KLEIDIAI=ON \
+                -DLITERT_AUTO_BUILD_TFLITE=OFF \
+                -DLITERT_ENABLE_GPU=OFF \
+                -DLITERT_ENABLE_NPU=OFF \
+                -DLITERT_DISABLE_KLEIDIAI=OFF \
                 -DLITERT_HOST_C_COMPILER=/usr/bin/clang \
                 -DLITERT_HOST_CXX_COMPILER=/usr/bin/clang++
           cmake --build build-release -j
