@@ -1,0 +1,3 @@
+package = org.kmp.playground.kflite.native
+headers = litert_model.h litert_compiled_model.h litert_environment.h litert_common.h litert_tensor_buffer.h
+headerFilter = litert_*
