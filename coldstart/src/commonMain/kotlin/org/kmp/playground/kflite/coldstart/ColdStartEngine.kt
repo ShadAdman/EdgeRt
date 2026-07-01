@@ -1,41 +1,6 @@
 package org.kmp.playground.kflite.coldstart
 
 import org.kmp.playground.kflite.interpreter.Interpreter
-import org.kmp.playground.kflite.kflite.KfliteClass
-import org.kmp.playground.kflite.tensor.TensorDataType
-
-/**
- * Interface for providing dummy input and output data for dry runs.
- */
-interface InputProvider {
-    /**
-     * Creates dummy input data for a tensor with the given [dataType] and [shape].
-     */
-    fun createInput(dataType: TensorDataType, shape: IntArray): Any
-
-    /**
-     * Creates a dummy container for output data for a tensor with the given [dataType] and [shape].
-     */
-    fun createOutput(dataType: TensorDataType, shape: IntArray): Any
-}
-
-/**
- * Default [InputProvider] that creates zero-filled arrays.
- */
-object ZeroInputProvider : InputProvider {
-    override fun createInput(dataType: TensorDataType, shape: IntArray): Any = createDummyData(dataType, shape)
-    override fun createOutput(dataType: TensorDataType, shape: IntArray): Any = createDummyData(dataType, shape)
-
-    private fun createDummyData(dataType: TensorDataType, shape: IntArray): Any {
-        val totalElements = shape.fold(1) { acc, i -> acc * (if (i <= 0) 1 else i) }
-        return when (dataType) {
-            TensorDataType.FLOAT32 -> FloatArray(totalElements)
-            TensorDataType.INT32 -> IntArray(totalElements)
-            TensorDataType.UINT8 -> ByteArray(totalElements)
-            TensorDataType.INT64 -> LongArray(totalElements)
-        }
-    }
-}
 
 /**
  * Configuration for the [ColdStartEngine].
@@ -99,6 +64,9 @@ class ColdStartEngine(
             tensor.dataType
         }
 
+        // 2. Trigger runtime/delegate setup by getting metadata
+        interpreter.getMetadata()
+
         // 3. Optional: single dummy execution
         if (config.runDummyInference) {
             runSingleInference(interpreter)
@@ -129,12 +97,12 @@ class ColdStartEngine(
     private fun runSingleInference(interpreter: Interpreter) {
         val inputs = (0 until interpreter.getInputTensorCount()).map {
             val tensor = interpreter.getInputTensor(it)
-            config.inputProvider.createInput(tensor.dataType, tensor.shape)
+            config.inputProvider.createInput(tensor, it)
         }
 
         val outputs = (0 until interpreter.getOutputTensorCount()).associateWith {
             val tensor = interpreter.getOutputTensor(it)
-            config.inputProvider.createOutput(tensor.dataType, tensor.shape)
+            config.inputProvider.createOutput(tensor, it)
         }
 
         interpreter.run(inputs, outputs)
