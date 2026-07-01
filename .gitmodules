@@ -1,6 +1,3 @@
-[submodule "kflite-sample"]
-	path = kflite-sample
-	url = https://github.com/ShadAdman/kflite-sample.git
 [submodule "core/native/LiteRT"]
 	path = core/native/LiteRT
 	url = https://github.com/google-ai-edge/LiteRT
