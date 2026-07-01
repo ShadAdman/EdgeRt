@@ -7,7 +7,7 @@ import org.kmp.playground.kflite.model.*
 import org.kmp.playground.kflite.tensor.*
 
 object Kflite {
-    private var interpreter: Interpreter? = null
+    var interpreter: Interpreter? = null
 
     val isInitialized: Boolean
         get() = interpreter != null
