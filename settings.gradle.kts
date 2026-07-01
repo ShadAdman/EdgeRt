@@ -21,7 +21,7 @@ dependencyResolutionManagement {
     }
 }
 rootProject.name = "KfliteLib"
-include(":kflite")
+include(":core")
 include(":preprocessing")
 include(":postprocessing")
 include(":doc")

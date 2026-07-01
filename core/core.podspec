@@ -1,5 +1,5 @@
 Pod::Spec.new do |spec|
-    spec.name                     = 'kflite'
+    spec.name                     = 'core'
     spec.version                  = '1.0'
     spec.homepage                 = 'https://github.com/ShadAdman/kflite'
     spec.source                   = { :http=> ''}
@@ -19,7 +19,7 @@ Pod::Spec.new do |spec|
         Kotlin framework 'kflite' doesn't exist yet, so a proper Xcode project can't be generated.
         'pod install' should be executed after running ':generateDummyFramework' Gradle task:
 
-            ./gradlew :kflite:generateDummyFramework
+            ./gradlew :core:generateDummyFramework
 
         Alternatively, proper pod installation is performed during Gradle sync in the IDE (if Podfile location is set)"
     end
@@ -29,13 +29,13 @@ Pod::Spec.new do |spec|
     }
                 
     spec.pod_target_xcconfig = {
-        'KOTLIN_PROJECT_PATH' => ':kflite',
+        'KOTLIN_PROJECT_PATH' => ':core',
         'PRODUCT_MODULE_NAME' => 'kflite',
     }
                 
     spec.script_phases = [
         {
-            :name => 'Build kflite',
+            :name => 'Build core',
             :execution_position => :before_compile,
             :shell_path => '/bin/sh',
             :script => <<-SCRIPT

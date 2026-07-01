@@ -9,6 +9,7 @@ plugins {
 }
 
 kotlin {
+    applyDefaultHierarchyTemplate()
     androidTarget {
         @OptIn(ExperimentalKotlinGradlePluginApi::class)
         compilerOptions {
@@ -19,6 +20,42 @@ kotlin {
     iosX64()
     iosArm64()
     iosSimulatorArm64()
+    linuxX64()
+    mingwX64()
+    macosX64()
+    macosArm64()
+
+    val nativeTargets = listOf(
+        "linuxX64",
+        "mingwX64",
+        "macosX64",
+        "macosArm64",
+        "iosArm64",
+        "iosX64",
+        "iosSimulatorArm64"
+    )
+
+    targets.filter { it.name in nativeTargets }.forEach { target ->
+        val platform = when {
+            target.name.startsWith("linux") -> "linux"
+            target.name.startsWith("mingw") -> "win"
+            target.name.startsWith("macos") -> "mac"
+            target.name == "iosArm64" -> "ios"
+            else -> "ios-sim"
+        }
+
+        (target as org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget).apply {
+            compilations.getByName("main") {
+                cinterops.create("litert") {
+                    definitionFile.set(project.file("src/nativeInterop/cinterop/litert.def"))
+                    includeDirs(project.file("generated/$platform/include"))
+                }
+            }
+            binaries.all {
+                linkerOpts("-L${project.file("generated/$platform/lib").absolutePath}", "-llitert")
+            }
+        }
+    }
 
     cocoapods {
         summary = "Core abstractions and native dependencies for KFlite"
@@ -45,6 +82,7 @@ kotlin {
         commonMain.dependencies {
             // Core abstractions
         }
+        val nativeMain by getting
         androidMain.dependencies {
             api(libs.litert)
             api("com.google.ai.edge.litert:litert-gpu:1.4.2") {
