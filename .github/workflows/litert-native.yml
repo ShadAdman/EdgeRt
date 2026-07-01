@@ -22,7 +22,7 @@ jobs:
                 -DLITERT_DISABLE_KLEIDIAI=ON \
                 -DLITERT_HOST_C_COMPILER=/usr/bin/clang \
                 -DLITERT_HOST_CXX_COMPILER=/usr/bin/clang++
-          cmake --build build-release --target cmake_build -j
+          cmake --build build-release -j
 
 #      - name: Prepare Artifacts
 #        run: |
