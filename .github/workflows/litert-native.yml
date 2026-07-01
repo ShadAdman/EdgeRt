@@ -4,8 +4,6 @@ on:
   workflow_dispatch:
   push:
     branches: [ feat/native ]
-    paths:
-      - 'core/native/**'
 
 jobs:
   build-linux:
