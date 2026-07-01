@@ -26,64 +26,64 @@ jobs:
                 -DLITERT_HOST_CXX_COMPILER=/usr/bin/clang++
           cmake --build build-release --target dispatch_api_Qualcomm_so -j8
 
-      - name: Prepare Artifacts
-        run: |
-          mkdir -p core/generated/linux/lib
-          mkdir -p core/generated/linux/include
-          find build-release -name "*.so" -exec cp {} core/generated/linux/lib/ \;
-          cp -r core/native/LiteRT/litert/c/*.h core/generated/linux/include/
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: litert-linux-x64
-          path: core/generated/linux/
-
-  build-windows:
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-      - name: Build LiteRT (Windows)
-        run: |
-          mkdir build_win
-          cd build_win
-          cmake ../core/native/LiteRT/litert -DCMAKE_BUILD_TYPE=Release -DLITERT_BUILD_DYNAMIC_LIB=ON
-          cmake --build . --config Release -j $env:NUMBER_OF_PROCESSORS
-
-      - name: Prepare Artifacts
-        shell: bash
-        run: |
-          mkdir -p core/generated/win/lib
-          mkdir -p core/generated/win/include
-          cp build_win/Release/*.dll core/generated/win/lib/
-          cp -r core/native/LiteRT/litert/c/*.h core/generated/win/include/
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: litert-win-x64
-          path: core/generated/win/
-
-  build-macos:
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-      - name: Build LiteRT (macOS)
-        run: |
-          mkdir -p build_mac && cd build_mac
-          cmake ../core/native/LiteRT/litert -DCMAKE_BUILD_TYPE=Release -DLITERT_BUILD_DYNAMIC_LIB=ON
-          cmake --build . -j $(sysctl -n hw.ncpu)
-
-      - name: Prepare Artifacts
-        run: |
-          mkdir -p core/generated/mac/lib
-          mkdir -p core/generated/mac/include
-          cp build_mac/*.dylib core/generated/mac/lib/
-          cp -r core/native/LiteRT/litert/c/*.h core/generated/mac/include/
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: litert-mac
-          path: core/generated/mac/
+#      - name: Prepare Artifacts
+#        run: |
+#          mkdir -p core/generated/linux/lib
+#          mkdir -p core/generated/linux/include
+#          find build-release -name "*.so" -exec cp {} core/generated/linux/lib/ \;
+#          cp -r core/native/LiteRT/litert/c/*.h core/generated/linux/include/
+#
+#      - uses: actions/upload-artifact@v4
+#        with:
+#          name: litert-linux-x64
+#          path: core/generated/linux/
+#
+#  build-windows:
+#    runs-on: windows-latest
+#    steps:
+#      - uses: actions/checkout@v4
+#        with:
+#          submodules: recursive
+#      - name: Build LiteRT (Windows)
+#        run: |
+#          mkdir build_win
+#          cd build_win
+#          cmake ../core/native/LiteRT/litert -DCMAKE_BUILD_TYPE=Release -DLITERT_BUILD_DYNAMIC_LIB=ON
+#          cmake --build . --config Release -j $env:NUMBER_OF_PROCESSORS
+#
+#      - name: Prepare Artifacts
+#        shell: bash
+#        run: |
+#          mkdir -p core/generated/win/lib
+#          mkdir -p core/generated/win/include
+#          cp build_win/Release/*.dll core/generated/win/lib/
+#          cp -r core/native/LiteRT/litert/c/*.h core/generated/win/include/
+#
+#      - uses: actions/upload-artifact@v4
+#        with:
+#          name: litert-win-x64
+#          path: core/generated/win/
+#
+#  build-macos:
+#    runs-on: macos-latest
+#    steps:
+#      - uses: actions/checkout@v4
+#        with:
+#          submodules: recursive
+#      - name: Build LiteRT (macOS)
+#        run: |
+#          mkdir -p build_mac && cd build_mac
+#          cmake ../core/native/LiteRT/litert -DCMAKE_BUILD_TYPE=Release -DLITERT_BUILD_DYNAMIC_LIB=ON
+#          cmake --build . -j $(sysctl -n hw.ncpu)
+#
+#      - name: Prepare Artifacts
+#        run: |
+#          mkdir -p core/generated/mac/lib
+#          mkdir -p core/generated/mac/include
+#          cp build_mac/*.dylib core/generated/mac/lib/
+#          cp -r core/native/LiteRT/litert/c/*.h core/generated/mac/include/
+#
+#      - uses: actions/upload-artifact@v4
+#        with:
+#          name: litert-mac
+#          path: core/generated/mac/
