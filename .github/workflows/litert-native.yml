@@ -1,11 +1,11 @@
 name: Build LiteRT Native Libraries
 
 on:
+  workflow_dispatch:
   push:
     branches: [ feat/native ]
     paths:
       - 'core/native/**'
-  workflow_dispatch:
 
 jobs:
   build-linux:
