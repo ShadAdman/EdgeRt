@@ -19,9 +19,7 @@ jobs:
                 -DLITERT_AUTO_BUILD_TFLITE=OFF \
                 -DLITERT_ENABLE_GPU=OFF \
                 -DLITERT_ENABLE_NPU=OFF \
-                -DLITERT_DISABLE_KLEIDIAI=OFF \
-                -DLITERT_HOST_C_COMPILER=/usr/bin/clang \
-                -DLITERT_HOST_CXX_COMPILER=/usr/bin/clang++
+                -DLITERT_DISABLE_KLEIDIAI=OFF 
           cmake --build build-release -j2
 
 #      - name: Prepare Artifacts
