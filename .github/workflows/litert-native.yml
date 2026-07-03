@@ -13,12 +13,6 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Compiler versions
-        run: |
-          gcc --version
-          g++ --version
-          cmake --version    
-
       - name: Set up dependencies
         run: sudo apt-get update && sudo apt-get install -y clang
 
@@ -34,17 +28,18 @@ jobs:
                 -DLITERT_DISABLE_KLEIDIAI=ON
           cmake --build build-release -j1
 
-#      - name: Prepare Artifacts
-#        run: |
-#          mkdir -p core/generated/linux/lib
-#          mkdir -p core/generated/linux/include
-#          find build-release -name "*.so" -exec cp {} core/generated/linux/lib/ \;
-#          cp -r core/native/LiteRT/litert/c/*.h core/generated/linux/include/
-#
-#      - uses: actions/upload-artifact@v4
-#        with:
-#          name: litert-linux-x64
-#          path: core/generated/linux/
+      - name: Prepare Artifacts
+        run: |
+          DEST="core/generated/litert/linux/x64"
+          mkdir -p "$DEST/lib"
+          mkdir -p "$DEST/include"
+          find build-release -name "*.so" -exec cp {} "$DEST/lib/" \;
+          cp -r core/native/LiteRT/litert/c/*.h "$DEST/include/"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: litert-linux-x64
+          path: core/generated/linux/
 #
 #  build-windows:
 #    runs-on: windows-latest
