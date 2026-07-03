@@ -25,6 +25,8 @@ jobs:
       - name: Build LiteRT (Linux)
         run: |
           cmake -S core/native/LiteRT/litert -B build-release \
+                -DCMAKE_C_COMPILER=clang \
+                -DCMAKE_CXX_COMPILER=clang++ \
                 -DCMAKE_BUILD_TYPE=Release \
                 -DLITERT_AUTO_BUILD_TFLITE=OFF \
                 -DLITERT_ENABLE_GPU=OFF \
