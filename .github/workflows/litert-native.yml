@@ -12,6 +12,16 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+
+      - name: Compiler versions
+        run: |
+          gcc --version
+          g++ --version
+          cmake --version    
+
+      - name: Set up dependencies
+        run: sudo apt-get update && sudo apt-get install -y clang
+
       - name: Build LiteRT (Linux)
         run: |
           cmake -S core/native/LiteRT/litert -B build-release \
@@ -19,8 +29,8 @@ jobs:
                 -DLITERT_AUTO_BUILD_TFLITE=OFF \
                 -DLITERT_ENABLE_GPU=OFF \
                 -DLITERT_ENABLE_NPU=OFF \
-                -DLITERT_DISABLE_KLEIDIAI=OFF 
-          cmake --build build-release -j2
+                -DLITERT_DISABLE_KLEIDIAI=ON
+          cmake --build build-release -j1
 
 #      - name: Prepare Artifacts
 #        run: |
