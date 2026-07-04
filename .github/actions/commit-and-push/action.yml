@@ -1,0 +1,54 @@
+name: Commit and push
+
+inputs:
+  message:
+    description: Commit message
+    required: true
+
+  add:
+    description: Files to add
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Commit and push
+      shell: bash
+      env:
+        INPUT_MESSAGE: ${{ inputs.message }}
+        INPUT_ADD: ${{ inputs.add }}
+
+      run: |
+        git config user.name "GitHub"
+        git config user.email "noreply@github.com"
+
+        echo "$INPUT_ADD" | sed 's/^- //' | while read file; do
+          if [ -n "$file" ]; then
+            git add "$file"
+          fi
+        done
+
+        if git diff --cached --quiet; then
+          echo "⏭️ No changes to commit"
+          exit 0
+        fi
+
+        git commit -m "$INPUT_MESSAGE" --author="Georgii Ippolitov <github@g000sha256.dev>"
+
+        for attempt in 1 2 3; do
+          if [ "$attempt" -gt 1 ]; then
+            sleep 10
+          fi
+          if ! git pull --rebase; then
+            echo "❌ Rebase failed"
+            exit 1
+          fi
+          if git push; then
+            echo "✅ Push succeeded"
+            exit 0
+          fi
+          echo "⚠️ Push attempt $attempt failed"
+        done
+
+        echo "❌ Push failed after 3 attempts"
+        exit 1
