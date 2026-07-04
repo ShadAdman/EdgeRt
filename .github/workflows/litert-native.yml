@@ -39,7 +39,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: litert-linux-x64
-          path: core/generated/linux/
+          path: core/generated/litert/linux/
 #
 #  build-windows:
 #    runs-on: windows-latest
