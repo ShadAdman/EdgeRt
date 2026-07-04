@@ -39,7 +39,7 @@ jobs:
       - name: Commit and push
         uses: ./.github/actions/commit-and-push
         with:
-          message: LiteRT for Linux x64 [skip ci]
+          message: LiteRT for Linux x64
           add: core
 #
 #  build-windows:
