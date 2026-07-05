@@ -69,8 +69,8 @@ jobs:
           rm -rf build-release
           cmake -S core/native/LiteRT/litert -B build-release \
                 -G Ninja \
-                -DCMAKE_C_COMPILER=clang \
-                -DCMAKE_CXX_COMPILER=clang++ \
+                -DCMAKE_C_COMPILER=clang-cl \
+                -DCMAKE_CXX_COMPILER=clang-cl \
                 -DCMAKE_BUILD_TYPE=Release \
                 -DLITERT_AUTO_BUILD_TFLITE=OFF \
                 -DLITERT_ENABLE_GPU=OFF \
