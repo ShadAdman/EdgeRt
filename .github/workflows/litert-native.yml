@@ -56,19 +56,27 @@ jobs:
           submodules: recursive
 
       - name: Set up dependencies
-        run: choco install llvm --no-progress -y
+        run: |
+          choco install llvm --no-progress -y
+          choco install ninja --no-progress -y
+
+      - name: Set up MSVC environment
+        uses: ilammy/msvc-dev-cmd@v1
 
       - name: Build LiteRT (Windows)
+        shell: bash
         run: |
-          cmake -S core/native/LiteRT/litert -B build-release `
-                -DCMAKE_C_COMPILER=clang `
-                -DCMAKE_CXX_COMPILER=clang++ `
-                -DCMAKE_BUILD_TYPE=Release `
-                -DLITERT_AUTO_BUILD_TFLITE=OFF `
-                -DLITERT_ENABLE_GPU=OFF `
-                -DLITERT_ENABLE_NPU=OFF `
+          rm -rf build-release
+          cmake -S core/native/LiteRT/litert -B build-release \
+                -G Ninja \
+                -DCMAKE_C_COMPILER=clang \
+                -DCMAKE_CXX_COMPILER=clang++ \
+                -DCMAKE_BUILD_TYPE=Release \
+                -DLITERT_AUTO_BUILD_TFLITE=OFF \
+                -DLITERT_ENABLE_GPU=OFF \
+                -DLITERT_ENABLE_NPU=OFF \
                 -DLITERT_DISABLE_KLEIDIAI=ON
-          cmake --build build-release --config Release -j1
+          cmake --build build-release -j 4
 
       - name: Prepare Artifacts
         shell: bash
