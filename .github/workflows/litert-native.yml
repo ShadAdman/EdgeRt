@@ -63,7 +63,7 @@ jobs:
                 -DLITERT_ENABLE_GPU=OFF `
                 -DLITERT_ENABLE_NPU=OFF `
                 -DLITERT_DISABLE_KLEIDIAI=ON
-          cmake --build build-release --config Release -j $env:NUMBER_OF_PROCESSORS
+          cmake --build build-release --config Release -j1
 
       - name: Prepare Artifacts
         shell: bash
