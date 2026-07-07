@@ -33,7 +33,7 @@ runs:
           exit 0
         fi
 
-        git commit -m "$INPUT_MESSAGE" --author="Georgii Ippolitov <github@g000sha256.dev>"
+        git commit -m "$INPUT_MESSAGE"
 
         for attempt in 1 2 3; do
           if [ "$attempt" -gt 1 ]; then
