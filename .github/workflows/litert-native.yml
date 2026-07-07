@@ -9,93 +9,93 @@ permissions:
   contents: write
 
 jobs:
-#  build-linux:
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v4
-#        with:
-#          submodules: recursive
-#
-#      - name: Set up dependencies
-#        run: sudo apt-get update && sudo apt-get install -y clang
-#
-#      - name: Build LiteRT (Linux)
-#        run: |
-#          cmake -S core/native/LiteRT/litert -B build-release \
-#                -DCMAKE_C_COMPILER=clang \
-#                -DCMAKE_CXX_COMPILER=clang++ \
-#                -DCMAKE_BUILD_TYPE=Release \
-#                -DLITERT_AUTO_BUILD_TFLITE=OFF \
-#                -DLITERT_ENABLE_GPU=OFF \
-#                -DLITERT_ENABLE_NPU=OFF \
-#                -DLITERT_DISABLE_KLEIDIAI=ON
-#          cmake --build build-release -j1
-#
-#      - name: Prepare Artifacts
-#        run: |
-#          DEST="core/generated/litert/linux/x64"
-#          mkdir -p "$DEST/lib"
-#          mkdir -p "$DEST/include"
-#          find build-release -name "*.so" -exec cp {} "$DEST/lib/" \;
-#          cp -r core/native/LiteRT/litert/c/*.h "$DEST/include/"
-#
-#      - name: Force add artifacts
-#        run: git add -f core/generated/litert/linux/x64
-#
-#      - name: Commit and push
-#        uses: ./.github/actions/commit-and-push
-#        with:
-#          message: LiteRT for Linux x64
-#          add: core
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
-#  build-windows:
-#    runs-on: windows-latest
-#    steps:
-#      - uses: actions/checkout@v4
-#        with:
-#          submodules: recursive
-#
-#      - name: Set up dependencies
-#        run: |
-#          choco install llvm --no-progress -y
-#          choco install ninja --no-progress -y
-#
-#      - name: Set up MSVC environment
-#        uses: ilammy/msvc-dev-cmd@v1
-#
-#      - name: Build LiteRT (Windows)
-#        shell: bash
-#        run: |
-#          rm -rf build-release
-#          cmake -S core/native/LiteRT/litert -B build-release \
-#                -G Ninja \
-#                -DCMAKE_C_COMPILER=clang-cl \
-#                -DCMAKE_CXX_COMPILER=clang-cl \
-#                -DCMAKE_BUILD_TYPE=Release \
-#                -DLITERT_AUTO_BUILD_TFLITE=OFF \
-#                -DLITERT_ENABLE_GPU=OFF \
-#                -DLITERT_ENABLE_NPU=OFF \
-#                -DLITERT_DISABLE_KLEIDIAI=ON
-#          cmake --build build-release -j 4
-#
-#      - name: Prepare Artifacts
-#        shell: bash
-#        run: |
-#          DEST="core/generated/litert/win/x64"
-#          mkdir -p "$DEST/lib"
-#          mkdir -p "$DEST/include"
-#          find build-release -name "*.dll" -exec cp {} "$DEST/lib/" \;
-#          cp -r core/native/LiteRT/litert/c/*.h "$DEST/include/"
-#
-#      - name: Force add artifacts
-#        run: git add -f core/generated/litert/win/x64
-#
-#      - name: Commit and push
-#        uses: ./.github/actions/commit-and-push
-#        with:
-#          message: LiteRT for Windows x64
-#          add: core
-#
+      - name: Set up dependencies
+        run: sudo apt-get update && sudo apt-get install -y clang
+
+      - name: Build LiteRT (Linux)
+        run: |
+          cmake -S core/native/LiteRT/litert -B build-release \
+                -DCMAKE_C_COMPILER=clang \
+                -DCMAKE_CXX_COMPILER=clang++ \
+                -DCMAKE_BUILD_TYPE=Release \
+                -DLITERT_AUTO_BUILD_TFLITE=OFF \
+                -DLITERT_ENABLE_GPU=OFF \
+                -DLITERT_ENABLE_NPU=OFF \
+                -DLITERT_DISABLE_KLEIDIAI=ON
+          cmake --build build-release -j1
+
+      - name: Prepare Artifacts
+        run: |
+          DEST="core/generated/litert/linux/x64"
+          mkdir -p "$DEST/lib"
+          mkdir -p "$DEST/include"
+          find build-release -name "*.so" -exec cp {} "$DEST/lib/" \;
+          cp -r core/native/LiteRT/litert/c/*.h "$DEST/include/"
+
+      - name: Force add artifacts
+        run: git add -f core/generated/litert/linux/x64
+
+      - name: Commit and push
+        uses: ./.github/actions/commit-and-push
+        with:
+          message: LiteRT for Linux x64
+          add: core
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up dependencies
+        run: |
+          choco install llvm --no-progress -y
+          choco install ninja --no-progress -y
+
+      - name: Set up MSVC environment
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Build LiteRT (Windows)
+        shell: bash
+        run: |
+          rm -rf build-release
+          cmake -S core/native/LiteRT/litert -B build-release \
+                -G Ninja \
+                -DCMAKE_C_COMPILER=clang-cl \
+                -DCMAKE_CXX_COMPILER=clang-cl \
+                -DCMAKE_BUILD_TYPE=Release \
+                -DLITERT_AUTO_BUILD_TFLITE=OFF \
+                -DLITERT_ENABLE_GPU=OFF \
+                -DLITERT_ENABLE_NPU=OFF \
+                -DLITERT_DISABLE_KLEIDIAI=ON
+          cmake --build build-release -j 4
+
+      - name: Prepare Artifacts
+        shell: bash
+        run: |
+          DEST="core/generated/litert/win/x64"
+          mkdir -p "$DEST/lib"
+          mkdir -p "$DEST/include"
+          find build-release -name "*.dll" -exec cp {} "$DEST/lib/" \;
+          cp -r core/native/LiteRT/litert/c/*.h "$DEST/include/"
+
+      - name: Force add artifacts
+        run: git add -f core/generated/litert/win/x64
+
+      - name: Commit and push
+        uses: ./.github/actions/commit-and-push
+        with:
+          message: LiteRT for Windows x64
+          add: core
+
   build-macos:
     runs-on: macos-latest
     steps:
