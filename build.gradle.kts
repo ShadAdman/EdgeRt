@@ -31,7 +31,9 @@ subprojects {
             signAllPublications()
 
 
-            coordinates(project.group.toString(), artifactIdProp, project.version.toString())
+            artifactIdProp?.let {
+                coordinates(project.group.toString(), artifactIdProp, project.version.toString())
+            }
 
 
             pom {
