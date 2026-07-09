@@ -3,13 +3,6 @@
 [![Gradle](https://img.shields.io/badge/Gradle-8.x-green.svg?style=flat-square&logo=gradle)](https://gradle.org/)
 
 ![](poster.png)
-<p align="center"> kflite is a fresh and improved version of <a href="https://github.com/icerockdev/moko-tensorflow">moko-tensorflow</a> with litert support</p>
-
-`kflite` is now split into 4 main artifacts for better flexibility:
-- **`kflite`**: The main runtime and model management.
-- **`preprocessing`**: Image preprocessing utilities (Audio and Text coming soon).
-- **`postprocessing`**: NMS, COCO helpers, and image normalization.
-- **`coldstart`**: Configurable dry run engine for model warm-up.
 
 ## About
 
@@ -17,11 +10,17 @@
 It abstracts platform differences, and manages model loading, tensor creation, and inference through
 a unified API without any performance change & completely native. 
 
+`kflite` is now split into 4 main artifacts for better flexibility:
+- **`kflite`**: The main runtime and model management.
+- **`preprocessing`**: Image preprocessing utilities (Audio and Text coming soon).
+- **`postprocessing`**: NMS, COCO helpers, and image normalization.
+
 Key features:
 
 - Works with Compose Multiplatform `composeResources`
 - Ability to switch between TFLite and LiteRT runtimes
 - Supports model normalization (`YOLO`, `COCO`, `PascalVOC`, `TF formats`) via the `postprocessing` module
+- Supports reshaping model output via `postprocessing` module
 - Enable/Disable
   quantization <a href="https://huggingface.co/docs/optimum/en/concept_guides/quantization">What's
   quantization?</a>
