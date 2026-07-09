@@ -3,6 +3,13 @@
 [![Gradle](https://img.shields.io/badge/Gradle-8.x-green.svg?style=flat-square&logo=gradle)](https://gradle.org/)
 
 ![](poster.png)
+<p align="center"> kflite is a fresh and improved version of <a href="https://github.com/icerockdev/moko-tensorflow">moko-tensorflow</a> with litert support</p>
+
+`kflite` is now split into 4 main artifacts for better flexibility:
+- **`kflite`**: The main runtime and model management.
+- **`preprocessing`**: Image preprocessing utilities (Audio and Text coming soon).
+- **`postprocessing`**: NMS, COCO helpers, and image normalization.
+- **`coldstart`**: Configurable dry run engine for model warm-up.
 
 ## About
 
@@ -12,7 +19,7 @@ a unified API without any performance change & completely native.
 
 Key features:
 
-- Load models directly from `composeResources` or load from File (Memory Mapped)
+- Works with Compose Multiplatform `composeResources`
 - Ability to switch between TFLite and LiteRT runtimes
 - Supports model normalization (`YOLO`, `COCO`, `PascalVOC`, `TF formats`) via the `postprocessing` module
 - Enable/Disable
@@ -23,20 +30,14 @@ Key features:
 - Whether to allow inference with float16 precision for FP32 models. `allowFp16PrecisionForFp32`
 - Change preference for inference speed and accuracy. `SUSTAINED_SPEED` `FAST_SINGLE_ANSWER`
 
-
-`kflite` is now split into 3 main artifacts for better flexibility:
-- **`kflite`**: The main runtime and model management.
-- **`preprocessing`**: Image preprocessing utilities (Audio and Text coming soon).
-- **`postprocessing`**: NMS, COCO helpers, reshaping, and image normalization.
-
 ## Quick Intro
 
-[For a Compose example to run with TFLite checkout here](https://github.com/ShadAdman/kflite/blob/c8b65b3caab66f5eca5a08d92962ef50459c9ae8/sample/src/commonMain/kotlin/org/kmp/playground/kflite/sample/RunModelWithInputImageExample.kt#L84)
+[For a Compose example to run with TFLite checkout here](https://github.com/ShadAdman/kflite-sample/blob/fc6bf39ce51928ee2e89480ad31b441fba9c296f/composeApp/src/commonMain/kotlin/org/kmp/playground/kflite/sample/RunModelWithInputImageExample.kt#L72)
 
 
-[For a Compose example to run with LiteRT checkout here](https://github.com/ShadAdman/kflite/blob/c8b65b3caab66f5eca5a08d92962ef50459c9ae8/sample/src/commonMain/kotlin/org/kmp/playground/kflite/sample/RunModelWithInputImageExample.kt#L18)
+[For a Compose example to run with LiteRT checkout here](https://github.com/ShadAdman/kflite-sample/blob/fc6bf39ce51928ee2e89480ad31b441fba9c296f/composeApp/src/commonMain/kotlin/org/kmp/playground/kflite/sample/RunModelWithInputImageExample.kt#L17)
 
-[For a memmory mapped example to run with TFLite checkout here](https://github.com/ShadAdman/kflite/blob/c8b65b3caab66f5eca5a08d92962ef50459c9ae8/sample/src/commonMain/kotlin/org/kmp/playground/kflite/sample/RunModelWithInputImageExample.kt#L56)
+[For a Live Detection example checkout the kamera library](https://github.com/Kashif-E/Kamera/blob/main/Sample/src/mobileMain/kotlin/org/company/app/Util.mobile.kt)
 
 ## Installation
 
@@ -45,7 +46,7 @@ Key features:
 Include the required dependencies in your shared `commonMain.dependencies`. You can choose only what you need:
 
 ``` gradle
-val version = "3.4.0"
+val version = "3.4.0-alpha"
 implementation("io.github.shadadman:kflite:$version")
 implementation("io.github.shadadman:preprocessing:$version")
 implementation("io.github.shadadman:postprocessing:$version")
@@ -267,12 +268,12 @@ val normalizedBox = Normalization(
 - `Normalization.tfObjectDetection(top, left, bottom, right)`
 - `Normalization.tfRecordVariant(x_min, y_min, x_max, y_max)`
 
+
 ## What's next
 
 - Support for NLP models
-- Migrate to [litert](https://github.com/google-ai-edge/LiteRT)
+- Model Warm-up (Cold Start)
 - Support Kotlin/Native
-- Live detection with Camera feed
 
 ## Licence
 
