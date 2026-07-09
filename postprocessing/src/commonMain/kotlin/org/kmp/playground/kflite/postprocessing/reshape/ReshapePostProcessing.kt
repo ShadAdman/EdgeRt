@@ -22,6 +22,18 @@ class ReshapePostProcessing(
         }
     }
 
+    fun permute(
+        input: Array<Array<FloatArray>>,
+        permuteAxes: IntArray
+    ): Array<Array<FloatArray>> {
+
+        val flat = input.flatten()
+
+        val result = permute(flat, permuteAxes)
+
+        return result.to3D(targetShape)
+    }
+
     /**
      * Permutes/transposes a flat FloatArray based on a desired axis mapping.
      * Example: To change [1, 40, 8400] to [1, 8400, 40], permuteAxes = intArrayOf(0, 2, 1)
@@ -69,5 +81,41 @@ class ReshapePostProcessing(
         }
 
         return output
+    }
+
+
+    private fun Array<Array<FloatArray>>.flatten(): FloatArray {
+        val size = sumOf { level1 ->
+            level1.sumOf { it.size }
+        }
+
+        val output = FloatArray(size)
+        var index = 0
+
+        for (a in this) {
+            for (b in a) {
+                b.copyInto(output, index)
+                index += b.size
+            }
+        }
+
+        return output
+    }
+
+    private fun FloatArray.to3D(shape: IntArray): Array<Array<FloatArray>> {
+        require(shape.size == 3)
+
+        val (d0, d1, d2) = shape
+
+        var offset = 0
+
+        return Array(d0) {
+            Array(d1) {
+                FloatArray(d2).also {
+                    copyInto(it, 0, offset, offset + d2)
+                    offset += d2
+                }
+            }
+        }
     }
 }
