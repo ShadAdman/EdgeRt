@@ -205,6 +205,10 @@ val modelOutputContainer = Array(batchSize) {
 }
 ```
 
+> [!TIP]
+> **Reshaping Output:** Some models (like YOLO) may output data in a layout that’s difficult to process directly (e.g., `[1, 40, 8400]`). You can use `ReshapePostProcessing` from the **`postprocessing`** module to easily transpose axes (e.g., to `[1, 8400, 40]`) for easier iteration.
+
+
 
 ### Step 5 - Running the model:
 
