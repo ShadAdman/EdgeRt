@@ -39,6 +39,12 @@ object Kflite {
     fun run(inputs: List<Any>, outputs: Map<Int, Any>) =
         interpreterOrThrow().run(inputs, outputs)
 
+    fun warmUp(config: WarmUpConfig) =
+        interpreterOrThrow().warmUp(config)
+
+    fun wakeUp(config: WarmUpConfig = WarmUpConfig()) =
+        interpreterOrThrow().wakeUp(config)
+
     fun getMetadata(): ModelMetadata =
         interpreterOrThrow().getMetadata()
 

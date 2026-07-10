@@ -24,6 +24,5 @@ rootProject.name = "KfliteLib"
 include(":kflite")
 include(":preprocessing")
 include(":postprocessing")
-include(":coldstart")
 include(":doc")
 include(":sample")
