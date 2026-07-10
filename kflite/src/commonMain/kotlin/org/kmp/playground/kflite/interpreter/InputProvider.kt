@@ -1,4 +1,4 @@
-package org.kmp.playground.kflite.coldstart
+package org.kmp.playground.kflite.interpreter
 
 import org.kmp.playground.kflite.tensor.Tensor
 import org.kmp.playground.kflite.tensor.TensorDataType

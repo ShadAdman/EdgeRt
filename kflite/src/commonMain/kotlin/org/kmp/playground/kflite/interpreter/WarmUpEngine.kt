@@ -1,16 +1,14 @@
-package org.kmp.playground.kflite.coldstart
-
-import org.kmp.playground.kflite.interpreter.Interpreter
+package org.kmp.playground.kflite.interpreter
 
 /**
- * Configuration for the [ColdStartEngine].
+ * Configuration for the [WarmUpEngine].
  *
  * @property iterations Number of dry runs to perform.
  * @property inputProvider Provider for dummy input and output data.
  * @property closeInterpreter Whether to close the interpreter after dry runs.
- * @property runDummyInference Whether to run a single dummy inference pass during [ColdStartEngine.wakeUp].
+ * @property runDummyInference Whether to run a single dummy inference pass during [WarmUpEngine.wakeUp].
  */
-data class ColdStartConfig(
+data class WarmUpConfig(
     val iterations: Int = 1,
     val inputProvider: InputProvider = ZeroInputProvider,
     val closeInterpreter: Boolean = true,
@@ -19,20 +17,10 @@ data class ColdStartConfig(
 
 /**
  * Engine for performing configurable dry runs (warm-ups) and lightweight preparation (wake-ups) on a model.
- *
- * Example usage:
- * ```kotlin
- * val kflite = KfliteClass()
- * kflite.init(modelSource, InterpreterOptions())
- *
- * val engine = ColdStartEngine(kflite.interpreter)
- * engine.wakeUp()
- * engine.warmUp()
- * ```
  */
-class ColdStartEngine(
-    private val kfliteInterpreter: Interpreter?,
-    private val config: ColdStartConfig = ColdStartConfig()
+class WarmUpEngine(
+    private val interpreter: Interpreter,
+    private val config: WarmUpConfig = WarmUpConfig()
 ) {
     private var isWakedUp = false
 
@@ -41,10 +29,8 @@ class ColdStartEngine(
      * This triggers delegate initialization, pre-touches tensors, and optionally runs a single dummy inference.
      * This operation is idempotent and safe to call multiple times.
      */
-    fun wakeUp(): ColdStartEngine {
+    fun wakeUp(): WarmUpEngine {
         if (isWakedUp) return this
-        
-        val interpreter = kfliteInterpreter ?: error("Interpreter must be initialized before calling wakeUp().")
         
         // 1. Pre-touch tensors (triggers internal allocation and metadata loading)
         val inputCount = interpreter.getInputTensorCount()
@@ -64,8 +50,9 @@ class ColdStartEngine(
             tensor.dataType
         }
 
-        // 2. Trigger runtime/delegate setup by getting metadata
-        interpreter.getMetadata()
+        // 2. Trigger runtime/delegate setup
+        // Note: getMetadata() call removed if not present in common Interpreter
+        // If it's needed, it should be added to Interpreter.kt
 
         // 3. Optional: single dummy execution
         if (config.runDummyInference) {
@@ -80,9 +67,7 @@ class ColdStartEngine(
      * Performs the warm-up runs as configured and returns the engine instance.
      * Assumes the supplied interpreter is already initialized.
      */
-    fun warmUp(): ColdStartEngine {
-        val interpreter = kfliteInterpreter ?: error("Interpreter must be initialized before calling warmUp().")
-
+    fun warmUp(): WarmUpEngine {
         repeat(config.iterations) {
             runSingleInference(interpreter)
         }

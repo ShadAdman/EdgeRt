@@ -35,6 +35,12 @@ actual class Interpreter actual constructor(modelSource: ModelSource, options: I
     actual fun getOutputTensor(index: Int): Tensor = wrapper.getOutputTensor(index)
     actual fun resizeInput(index: Int, shape: TensorShape) = wrapper.resizeInput(index, shape.dimensions)
     actual fun run(inputs: List<Any>, outputs: Map<Int, Any>) = wrapper.run(inputs, outputs)
+    actual fun warmUp(config: WarmUpConfig) {
+        WarmUpEngine(this, config).warmUp()
+    }
+    actual fun wakeUp() {
+        WarmUpEngine(this).wakeUp()
+    }
     actual fun getMetadata(): ModelMetadata = wrapper.getMetadata()
     actual fun close() = wrapper.close()
 
