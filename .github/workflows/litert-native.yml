@@ -120,26 +120,19 @@ jobs:
 
       - name: Build LiteRT (macOS)
         run: |
-          cmake -S core/native/LiteRT/litert -B build-release \
-                -DCMAKE_C_COMPILER=clang \
-                -DCMAKE_CXX_COMPILER=clang++ \
-                -DCMAKE_BUILD_TYPE=Release \
+          cmake -S core/native/LiteRT/litert --preset default \
                 -DLITERT_AUTO_BUILD_TFLITE=OFF \
                 -DLITERT_ENABLE_GPU=OFF \
                 -DLITERT_ENABLE_NPU=OFF \
-                -DLITERT_ENABLE_VENDORS=OFF \
-                -DLITERT_BUILD_EXAMPLES=OFF \
-                -DLITERT_BUILD_TESTS=OFF \
                 -DLITERT_DISABLE_KLEIDIAI=ON
-          cmake --preset default
-          cmake --build build-release -j 4
+          cmake --build cmake_build -j 4 --target LiteRt
 
       - name: Prepare Artifacts
         run: |
           DEST="core/generated/litert/mac/x64"
           mkdir -p "$DEST/lib"
           mkdir -p "$DEST/include"
-          find build-release -name "*.dylib" -exec cp {} "$DEST/lib/" \;
+          find cmake_build -name "*.dylib" -exec cp {} "$DEST/lib/" \;
           cp -r core/native/LiteRT/litert/c/*.h "$DEST/include/"
 
       - name: Force add artifacts
