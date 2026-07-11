@@ -127,6 +127,8 @@ jobs:
                 -DLITERT_ENABLE_GPU=OFF \
                 -DLITERT_ENABLE_NPU=OFF \
                 -DLITERT_ENABLE_VENDORS=OFF \
+                -DLITERT_BUILD_EXAMPLES=OFF \
+                -DLITERT_BUILD_TESTS=OFF \
                 -DLITERT_DISABLE_KLEIDIAI=ON
           cmake --build build-release -j 4
 
