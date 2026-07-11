@@ -106,6 +106,17 @@ jobs:
       - name: Set up dependencies
         run: brew install gperf cmake coreutils
 
+      - name: Patch LiteRT (macOS)
+        run: |
+          FILE="core/native/LiteRT/litert/vendors/samsung/ai_litecore_manager.cc"
+          if [ -f "$FILE" ]; then
+            echo "Patching $FILE to fix missing constants on macOS"
+            # Prepend definitions to the file
+            printf '#define kLibSuffix ".dylib"\n#define kRelativePath ""\n' > "$FILE.tmp"
+            cat "$FILE" >> "$FILE.tmp"
+            mv "$FILE.tmp" "$FILE"
+          fi
+
       - name: Build LiteRT (macOS)
         run: |
           cmake -S core/native/LiteRT/litert -B build-release \
@@ -115,6 +126,7 @@ jobs:
                 -DLITERT_AUTO_BUILD_TFLITE=OFF \
                 -DLITERT_ENABLE_GPU=OFF \
                 -DLITERT_ENABLE_NPU=OFF \
+                -DLITERT_ENABLE_VENDORS=OFF \
                 -DLITERT_DISABLE_KLEIDIAI=ON
           cmake --build build-release -j 4
 
