@@ -125,14 +125,14 @@ jobs:
                 -DLITERT_ENABLE_GPU=OFF \
                 -DLITERT_ENABLE_NPU=OFF \
                 -DLITERT_DISABLE_KLEIDIAI=ON
-          cmake --build cmake_build -j 4 --target LiteRt
+          cmake --build core/native/LiteRT/litert/cmake_build -j 4 --target LiteRt
 
       - name: Prepare Artifacts
         run: |
           DEST="core/generated/litert/mac/x64"
           mkdir -p "$DEST/lib"
           mkdir -p "$DEST/include"
-          find cmake_build -name "*.dylib" -exec cp {} "$DEST/lib/" \;
+          find core/native/LiteRT/litert/cmake_build -name "*.dylib" -exec cp {} "$DEST/lib/" \;
           cp -r core/native/LiteRT/litert/c/*.h "$DEST/include/"
 
       - name: Force add artifacts
