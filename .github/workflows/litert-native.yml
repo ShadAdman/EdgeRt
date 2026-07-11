@@ -125,7 +125,7 @@ jobs:
                 -DLITERT_ENABLE_GPU=OFF \
                 -DLITERT_ENABLE_NPU=OFF \
                 -DLITERT_DISABLE_KLEIDIAI=ON
-          cmake --build core/native/LiteRT/litert/cmake_build -j 4 --target LiteRt
+          cmake --build core/native/LiteRT/litert/cmake_build -j 4
 
       - name: Prepare Artifacts
         run: |
