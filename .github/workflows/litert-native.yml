@@ -106,6 +106,7 @@ jobs:
       - name: Set up dependencies
         run: brew install gperf cmake coreutils
 
+
       - name: Patch LiteRT (macOS)
         run: |
           FILE="core/native/LiteRT/litert/vendors/samsung/ai_litecore_manager.cc"
@@ -130,6 +131,7 @@ jobs:
                 -DLITERT_BUILD_EXAMPLES=OFF \
                 -DLITERT_BUILD_TESTS=OFF \
                 -DLITERT_DISABLE_KLEIDIAI=ON
+          cmake --preset default
           cmake --build build-release -j 4
 
       - name: Prepare Artifacts
