@@ -42,8 +42,8 @@ object Kflite {
     fun warmUp(config: WarmUpConfig) =
         interpreterOrThrow().warmUp(config)
 
-    fun wakeUp(config: WarmUpConfig = WarmUpConfig()) =
-        interpreterOrThrow().wakeUp(config)
+    fun wakeUp() =
+        interpreterOrThrow().wakeUp()
 
     fun getMetadata(): ModelMetadata =
         interpreterOrThrow().getMetadata()
