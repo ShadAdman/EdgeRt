@@ -3,7 +3,7 @@ name: Build LiteRT Native Libraries
 on:
   workflow_dispatch:
   push:
-    branches: [ feat/native ]
+    branches: [ pull-litert-binaries ]
 
 permissions:
   contents: write

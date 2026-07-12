@@ -1,3 +1,0 @@
-[submodule "core/native/LiteRT"]
-	path = core/native/LiteRT
-	url = https://github.com/google-ai-edge/LiteRT
