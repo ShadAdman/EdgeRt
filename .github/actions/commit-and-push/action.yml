@@ -47,8 +47,9 @@ runs:
           echo "🚀 Pushing LFS objects..."
           git lfs push --all origin
 
-          if ! git pull --rebase; then
-            echo "❌ Rebase failed"
+          if ! git pull --rebase --autostash; then
+            echo "❌ Rebase failed. Current status:"
+            git status
             exit 1
           fi
           if git push; then
