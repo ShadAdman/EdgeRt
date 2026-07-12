@@ -1,8 +1,6 @@
 package org.kmp.playground.kflite.interpreter
 
 import org.kmp.playground.kflite.delegation.*
-import org.kmp.playground.kflite.interpreter.*
-import org.kmp.playground.kflite.kflite.*
 import org.kmp.playground.kflite.model.*
 import org.kmp.playground.kflite.tensor.*
 
@@ -14,6 +12,8 @@ expect class Interpreter(modelSource: ModelSource, options: InterpreterOptions) 
     fun getOutputTensor(index: Int): Tensor
     fun resizeInput(index: Int, shape: TensorShape)
     fun run(inputs: List<Any>, outputs: Map<Int, Any>)
+    fun warmUp(config: WarmUpConfig)
+    fun wakeUp()
     fun getMetadata(): ModelMetadata
     fun close()
 }

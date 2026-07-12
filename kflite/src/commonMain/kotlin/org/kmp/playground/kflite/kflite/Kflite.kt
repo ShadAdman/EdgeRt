@@ -7,7 +7,7 @@ import org.kmp.playground.kflite.model.*
 import org.kmp.playground.kflite.tensor.*
 
 object Kflite {
-    private var interpreter: Interpreter? = null
+    var interpreter: Interpreter? = null
 
     val isInitialized: Boolean
         get() = interpreter != null
@@ -38,6 +38,12 @@ object Kflite {
 
     fun run(inputs: List<Any>, outputs: Map<Int, Any>) =
         interpreterOrThrow().run(inputs, outputs)
+
+    fun warmUp(config: WarmUpConfig) =
+        interpreterOrThrow().warmUp(config)
+
+    fun wakeUp(config: WarmUpConfig = WarmUpConfig()) =
+        interpreterOrThrow().wakeUp(config)
 
     fun getMetadata(): ModelMetadata =
         interpreterOrThrow().getMetadata()
