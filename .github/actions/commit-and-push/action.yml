@@ -26,9 +26,11 @@ runs:
 
         echo "$INPUT_ADD" | sed 's/^- //' | while read file; do
           if [ -n "$file" ]; then
-            git add "$file"
+            git add -f "$file"
           fi
         done
+
+        git lfs status
 
         if git diff --cached --quiet; then
           echo "⏭️ No changes to commit"
@@ -41,6 +43,10 @@ runs:
           if [ "$attempt" -gt 1 ]; then
             sleep 10
           fi
+          
+          echo "🚀 Pushing LFS objects..."
+          git lfs push origin $(git rev-parse --abbrev-ref HEAD)
+
           if ! git pull --rebase; then
             echo "❌ Rebase failed"
             exit 1
