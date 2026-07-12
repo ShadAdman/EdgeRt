@@ -1,0 +1,70 @@
+name: Build LiteRT Native Libraries
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ feat/native ]
+
+permissions:
+  contents: write
+
+jobs:
+  update-prebuilts:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux
+            arch: x64
+            src: linux_x86_64
+            dest: linux/x64
+          - platform: linux
+            arch: arm64
+            src: linux_arm64
+            dest: linux/arm64
+          - platform: mac
+            arch: arm64
+            src: macos_arm64
+            dest: mac/arm64
+          - platform: win
+            arch: x64
+            src: windows_x86_64
+            dest: win/x64
+
+    name: LiteRT (${{ matrix.platform }}-${{ matrix.arch }})
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v4
+
+      - name: Checkout LiteRT
+        uses: actions/checkout@v4
+        with:
+          repository: google-ai-edge/LiteRT
+          path: LiteRT-repo
+          sparse-checkout: |
+            litert/c
+            litert/prebuilt
+          sparse-checkout-cone-mode: false
+
+      - name: Prepare Artifacts
+        run: |
+          DEST_PATH="core/generated/litert/${{ matrix.dest }}"
+          mkdir -p "$DEST_PATH/lib"
+          mkdir -p "$DEST_PATH/include"
+          
+          echo "Copying libraries from ${{ matrix.src }}..."
+          cp -v LiteRT-repo/litert/prebuilt/${{ matrix.src }}/* "$DEST_PATH/lib/"
+          
+          echo "Copying headers..."
+          cp -v LiteRT-repo/litert/c/*.h "$DEST_PATH/include/"
+
+      - name: Force add artifacts
+        run: |
+          git add -f "core/generated/litert/${{ matrix.dest }}"
+
+      - name: Commit and push
+        uses: ./.github/actions/commit-and-push
+        with:
+          message: "Update LiteRT prebuilt: ${{ matrix.platform }} ${{ matrix.arch }}"
+          add: core
