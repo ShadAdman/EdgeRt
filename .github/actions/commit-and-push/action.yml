@@ -20,6 +20,7 @@ runs:
 
       run: |
         git lfs install
+        git config lfs.allowincompletepush true
         git config user.name "GitHub"
         git config user.email "noreply@github.com"
 
