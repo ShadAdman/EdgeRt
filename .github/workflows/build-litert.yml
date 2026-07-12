@@ -40,7 +40,9 @@ jobs:
           lfs: true
 
       - name: Initialize Git LFS
-        run: git lfs install
+        run: |
+          git lfs install
+          git config lfs.allowincompletepush true
 
       - name: Checkout LiteRT
         uses: actions/checkout@v4
