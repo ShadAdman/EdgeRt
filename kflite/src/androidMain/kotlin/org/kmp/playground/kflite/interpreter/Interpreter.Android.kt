@@ -43,6 +43,12 @@ actual class Interpreter actual constructor(modelSource: ModelSource, options: I
     actual fun getOutputTensor(index: Int): Tensor = wrapper.getOutputTensor(index)
     actual fun resizeInput(index: Int, shape: TensorShape) = wrapper.resizeInput(index, shape.dimensions)
     actual fun run(inputs: List<Any>, outputs: Map<Int, Any>) = wrapper.run(inputs, outputs)
+    actual fun warmUp(config: WarmUpConfig) {
+        WarmUpEngine(this, config).warmUp()
+    }
+    actual fun wakeUp() {
+        WarmUpEngine(this).wakeUp()
+    }
     actual fun getMetadata(): ModelMetadata = wrapper.getMetadata()
     actual fun close() = wrapper.close()
 
@@ -84,18 +90,20 @@ actual class Interpreter actual constructor(modelSource: ModelSource, options: I
         override fun run(inputs: List<Any>, outputs: Map<Int, Any>) {
             interpreter.runForMultipleInputsOutputs(inputs.toTypedArray(), outputs)
         }
+
+        override fun close() = interpreter.close()
+
         override fun getMetadata(): ModelMetadata {
             val inputs = (0 until inputTensorCount).map { i ->
-                val t = interpreter.getInputTensor(i)
-                TensorMetadata(t.name(), t.shape(), t.dataType().toCoreTensorDataType())
+                val t = getInputTensor(i)
+                TensorMetadata(t.name, t.shape, t.dataType)
             }
             val outputs = (0 until outputTensorCount).map { i ->
-                val t = interpreter.getOutputTensor(i)
-                TensorMetadata(t.name(), t.shape(), t.dataType().toCoreTensorDataType())
+                val t = getOutputTensor(i)
+                TensorMetadata(t.name, t.shape, t.dataType)
             }
             return ModelMetadata(null, null, null, null, null, null, inputs, outputs)
         }
-        override fun close() = interpreter.close()
 
         private class TfliteRuntimeTensor(private val tflTensor: PlatformTFLiteTensor) : RuntimeTensor {
             override val dataType: TensorDataType get() = tflTensor.dataType().toCoreTensorDataType()
@@ -139,16 +147,23 @@ actual class Interpreter actual constructor(modelSource: ModelSource, options: I
                 if (index < outputBuffers.size) copyFromLiteRTBuffer(outputBuffers[index], outputContainer)
             }
         }
-        override fun getMetadata(): ModelMetadata {
-            val inputs = inputBuffers.mapIndexed { index, _ -> TensorMetadata("input_$index", IntArray(0), TensorDataType.FLOAT32) }
-            val outputs = outputBuffers.mapIndexed { index, _ -> TensorMetadata("output_$index", IntArray(0), TensorDataType.FLOAT32) }
-            return ModelMetadata(null, null, null, null, null, null, inputs, outputs)
-        }
         override fun close() {
             inputBuffers.forEach { it.close() }
             outputBuffers.forEach { it.close() }
             compiledModel.close()
             env.close()
+        }
+
+        override fun getMetadata(): ModelMetadata {
+             val inputs = (0 until inputTensorCount).map { i ->
+                val t = getInputTensor(i)
+                TensorMetadata(t.name, t.shape, t.dataType)
+            }
+            val outputs = (0 until outputTensorCount).map { i ->
+                val t = getOutputTensor(i)
+                TensorMetadata(t.name, t.shape, t.dataType)
+            }
+            return ModelMetadata(null, null, null, null, null, null, inputs, outputs)
         }
 
         private fun getAccelerator(type: DelegateType): Accelerator = when (type) {
