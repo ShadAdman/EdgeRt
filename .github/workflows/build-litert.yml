@@ -73,6 +73,9 @@ jobs:
           
           echo "Copying headers..."
           cp -v LiteRT-repo/litert/c/*.h "$DEST_PATH/include/"
+          
+          # Remove the source repo to avoid git confusion (it's an untracked repo inside a repo)
+          rm -rf LiteRT-repo
 
       - name: Commit and push
         uses: ./.github/actions/commit-and-push
