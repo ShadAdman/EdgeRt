@@ -44,6 +44,7 @@ jobs:
         with:
           repository: google-ai-edge/LiteRT
           path: LiteRT-repo
+          lfs: true
           sparse-checkout: |
             litert/c
             litert/prebuilt
@@ -57,6 +58,18 @@ jobs:
           
           echo "Copying libraries from ${{ matrix.src }}..."
           cp -vL LiteRT-repo/litert/prebuilt/${{ matrix.src }}/* "$DEST_PATH/lib/"
+          
+          # Verify that we have real files, not LFS pointers
+          for f in "$DEST_PATH/lib"/*; do
+            if [ -f "$f" ]; then
+              size=$(stat -c%s "$f")
+              if [ "$size" -lt 1000 ]; then
+                echo "❌ Error: $f looks like a Git LFS pointer (size: $size bytes)"
+                cat "$f"
+                exit 1
+              fi
+            fi
+          done
           
           echo "Copying headers..."
           cp -v LiteRT-repo/litert/c/*.h "$DEST_PATH/include/"
