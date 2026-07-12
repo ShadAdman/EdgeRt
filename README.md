@@ -18,6 +18,7 @@ a unified API without any performance change & completely native.
 Key features:
 
 - Works with Compose Multiplatform `composeResources`
+- No more 16kb issues on Android
 - Ability to switch between TFLite and LiteRT runtimes
 - Supports model normalization (`YOLO`, `COCO`, `PascalVOC`, `TF formats`) via the `postprocessing` module
 - Supports reshaping model output via `postprocessing` module
