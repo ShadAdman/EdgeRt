@@ -39,11 +39,6 @@ jobs:
         with:
           lfs: true
 
-      - name: Initialize Git LFS
-        run: |
-          git lfs install
-          git config lfs.allowincompletepush true
-
       - name: Checkout LiteRT
         uses: actions/checkout@v4
         with:
@@ -66,12 +61,8 @@ jobs:
           echo "Copying headers..."
           cp -v LiteRT-repo/litert/c/*.h "$DEST_PATH/include/"
 
-      - name: Force add artifacts
-        run: |
-          git add -f "core/generated/litert/${{ matrix.dest }}"
-
       - name: Commit and push
         uses: ./.github/actions/commit-and-push
         with:
           message: "Update LiteRT prebuilt: ${{ matrix.platform }} ${{ matrix.arch }}"
-          add: core
+          add: "core/generated/litert/${{ matrix.dest }}"
