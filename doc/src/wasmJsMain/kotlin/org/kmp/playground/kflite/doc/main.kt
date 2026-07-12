@@ -4,6 +4,7 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -34,8 +35,11 @@ fun main() {
 
 sealed class NavItem(val title: String, val icon: ImageVector) {
     data object Intro : NavItem("Introduction", Icons.Default.Home)
+    data object PreparingInput : NavItem("Preparing Input", Icons.AutoMirrored.Filled.ArrowForward)
     data object TFLite : NavItem("TFLite Runtime", Icons.Default.Settings)
     data object LiteRT : NavItem("LiteRT Runtime", Icons.Default.Bolt)
+    data object PreparingOutput : NavItem("Preparing Output", Icons.AutoMirrored.Filled.ArrowBack)
+    data object WarmingUp : NavItem("Warming Up", Icons.Default.Refresh)
     
     sealed class PostProcessing(title: String) : NavItem(title, Icons.Default.Build) {
         data object Reshaping : PostProcessing("Reshaping")
@@ -105,8 +109,11 @@ fun LazySidebarContent(selectedItem: NavItem, onItemSelected: (NavItem) -> Unit)
         SidebarItem(NavItem.Intro, selectedItem == NavItem.Intro) { onItemSelected(NavItem.Intro) }
         
         SectionLabel("Runtimes")
+        SidebarItem(NavItem.PreparingInput, selectedItem == NavItem.PreparingInput) { onItemSelected(NavItem.PreparingInput) }
         SidebarItem(NavItem.TFLite, selectedItem == NavItem.TFLite) { onItemSelected(NavItem.TFLite) }
         SidebarItem(NavItem.LiteRT, selectedItem == NavItem.LiteRT) { onItemSelected(NavItem.LiteRT) }
+        SidebarItem(NavItem.PreparingOutput, selectedItem == NavItem.PreparingOutput) { onItemSelected(NavItem.PreparingOutput) }
+        SidebarItem(NavItem.WarmingUp, selectedItem == NavItem.WarmingUp) { onItemSelected(NavItem.WarmingUp) }
 
         SectionLabel("Postprocessing")
         SidebarItem(NavItem.PostProcessing.Reshaping, selectedItem == NavItem.PostProcessing.Reshaping, indent = 16) { 
@@ -170,6 +177,12 @@ fun ContentArea(item: NavItem) {
     Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
         when (item) {
             is NavItem.Intro -> IntroPage()
+            is NavItem.PreparingInput -> DetailPage(
+                title = "Preparing Input",
+                what = "Machine learning models require data in a specific format (ByteBuffers) rather than raw images. Preparing input involves resizing, color space conversion, and optional normalization.",
+                whenToUse = "Before calling `Kflite.run()`, you must transform your raw data (like a Bitmap or ByteArray) into the exact tensor shape and type expected by the model.",
+                howToUse = "Use the `preprocessing` module to convert images to `ByteBuffer`. Ensure dimensions match your model's input tensor:\n\n```kotlin\nval inputImage = bitmap.toScaledByteBuffer(\n    inputWidth = 640,\n    inputHeight = 640,\n    inputAllocateSize = 640 * 640 * 3 * 4, // 3 channels, 4 bytes (Float32)\n    normalize = true // Scale pixels to [0, 1]\n)\n\n// Run inference with the prepared buffer\nKflite.run(inputs = listOf(inputImage), ...)\n```"
+            )
             is NavItem.TFLite -> DetailPage(
                 title = "TFLite Runtime",
                 what = "The TensorFlow Lite (TFLite) runtime is the established standard for running machine learning models on edge devices. It supports a vast library of operators and is highly optimized for mobile CPU and GPU execution.",
@@ -182,6 +195,13 @@ fun ContentArea(item: NavItem) {
                 whenToUse = "Choose LiteRT for new projects where you want the latest performance improvements and a more streamlined runtime experience on Android and beyond.",
                 howToUse = "Select `RuntimeType.LITERT` in your `InterpreterOptions`:\n\n```kotlin\nval options = InterpreterOptions(runtime = RuntimeType.LITERT)\nKflite.init(modelSource, options)\n```"
             )
+            is NavItem.PreparingOutput -> DetailPage(
+                title = "Preparing Output",
+                what = "Model outputs are raw multidimensional arrays. To read results, you must provide a pre-allocated container (like a FloatArray or Nested Array) that perfectly matches the model's output tensor shape.",
+                whenToUse = "Every time you run inference, you need to provide containers for the model to fill with its predictions.",
+                howToUse = "Define a container matching the output shape (e.g., [1, 25, 4] for 25 boxes):\n\n```kotlin\nval outputContainer = Array(1) { \n    Array(25) { FloatArray(4) }\n}\n\nKflite.run(\n    inputs = listOf(inputImage),\n    outputs = mapOf(0 to outputContainer)\n)\n\n// Access detection results\nval firstBox = outputContainer[0][0]\n```"
+            )
+            is NavItem.WarmingUp -> WarmingUpPage()
             is NavItem.PostProcessing.Reshaping -> DetailPage(
                 title = "Postprocessing: Reshaping",
                 what = "Reshaping is a utility that allows you to transform the multi-dimensional output arrays of a model into a more convenient shape without changing the data itself. It's primarily used to permute axes (transposing) to match the expected format of subsequent logic.",
@@ -243,6 +263,7 @@ fun IntroPage() {
         
         SectionHeader("Features")
         BulletPoint("Native performance with unified KMP API")
+        BulletPoint("No more 16kb issues on Android")
         BulletPoint("Switch runtimes between TFLite and LiteRT")
         BulletPoint("Built-in Preprocessing (Image scaling/normalization)")
         BulletPoint("Built-in Postprocessing (Reshaping, Box normalization, NMS)")
@@ -264,6 +285,33 @@ fun DetailPage(title: String, what: String, whenToUse: String, howToUse: String)
         DetailSection("What is this?", what)
         DetailSection("When you need this?", whenToUse)
         DetailSection("How to use it?", howToUse, isCode = true)
+    }
+}
+
+@Composable
+fun WarmingUpPage() {
+    Column {
+        Text("Warming up engine", style = MaterialTheme.typography.displaySmall, fontWeight = FontWeight.Bold)
+        Spacer(modifier = Modifier.height(32.dp))
+
+        Text(
+            "Warming up your model is crucial for a smooth user experience. Many runtimes and hardware delegates use 'lazy loading', meaning they only initialize complex math kernels when the first inference actually happens. This leads to a 'cold start' where the first prediction takes significantly longer than subsequent ones.",
+            style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 28.sp)
+        )
+
+        Spacer(modifier = Modifier.height(40.dp))
+
+        DetailSection(
+            header = "1. Wake Up",
+            content = "A lightweight preparation that triggers delegate initialization and pre-touches tensors without necessarily running full math operations. Use this to prepare the engine when the user enters a screen, but before they hit 'start'.\n\n```kotlin\nKflite.wakeUp() \n```",
+            isCode = true
+        )
+
+        DetailSection(
+            header = "2. Warm Up",
+            content = "Performs full 'dry runs' of the model using dummy data. This ensures all execution paths and memory caches are fully primed. It increases the 'first impression' of your app by ensuring the very first real inference is as fast as the hundredth.\n\n```kotlin\nval config = WarmUpConfig(iterations = 5)\nKflite.warmUp(config)\n```",
+            isCode = true
+        )
     }
 }
 
