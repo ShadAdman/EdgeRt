@@ -45,7 +45,7 @@ runs:
           fi
           
           echo "🚀 Pushing LFS objects..."
-          git lfs push origin $(git rev-parse --abbrev-ref HEAD)
+          git lfs push --all origin
 
           if ! git pull --rebase; then
             echo "❌ Rebase failed"
