@@ -1,7 +1,7 @@
 package org.kmp.playground.kflite.sample
 
 import androidx.compose.runtime.Composable
-import org.kmp.playground.kflite.sample.object_detection.ResourceRunModelSample
+import org.kmp.playground.kflite.sample.object_detection.litert.ResourceRunModelSample
 
 @Composable
 fun App() {
