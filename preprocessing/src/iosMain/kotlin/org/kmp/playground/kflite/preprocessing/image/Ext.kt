@@ -3,21 +3,11 @@ package org.kmp.playground.kflite.preprocessing.image
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asSkiaBitmap
 import kotlinx.cinterop.*
+import platform.CoreGraphics.*
 import platform.CoreGraphics.CGColorRenderingIntent.kCGRenderingIntentDefault
-import platform.CoreGraphics.CGColorSpaceCreateDeviceRGB
-import platform.CoreGraphics.CGDataProviderCreateWithData
-import platform.CoreGraphics.CGImageAlphaInfo
-import platform.CoreGraphics.CGImageCreate
-import platform.CoreGraphics.CGRectMake
-import platform.CoreGraphics.CGSizeMake
-import platform.CoreGraphics.kCGBitmapByteOrder32Big
-import platform.CoreGraphics.CGContextDrawImage
-import platform.CoreGraphics.CGBitmapContextCreate
 import platform.Foundation.*
-import platform.UIKit.UIGraphicsBeginImageContextWithOptions
-import platform.UIKit.UIGraphicsEndImageContext
-import platform.UIKit.UIGraphicsGetImageFromCurrentImageContext
-import platform.UIKit.UIImage
+import platform.UIKit.*
+import kotlin.math.PI
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalForeignApi::class)
@@ -39,6 +29,49 @@ fun UIImage.scaleTo(width: Int, height: Int): UIImage {
     return scaledImage ?: error("Failed to scale image")
 }
 
+@OptIn(ExperimentalForeignApi::class)
+fun UIImage.rotate(degrees: Float): UIImage {
+    val radians = degrees * PI / 180.0
+    val size = this.size.useContents { CGSizeMake(width, height) }
+    UIGraphicsBeginImageContextWithOptions(size, false, 0.0)
+    val context = UIGraphicsGetCurrentContext()
+
+    size.useContents {
+        CGContextTranslateCTM(context, width / 2.0, height / 2.0)
+        CGContextRotateCTM(context, radians)
+        this@rotate.drawInRect(CGRectMake(-width / 2.0, -height / 2.0, width, height))
+    }
+
+    val rotatedImage = UIGraphicsGetImageFromCurrentImageContext()
+    UIGraphicsEndImageContext()
+    return rotatedImage ?: this
+}
+
+@OptIn(ExperimentalForeignApi::class)
+fun UIImage.crop(x: Int, y: Int, width: Int, height: Int): UIImage {
+    val rect = CGRectMake(x.toDouble(), y.toDouble(), width.toDouble(), height.toDouble())
+    val cgImage = this.CGImage()?.let {
+        CGImageCreateWithImageInRect(it, rect)
+    }
+    return cgImage?.let { UIImage.imageWithCGImage(it) } ?: this
+}
+
+internal fun UIImage.applyConfig(config: ImageProcessorConfig): UIImage {
+    var result = this
+    // 1. Rotate
+    config.rotationDegrees?.let {
+        result = result.rotate(it)
+    }
+    // 2. Crop
+    if (config.cropX != null && config.cropY != null && config.cropWidth != null && config.cropHeight != null) {
+        result = result.crop(config.cropX!!, config.cropY!!, config.cropWidth!!, config.cropHeight!!)
+    }
+    // 3. Resize
+    if (config.resizeWidth != null && config.resizeHeight != null) {
+        result = result.scaleTo(config.resizeWidth!!, config.resizeHeight!!)
+    }
+    return result
+}
 
 @OptIn(ExperimentalForeignApi::class)
 internal fun ImageBitmap.toUIImage(): UIImage? {
