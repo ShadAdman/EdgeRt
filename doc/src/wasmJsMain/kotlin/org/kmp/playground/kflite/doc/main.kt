@@ -181,7 +181,7 @@ fun ContentArea(item: NavItem) {
                 title = "Preparing Input",
                 what = "Machine learning models require data in a specific format (ByteBuffers) rather than raw images. Preparing input involves resizing, color space conversion, and optional normalization.",
                 whenToUse = "Before calling `Kflite.run()`, you must transform your raw data (like a Bitmap or ByteArray) into the exact tensor shape and type expected by the model.",
-                howToUse = "Use the `preprocessing` module to convert images to `ByteBuffer`. Ensure dimensions match your model's input tensor:\n\n```kotlin\nval inputImage = bitmap.toScaledByteBuffer(\n    inputWidth = 640,\n    inputHeight = 640,\n    inputAllocateSize = 640 * 640 * 3 * 4, // 3 channels, 4 bytes (Float32)\n    normalize = true // Scale pixels to [0, 1]\n)\n\n// Run inference with the prepared buffer\nKflite.run(inputs = listOf(inputImage), ...)\n```"
+                howToUse = "Use the `preprocessing` module to convert images to `ByteBuffer`. Ensure dimensions match your model's input tensor:\n\n```kotlin\nval inputImage = bitmap.imageToScaledByteBuffer(\n    inputWidth = 640,\n    inputHeight = 640,\n    inputAllocateSize = 640 * 640 * 3 * 4, // 3 channels, 4 bytes (Float32)\n    normalize = true // Scale pixels to [0, 1]\n)\n\n// Run inference with the prepared buffer\nKflite.run(inputs = listOf(inputImage), ...)\n```"
             )
             is NavItem.TFLite -> DetailPage(
                 title = "TFLite Runtime",
@@ -216,9 +216,9 @@ fun ContentArea(item: NavItem) {
             )
             is NavItem.PreProcessing.Image -> DetailPage(
                 title = "Preprocessing: Image",
-                what = "Image preprocessing involves resizing, cropping, and converting image pixels into a normalized byte buffer format that a machine learning model can ingest as input.",
-                whenToUse = "Use this before every image-based inference. It ensures the input data matches the model's expected dimensions, color space, and data type (Float32 or Uint8).",
-                howToUse = "Use the `toScaledByteBuffer` extension on an `ImageBitmap` or `ByteArray`:\n\n```kotlin\nval inputBuffer = bitmap.toScaledByteBuffer(\n    inputWidth = 640,\n    inputHeight = 640,\n    inputAllocateSize = 640 * 640 * 3 * 4, // 4 bytes for Float32\n    normalize = true // Scales pixels to [0, 1]\n)\n```"
+                what = "Image preprocessing involves resizing, cropping, rotating, and converting image pixels into a normalized byte buffer format that a machine learning model can ingest as input.",
+                whenToUse = "Use this before every image-based inference. It ensures the input data matches the model's expected dimensions, color space, and orientation.",
+                howToUse = "You can use the simple shorthand or the flexible `preprocess` DSL for complex pipelines:\n\n```kotlin\n// Shorthand for simple resizing\nval buffer = bitmap.imageToScaledByteBuffer(\n    inputWidth = 640,\n    inputHeight = 640,\n    inputAllocateSize = 640 * 640 * 3 * 4,\n    normalize = true\n)\n\n// DSL for complex pipelines\nval dslBuffer = bitmap.preprocess(allocateSize = 640 * 640 * 3 * 4) {\n    rotate(90f)\n    crop(x = 0, y = 0, width = 300, height = 300)\n    resize(width = 640, height = 640)\n    normalize = true\n}\n```"
             )
         }
         Spacer(modifier = Modifier.height(64.dp))
