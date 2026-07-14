@@ -25,6 +25,33 @@ kotlin {
     macosX64()
     macosArm64()
 
+    sourceSets {
+        commonMain.dependencies {
+            // Core abstractions
+        }
+        val nativeMain by getting
+        val desktopMain by creating {
+            dependsOn(nativeMain)
+        }
+        val linuxMain by getting {
+            dependsOn(desktopMain)
+        }
+        val macosMain by getting {
+            dependsOn(desktopMain)
+        }
+        val mingwMain by getting {
+            dependsOn(desktopMain)
+        }
+
+        androidMain.dependencies {
+            api(libs.litert)
+            api("com.google.ai.edge.litert:litert-gpu:1.4.2") {
+                exclude(group = "com.google.ai.edge.litert", module = "litert-api")
+            }
+            implementation(libs.androidx.startup)
+        }
+    }
+
     val nativeTargets = listOf(
         "linuxX64",
         "mingwX64",
@@ -36,23 +63,37 @@ kotlin {
     )
 
     targets.filter { it.name in nativeTargets }.forEach { target ->
-        val platform = when {
-            target.name.startsWith("linux") -> "linux"
-            target.name.startsWith("mingw") -> "win"
-            target.name.startsWith("macos") -> "mac"
-            target.name == "iosArm64" -> "ios"
-            else -> "ios-sim"
+        val (platform, arch) = when (target.name) {
+            "linuxX64" -> "linux" to "x64"
+            "mingwX64" -> "win" to "x64"
+            "macosX64" -> "mac" to "x64"
+            "macosArm64" -> "mac" to "arm64"
+            "iosArm64" -> "ios" to "arm64"
+            "iosX64" -> "ios" to "x64"
+            "iosSimulatorArm64" -> "ios" to "arm64"
+            else -> "ios" to "arm64"
+        }
+
+        if (platform == "ios") return@forEach
+
+        val defFile = when (platform) {
+            "linux" -> "litert_linux.def"
+            "mac" -> "litert_macos.def"
+            "win" -> "litert_mingw.def"
+            else -> "litert.def"
         }
 
         (target as org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget).apply {
             compilations.getByName("main") {
+                defaultSourceSet.dependsOn(this@kotlin.sourceSets.getByName("desktopMain"))
                 cinterops.create("litert") {
                     definitionFile.set(project.file("src/nativeInterop/cinterop/litert.def"))
-                    includeDirs(project.file("generated/$platform/include"))
+                    includeDirs(project.file("generated/litert/$platform/$arch/include"))
                 }
             }
             binaries.all {
-                linkerOpts("-L${project.file("generated/$platform/lib").absolutePath}", "-llitert")
+                val libName = if (platform == "win") "LiteRt" else "LiteRt"
+                linkerOpts("-L${project.file("generated/litert/$platform/$arch/lib").absolutePath}", "-l$libName")
             }
         }
     }
@@ -75,20 +116,6 @@ kotlin {
                 project.file("../sample/iosApp/Pods/TensorFlowLiteObjC/Frameworks").path.let { "-F$it" },
                 "-framework", "TensorFlowLiteObjC"
             )
-        }
-    }
-
-    sourceSets {
-        commonMain.dependencies {
-            // Core abstractions
-        }
-        val nativeMain by getting
-        androidMain.dependencies {
-            api(libs.litert)
-            api("com.google.ai.edge.litert:litert-gpu:1.4.2") {
-                exclude(group = "com.google.ai.edge.litert", module = "litert-api")
-            }
-            implementation(libs.androidx.startup)
         }
     }
 }
