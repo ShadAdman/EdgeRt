@@ -50,12 +50,10 @@ fun BlazeFaceTFLiteSample() {
 
         Kflite.run(
             listOf(
-                inputImage.imageToScaledByteBuffer(
-                    inputWidth = inputWidth,
-                    inputHeight = inputHeight,
-                    inputAllocateSize = modelInputSize,
+                inputImage.preprocess(allocateSize = modelInputSize) {
+                    resize(inputWidth, inputHeight)
                     normalize = true
-                )
+                }
             ),
             outputs
         )
@@ -101,12 +99,10 @@ fun BlazeFaceLiteRTSample() {
 
         Kflite.run(
             listOf(
-                inputImage.imageToScaledByteBuffer(
-                    inputWidth = inputWidth,
-                    inputHeight = inputHeight,
-                    inputAllocateSize = modelInputSize,
+                inputImage.preprocess(allocateSize = modelInputSize) {
+                    resize(inputWidth, inputHeight)
                     normalize = true
-                )
+                }
             ),
             mapOf(
                 0 to scores,
