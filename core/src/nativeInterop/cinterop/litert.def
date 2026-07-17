@@ -1,4 +1,4 @@
 package = org.kmp.playground.kflite.native
-headers = litert/c/litert_model.h
+headers = litert/c/litert_model.h litert/c/litert_compiled_model.h litert/c/litert_environment.h litert/c/litert_common.h litert/c/litert_tensor_buffer.h
 
 headerFilter = litert/c/*

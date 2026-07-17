@@ -10,6 +10,7 @@ plugins {
 }
 
 kotlin {
+    applyDefaultHierarchyTemplate()
     androidTarget {
         @OptIn(ExperimentalKotlinGradlePluginApi::class)
         compilerOptions {
@@ -18,13 +19,42 @@ kotlin {
     }
 
 
-    listOf(iosX64(),
-    iosArm64(),
-    iosSimulatorArm64()).forEach { iosTarget ->
+    macosX64()
+    macosArm64()
+
+    listOf(
+        iosX64(),
+        iosArm64(),
+        iosSimulatorArm64()
+    ).forEach { iosTarget ->
         iosTarget.binaries.framework {
             baseName = "ComposeApp"
             isStatic = true
             binaryOption("bundleId", "org.kmp.playground.kflite.sample")
+        }
+    }
+
+    targets.filterIsInstance<org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget>()
+        .filter { it.name !in listOf("iosX64", "iosArm64", "iosSimulatorArm64") }
+        .forEach { target ->
+            target.binaries.executable {
+                entryPoint = "org.kmp.playground.kflite.sample.main"
+            }
+        }
+
+    val hostOs = System.getProperty("os.name")
+    val isArm64 = System.getProperty("os.arch") == "aarch64"
+    val hostTarget = when {
+        hostOs == "Mac OS X" -> if (isArm64) "macosArm64" else "macosX64"
+        hostOs == "Linux" -> "linuxX64"
+        hostOs.startsWith("Windows") -> "mingwX64"
+        else -> null
+    }
+
+    if (hostTarget != null) {
+        tasks.register("runDesktop") {
+            group = "run"
+            dependsOn("runDebugExecutable${hostTarget.replaceFirstChar { it.uppercase() }}")
         }
     }
 
@@ -41,21 +71,31 @@ kotlin {
     }
 
     sourceSets {
+        val nativeMain by getting
+        val desktopMain by creating {
+            dependsOn(nativeMain)
+        }
+        
+        getting { dependsOn(desktopMain) } // linuxX64Main
+        getting { dependsOn(desktopMain) } // mingwX64Main
+        getting { dependsOn(desktopMain) } // macosX64Main
+        getting { dependsOn(desktopMain) } // macosArm64Main
 
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
         }
         commonMain.dependencies {
+            implementation(project(":core"))
+            implementation(project(":preprocessing"))
+            implementation(project(":postprocessing"))
+            
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material3)
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
-            implementation(project(":core"))
-            implementation(project(":preprocessing"))
-            implementation(project(":postprocessing"))
         }
         commonTest.dependencies {
             implementation(kotlin("test"))

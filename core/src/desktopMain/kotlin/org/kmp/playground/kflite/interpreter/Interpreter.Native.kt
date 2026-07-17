@@ -19,7 +19,7 @@ internal interface PlatformInterpreterWrapper {
     fun close()
 }
 
-internal expect fun createTFLiteWrapper(modelSource: ModelSource, options: InterpreterOptions): PlatformInterpreterWrapper
+//internal expect fun createTFLiteWrapper(modelSource: ModelSource, options: InterpreterOptions): PlatformInterpreterWrapper
 
 internal class LiteRTInterpreterWrapper(
     modelSource: ModelSource,
@@ -41,7 +41,7 @@ internal class LiteRTInterpreterWrapper(
 actual class Interpreter actual constructor(modelSource: ModelSource, options: InterpreterOptions) {
 
     private val wrapper: PlatformInterpreterWrapper = when (options.runtime) {
-        RuntimeType.TFLITE -> createTFLiteWrapper(modelSource, options)
+        RuntimeType.TFLITE -> LiteRTInterpreterWrapper(modelSource, options)
         RuntimeType.LITERT -> LiteRTInterpreterWrapper(modelSource, options)
     }
 

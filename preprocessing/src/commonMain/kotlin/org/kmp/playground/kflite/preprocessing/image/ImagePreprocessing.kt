@@ -1,47 +1,15 @@
 package org.kmp.playground.kflite.preprocessing.image
 
-import androidx.compose.ui.graphics.ImageBitmap
-
 typealias TensorBuffer = Any
 
-class ImageProcessorConfig {
-    var resizeWidth: Int? = null
-    var resizeHeight: Int? = null
-    var cropX: Int? = null
-    var cropY: Int? = null
-    var cropWidth: Int? = null
-    var cropHeight: Int? = null
-    var rotationDegrees: Float? = null
-    var normalize: Boolean = false
+/**
+ * Platform-specific image type.
+ * On Android: android.graphics.Bitmap
+ * On iOS: platform.UIKit.UIImage
+ */
+expect class PlatformImage
 
-    fun resize(width: Int, height: Int) {
-        resizeWidth = width
-        resizeHeight = height
-    }
-
-    fun crop(x: Int, y: Int, width: Int, height: Int) {
-        cropX = x
-        cropY = y
-        cropWidth = width
-        cropHeight = height
-    }
-
-    fun rotate(degrees: Float) {
-        rotationDegrees = degrees
-    }
-}
-
-expect fun ImageBitmap.preprocess(
-    allocateSize: Int,
-    block: ImageProcessorConfig.() -> Unit
-): TensorBuffer
-
-expect fun ByteArray.preprocess(
-    allocateSize: Int,
-    block: ImageProcessorConfig.() -> Unit
-): TensorBuffer
-
-expect fun ImageBitmap.imageToScaledByteBuffer(
+expect fun PlatformImage.imageToScaledByteBuffer(
     inputWidth: Int,
     inputHeight: Int,
     inputAllocateSize: Int,
