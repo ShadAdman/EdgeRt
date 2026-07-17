@@ -1,10 +1,15 @@
 package org.kmp.playground.kflite.preprocessing.image
 
-import androidx.compose.ui.graphics.ImageBitmap
-
 typealias TensorBuffer = Any
 
-expect fun ImageBitmap.imageToScaledByteBuffer(
+/**
+ * Platform-specific image type.
+ * On Android: android.graphics.Bitmap
+ * On iOS: platform.UIKit.UIImage
+ */
+expect class PlatformImage
+
+expect fun PlatformImage.imageToScaledByteBuffer(
     inputWidth: Int,
     inputHeight: Int,
     inputAllocateSize: Int,

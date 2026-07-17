@@ -1,6 +1,5 @@
 package org.kmp.playground.kflite.preprocessing.image
 
-import androidx.compose.ui.graphics.ImageBitmap
 import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.UIKit.UIImage
@@ -10,15 +9,15 @@ import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.usePinned
 import org.kmp.playground.kflite.kflite.toNSData
 
-actual fun ImageBitmap.imageToScaledByteBuffer(
+actual typealias PlatformImage = UIImage
+
+actual fun PlatformImage.imageToScaledByteBuffer(
     inputWidth: Int,
     inputHeight: Int,
     inputAllocateSize: Int,
     normalize: Boolean
 ): TensorBuffer {
-    val uiImage = this.toUIImage()
-    checkNotNull(uiImage) { "Failed to convert ImageBitmap to UIImage" }
-    val scaledImage = uiImage.scaleTo(inputWidth, inputHeight)
+    val scaledImage = this.scaleTo(inputWidth, inputHeight)
     val pixelData = scaledImage.toRGBByteArray(normalize)
 
     println("RGB byte array size: ${pixelData.size}")

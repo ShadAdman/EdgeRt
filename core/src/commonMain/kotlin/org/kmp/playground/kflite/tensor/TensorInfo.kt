@@ -37,7 +37,7 @@ interface RuntimeTensor {
     val shape: IntArray
 }
 
-expect class Tensor {
+expect class Tensor(runtimeTensor: RuntimeTensor) {
     val dataType: TensorDataType
     val name: String
     val shape: IntArray

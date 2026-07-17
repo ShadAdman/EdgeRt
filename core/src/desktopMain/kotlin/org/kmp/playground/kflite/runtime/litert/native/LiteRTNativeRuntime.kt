@@ -6,6 +6,7 @@ import org.kmp.playground.kflite.interpreter.*
 import org.kmp.playground.kflite.model.*
 import org.kmp.playground.kflite.tensor.*
 import platform.posix.memcpy
+import platform.posix.size_tVar
 
 @OptIn(ExperimentalForeignApi::class)
 class LiteRTNativeRuntime(
@@ -87,7 +88,7 @@ class LiteRTNativeRuntime(
 
     fun resizeInput(index: Int, shape: IntArray) {
         shape.usePinned { pinned ->
-            LiteRtCompiledModelResizeInputTensor(compiledModel, 0, index.toULong(), pinned.addressOf(0), shape.size.toULong()).checkStatus()
+            LiteRtCompiledModelResizeInputTensor(compiledModel, 0.toULong(), index.toULong(), pinned.addressOf(0), shape.size.toULong()).checkStatus()
         }
     }
 
@@ -108,7 +109,7 @@ class LiteRTNativeRuntime(
                 LiteRtGetRankedTensorType(tensorPtr.value, rankedType.ptr).checkStatus()
 
                 val bufferPtr = alloc<LiteRtTensorBufferVar>()
-                LiteRtCreateManagedTensorBuffer(env, kLiteRtTensorBufferTypeHostMemory, rankedType.ptr, 0, bufferPtr.ptr).checkStatus()
+                LiteRtCreateManagedTensorBuffer(env, kLiteRtTensorBufferTypeHostMemory, rankedType.ptr, 0.toULong(), bufferPtr.ptr).checkStatus()
                 inputBuffers[i] = bufferPtr.value
                 
                 fillBuffer(bufferPtr.value!!, inputs[i])
@@ -123,11 +124,11 @@ class LiteRTNativeRuntime(
                 LiteRtGetRankedTensorType(tensorPtr.value, rankedType.ptr).checkStatus()
 
                 val bufferPtr = alloc<LiteRtTensorBufferVar>()
-                LiteRtCreateManagedTensorBuffer(env, kLiteRtTensorBufferTypeHostMemory, rankedType.ptr, 0, bufferPtr.ptr).checkStatus()
+                LiteRtCreateManagedTensorBuffer(env, kLiteRtTensorBufferTypeHostMemory, rankedType.ptr, 0.toULong(), bufferPtr.ptr).checkStatus()
                 outputBuffers[i] = bufferPtr.value
             }
 
-            LiteRtRunCompiledModel(compiledModel, 0, numInputs.toULong(), inputBuffers, numOutputs.toULong(), outputBuffers).checkStatus()
+            LiteRtRunCompiledModel(compiledModel, 0.toULong(), numInputs.toULong(), inputBuffers, numOutputs.toULong(), outputBuffers).checkStatus()
 
             for ((index, outputData) in outputs) {
                 readBuffer(outputBuffers[index]!!, outputData)

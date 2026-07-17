@@ -1,22 +1,22 @@
 package org.kmp.playground.kflite.preprocessing.image
 
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.core.graphics.get
 import androidx.core.graphics.scale
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
+actual typealias PlatformImage = Bitmap
 
-actual fun ImageBitmap.imageToScaledByteBuffer(
+actual fun PlatformImage.imageToScaledByteBuffer(
     inputWidth: Int,
     inputHeight: Int,
     inputAllocateSize: Int,
     normalize: Boolean
 ): TensorBuffer {
-    val bitmap = this.asAndroidBitmap().scale(inputWidth, inputHeight)
+    val bitmap = this.scale(inputWidth, inputHeight)
     val byteBuffer = ByteBuffer.allocateDirect(inputAllocateSize)
     byteBuffer.order(ByteOrder.nativeOrder())
 

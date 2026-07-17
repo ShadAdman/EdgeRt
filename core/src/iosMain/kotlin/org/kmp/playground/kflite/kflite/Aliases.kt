@@ -13,14 +13,8 @@ import cocoapods.TFLTensorFlowLite.TFLInterpreterOptions
 import kotlinx.cinterop.ExperimentalForeignApi
 
 @OptIn(ExperimentalForeignApi::class)
-internal typealias PlatformInterpreter = TFLInterpreter
+typealias PlatformInterpreter = TFLInterpreter
 @OptIn(ExperimentalForeignApi::class)
-internal typealias PlatformTensor = TFLTensor
+typealias PlatformTensor = TFLTensor
 @OptIn(ExperimentalForeignApi::class)
-internal typealias PlatformInterpreterOptions = TFLInterpreterOptions
-
-
-
-
-
-
+typealias PlatformInterpreterOptions = TFLInterpreterOptions

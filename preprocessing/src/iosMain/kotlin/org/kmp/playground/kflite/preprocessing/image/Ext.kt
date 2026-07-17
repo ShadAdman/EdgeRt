@@ -1,7 +1,5 @@
 package org.kmp.playground.kflite.preprocessing.image
 
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asSkiaBitmap
 import kotlinx.cinterop.*
 import platform.CoreGraphics.CGColorRenderingIntent.kCGRenderingIntentDefault
 import platform.CoreGraphics.CGColorSpaceCreateDeviceRGB
@@ -37,60 +35,6 @@ fun UIImage.scaleTo(width: Int, height: Int): UIImage {
         println("Original scaled UIImage size: ${this.width}x${this.height}")
     }
     return scaledImage ?: error("Failed to scale image")
-}
-
-
-@OptIn(ExperimentalForeignApi::class)
-internal fun ImageBitmap.toUIImage(): UIImage? {
-    val skiaBitmap = this.asSkiaBitmap()
-    val width = skiaBitmap.width
-    val height = skiaBitmap.height
-
-    val bytesPerPixel = 4
-    val bitsPerComponent = 8
-    val bytesPerRow = bytesPerPixel * width
-
-
-    val pixelBytes: ByteArray? = skiaBitmap.readPixels(
-        dstInfo = org.jetbrains.skia.ImageInfo.makeN32Premul(width, height),
-        dstRowBytes = bytesPerRow
-    )
-
-    val imageSize = pixelBytes?.size ?: 0
-    val buffer = nativeHeap.allocArray<ByteVar>(imageSize)
-    for (i in 0 until imageSize) {
-        buffer[i] = pixelBytes!![i]
-    }
-
-    val provider = CGDataProviderCreateWithData(
-        info = null,
-        data = buffer,
-        size = imageSize.toULong(),
-        releaseData = staticCFunction { _, data, _ -> nativeHeap.free(data!!) })
-
-    val colorSpace = CGColorSpaceCreateDeviceRGB()
-    val bitmapInfo =
-        kCGBitmapByteOrder32Big or CGImageAlphaInfo.kCGImageAlphaPremultipliedLast.value
-
-    val cgImage = CGImageCreate(
-        width.toULong(),
-        height.toULong(),
-        bitsPerComponent.toULong(),
-        (bytesPerPixel * bitsPerComponent).toULong(),
-        bytesPerRow.toULong(),
-        colorSpace,
-        bitmapInfo,
-        provider,
-        null,
-        false,
-        kCGRenderingIntentDefault,
-    ) ?: return null
-    val uiImage = UIImage.imageWithCGImage(cgImage)
-    uiImage.size.useContents {
-        println("Original UIImage size: ${this.width}x${this.height}")
-    }
-
-    return uiImage
 }
 
 
