@@ -3,3 +3,4 @@ core/generated/**/*.dylib filter=lfs diff=lfs merge=lfs -text
 core/generated/**/*.dll filter=lfs diff=lfs merge=lfs -text
 core/generated/**/*.a filter=lfs diff=lfs merge=lfs -text
 core/generated/**/*.lib filter=lfs diff=lfs merge=lfs -text
+core/generated/** filter=lfs diff=lfs merge=lfs -text
