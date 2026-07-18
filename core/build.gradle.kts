@@ -10,6 +10,12 @@ plugins {
 
 kotlin {
     applyDefaultHierarchyTemplate()
+    jvm {
+        @OptIn(ExperimentalKotlinGradlePluginApi::class)
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_22)
+        }
+    }
     androidTarget {
         @OptIn(ExperimentalKotlinGradlePluginApi::class)
         compilerOptions {
@@ -30,6 +36,7 @@ kotlin {
             // Core abstractions
         }
         val nativeMain by getting
+        val jvmMain by getting
         val desktopMain by creating {
             dependsOn(nativeMain)
         }

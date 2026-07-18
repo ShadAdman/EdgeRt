@@ -5,6 +5,7 @@ plugins {
 }
 
 kotlin {
+    jvm()
     androidTarget()
     linuxX64()
     mingwX64()
