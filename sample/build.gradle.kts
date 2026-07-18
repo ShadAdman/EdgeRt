@@ -11,6 +11,12 @@ plugins {
 
 kotlin {
     applyDefaultHierarchyTemplate()
+    jvm {
+        @OptIn(ExperimentalKotlinGradlePluginApi::class)
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_22)
+        }
+    }
     androidTarget {
         @OptIn(ExperimentalKotlinGradlePluginApi::class)
         compilerOptions {
@@ -72,6 +78,7 @@ kotlin {
 
     sourceSets {
         val nativeMain by getting
+        val jvmMain by getting
         val desktopMain by creating {
             dependsOn(nativeMain)
         }
@@ -127,6 +134,17 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+    }
+}
+
+compose.desktop {
+    application {
+        mainClass = "org.kmp.playground.kflite.sample.MainKt"
+        nativeDistributions {
+            targetFormats(org.jetbrains.compose.desktop.application.dsl.TargetFormat.Dmg, org.jetbrains.compose.desktop.application.dsl.TargetFormat.Msi, org.jetbrains.compose.desktop.application.dsl.TargetFormat.Deb)
+            packageName = "org.kmp.playground.kflite.sample"
+            packageVersion = "1.0.0"
+        }
     }
 }
 
