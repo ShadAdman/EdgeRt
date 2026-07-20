@@ -6,11 +6,12 @@ import kflitelib.sample.generated.resources.Res
 import kflitelib.sample.generated.resources.example_model_input
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.imageResource
-import org.kmp.playground.kflite.kflite.*
-import org.kmp.playground.kflite.interpreter.*
-import org.kmp.playground.kflite.model.*
-import org.kmp.playground.kflite.delegation.*
-import org.kmp.playground.kflite.preprocessing.image.*
+import org.kmp.playground.kflite.delegation.DelegateType
+import org.kmp.playground.kflite.interpreter.InterpreterOptions
+import org.kmp.playground.kflite.interpreter.RuntimeType
+import org.kmp.playground.kflite.kflite.Kflite
+import org.kmp.playground.kflite.model.KFliteModel
+import org.kmp.playground.kflite.sample.preprocess
 
 @Composable
 fun TFLiteRunModelWithImageSample() {

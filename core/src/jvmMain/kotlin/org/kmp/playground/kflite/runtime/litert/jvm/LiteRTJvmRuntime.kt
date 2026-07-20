@@ -5,8 +5,10 @@ import java.lang.invoke.MethodHandle
 import org.kmp.playground.kflite.interpreter.*
 import org.kmp.playground.kflite.model.*
 import org.kmp.playground.kflite.tensor.*
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.StandardCopyOption
+import java.util.*
 
 class LiteRTJvmRuntime(
     modelSource: ModelSource,
@@ -19,70 +21,138 @@ class LiteRTJvmRuntime(
 
     companion object {
         private val linker = Linker.nativeLinker()
-        private val lookup = SymbolLookup.libraryLookup("LiteRt", Arena.global()) // Assuming libLiteRt is in path
+        private val lookup: SymbolLookup by lazy {
+            val libName = getLibName()
+            val resourcePath = getResourcePath(libName)
+            val tempFile = loadLibrary(resourcePath, libName)
+            SymbolLookup.libraryLookup(tempFile, Arena.global())
+        }
+
+        private fun getLibName(): String {
+            val os = System.getProperty("os.name").lowercase(Locale.ENGLISH)
+            return when {
+                os.contains("win") -> "LiteRt.dll"
+                os.contains("mac") -> "libLiteRt.dylib"
+                else -> "libLiteRt.so"
+            }
+        }
+
+        private fun getResourcePath(libName: String): String {
+            val os = System.getProperty("os.name").lowercase(Locale.ENGLISH)
+            val arch = System.getProperty("os.arch").lowercase(Locale.ENGLISH)
+            val platformDir = when {
+                os.contains("win") -> "win-x64"
+                os.contains("mac") -> if (arch.contains("aarch64")) "mac-arm64" else "mac-x64"
+                else -> "linux-x64"
+            }
+            return "/$platformDir/$libName"
+        }
+
+        private fun loadLibrary(resourcePath: String, libName: String): Path {
+            val inputStream = LiteRTJvmRuntime::class.java.getResourceAsStream(resourcePath)
+                ?: throw IllegalArgumentException("Cannot find library resource: $resourcePath")
+            
+            val tempDir = Files.createTempDirectory("litert_native")
+            val tempFile = tempDir.resolve(libName)
+            Files.copy(inputStream, tempFile, StandardCopyOption.REPLACE_EXISTING)
+            
+            // Register for deletion on exit
+            tempFile.toFile().deleteOnExit()
+            tempDir.toFile().deleteOnExit()
+            
+            return tempFile
+        }
 
         private fun findFunction(name: String, desc: FunctionDescriptor): MethodHandle {
             return lookup.find(name).map { linker.downcallHandle(it, desc) }
                 .orElseThrow { NoSuchElementException("Symbol not found: $name") }
         }
 
-        // Define function handles (subset for brevity, following Native implementation)
-        private val LiteRtCreateEnvironment = findFunction("LiteRtCreateEnvironment", 
-            FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS))
+        // Define function handles
+        private val LiteRtCreateEnvironment by lazy { findFunction("LiteRtCreateEnvironment", 
+            FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS)) }
         
-        private val LiteRtCreateModelFromFile = findFunction("LiteRtCreateModelFromFile",
-            FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS))
+        private val LiteRtCreateModelFromFile by lazy { findFunction("LiteRtCreateModelFromFile",
+            FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS)) }
 
-        private val LiteRtCreateModelFromBuffer = findFunction("LiteRtCreateModelFromBuffer",
-            FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.JAVA_LONG, ValueLayout.ADDRESS))
+        private val LiteRtCreateModelFromBuffer by lazy { findFunction("LiteRtCreateModelFromBuffer",
+            FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.JAVA_LONG, ValueLayout.ADDRESS)) }
 
-        private val LiteRtCreateCompiledModel = findFunction("LiteRtCreateCompiledModel",
-            FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS))
+        private val LiteRtCreateCompiledModel by lazy { findFunction("LiteRtCreateCompiledModel",
+            FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS, ValueLayout.ADDRESS)) }
 
-        private val LiteRtGetNumModelSignatures = findFunction("LiteRtGetNumModelSignatures",
-            FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS))
+        private val LiteRtGetNumModelSignatures by lazy { findFunction("LiteRtGetNumModelSignatures",
+            FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS)) }
 
-        private val LiteRtGetModelSignature = findFunction("LiteRtGetModelSignature",
-            FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.JAVA_LONG, ValueLayout.ADDRESS))
+        private val LiteRtGetModelSignature by lazy { findFunction("LiteRtGetModelSignature",
+            FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.JAVA_LONG, ValueLayout.ADDRESS)) }
 
-        private val LiteRtGetNumSignatureInputs = findFunction("LiteRtGetNumSignatureInputs",
-            FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS))
+        private val LiteRtGetNumSignatureInputs by lazy { findFunction("LiteRtGetNumSignatureInputs",
+            FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS)) }
 
-        private val LiteRtGetNumSignatureOutputs = findFunction("LiteRtGetNumSignatureOutputs",
-            FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS))
+        private val LiteRtGetNumSignatureOutputs by lazy { findFunction("LiteRtGetNumSignatureOutputs",
+            FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.ADDRESS)) }
         
-        private val LiteRtDestroyCompiledModel = findFunction("LiteRtDestroyCompiledModel",
-            FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS))
+        private val LiteRtDestroyCompiledModel by lazy { findFunction("LiteRtDestroyCompiledModel",
+            FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS)) }
         
-        private val LiteRtDestroyModel = findFunction("LiteRtDestroyModel",
-            FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS))
+        private val LiteRtDestroyModel by lazy { findFunction("LiteRtDestroyModel",
+            FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS)) }
         
-        private val LiteRtDestroyEnvironment = findFunction("LiteRtDestroyEnvironment",
-            FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS))
+        private val LiteRtDestroyEnvironment by lazy { findFunction("LiteRtDestroyEnvironment",
+            FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS)) }
     }
 
     init {
         val envPtr = arena.allocate(ValueLayout.ADDRESS)
+        println("LiteRT: Creating environment...")
         (LiteRtCreateEnvironment.invokeExact(0, MemorySegment.NULL, envPtr) as Int).checkStatus()
         env = envPtr.get(ValueLayout.ADDRESS, 0)
+        println("LiteRT: Environment created at $env")
 
         val modelPtr = arena.allocate(ValueLayout.ADDRESS)
         when (modelSource) {
             is FileSource -> {
-                val pathStr = arena.allocateUtf8String(modelSource.path)
+                println("LiteRT: Loading model from file: ${modelSource.path}")
+                val pathStr = arena.allocateFrom(modelSource.path)
                 (LiteRtCreateModelFromFile.invokeExact(env, pathStr, modelPtr) as Int).checkStatus()
             }
             is ByteArraySource -> {
-                val buffer = arena.allocateArray(ValueLayout.JAVA_BYTE, *modelSource.bytes)
+                println("LiteRT: Loading model from bytes (${modelSource.bytes.size})...")
+                val buffer = arena.allocate(modelSource.bytes.size.toLong(), 16)
+                MemorySegment.copy(MemorySegment.ofArray(modelSource.bytes), 0, buffer, 0, modelSource.bytes.size.toLong())
                 (LiteRtCreateModelFromBuffer.invokeExact(env, buffer, modelSource.bytes.size.toLong(), modelPtr) as Int).checkStatus()
             }
-            else -> throw IllegalArgumentException("Unsupported model source")
+            is ResourceSource, is AssetSource -> {
+                val rawPath = if (modelSource is ResourceSource) modelSource.path else (modelSource as AssetSource).path
+                val path = if (rawPath.startsWith("/")) rawPath else "/$rawPath"
+                println("LiteRT: Loading model from resource: $path")
+                
+                val modelBytes = LiteRTJvmRuntime::class.java.getResourceAsStream(path)?.readAllBytes()
+                    ?: throw IllegalArgumentException("Model source not found in resources: $path")
+                
+                val tempModelFile = Files.createTempFile("litert_model", ".tflite")
+                Files.write(tempModelFile, modelBytes)
+                tempModelFile.toFile().deleteOnExit()
+                
+                println("LiteRT: Extracted to temp file: ${tempModelFile.toAbsolutePath()}")
+                val pathStr = arena.allocateFrom(tempModelFile.toAbsolutePath().toString())
+                (LiteRtCreateModelFromFile.invokeExact(env, pathStr, modelPtr) as Int).checkStatus()
+            }
         }
         model = modelPtr.get(ValueLayout.ADDRESS, 0)
+        println("LiteRT: Model loaded at $model")
 
         val compiledModelPtr = arena.allocate(ValueLayout.ADDRESS)
-        (LiteRtCreateCompiledModel.invokeExact(env, model, MemorySegment.NULL, compiledModelPtr) as Int).checkStatus()
+        println("LiteRT: Compiling model...")
+        // Passing NULL for options to use defaults
+        val status = LiteRtCreateCompiledModel.invokeExact(env, model, MemorySegment.NULL, compiledModelPtr) as Int
+        if (status != 0) {
+             println("LiteRT: Compilation FAILED with status $status")
+             status.checkStatus()
+        }
         compiledModel = compiledModelPtr.get(ValueLayout.ADDRESS, 0)
+        println("LiteRT: Model compiled successfully at $compiledModel")
     }
 
     val inputTensorCount: Int
@@ -113,9 +183,6 @@ class LiteRTJvmRuntime(
     }
 
     fun getInputTensor(index: Int): Tensor {
-        // Implementation similar to Native but using FFM
-        // For brevity in this task, I'll provide a placeholder that returns a dummy Tensor
-        // or enough to show the pattern.
         return Tensor(object : RuntimeTensor {
             override val dataType = TensorDataType.FLOAT32
             override val name = "input_$index"
@@ -132,11 +199,32 @@ class LiteRTJvmRuntime(
     }
 
     fun resizeInput(index: Int, shape: IntArray) {
-        // LiteRtCompiledModelResizeInputTensor call via FFM
     }
 
     fun run(inputs: List<Any>, outputs: Map<Int, Any>) {
-        // LiteRtRunCompiledModel call via FFM
+    }
+
+    fun warmUp(config: WarmUpConfig) {
+        val inputTensors = (0 until inputTensorCount).map { getInputTensor(it) }
+        val outputTensors = (0 until outputTensorCount).map { getOutputTensor(it) }
+
+        repeat(config.iterations) {
+            val inputs = inputTensors.mapIndexed { index, tensor ->
+                config.inputProvider.createInput(tensor, index)
+            }
+            val outputs = outputTensors.mapIndexed { index, tensor ->
+                index to config.inputProvider.createOutput(tensor, index)
+            }.toMap()
+
+            run(inputs, outputs)
+        }
+
+        if (config.closeInterpreter) {
+            close()
+        }
+    }
+
+    fun wakeUp() {
     }
 
     fun getMetadata(): ModelMetadata {
@@ -152,7 +240,7 @@ class LiteRTJvmRuntime(
 }
 
 private fun Int.checkStatus() {
-    if (this != 0) { // Assuming 0 is kLiteRtStatusOk
+    if (this != 0) {
         throw RuntimeException("LiteRT error: $this")
     }
 }

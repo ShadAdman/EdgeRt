@@ -9,6 +9,7 @@ plugins {
 }
 
 kotlin {
+    jvmToolchain(22)
     applyDefaultHierarchyTemplate()
     jvm {
         @OptIn(ExperimentalKotlinGradlePluginApi::class)

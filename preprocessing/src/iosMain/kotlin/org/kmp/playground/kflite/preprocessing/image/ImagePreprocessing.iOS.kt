@@ -11,37 +11,52 @@ import org.kmp.playground.kflite.kflite.toNSData
 
 actual typealias PlatformImage = UIImage
 
+actual fun PlatformImage.preprocess(
+    allocateSize: Int,
+    block: ImageProcessorConfig.() -> Unit
+): TensorBuffer {
+    val config = ImageProcessorConfig().apply(block)
+    val processedImage = this.applyConfig(config)
+    val pixelData = processedImage.toRGBByteArray(config.normalize)
+    return pixelData.toNSData()
+}
+
+@OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
+actual fun ByteArray.preprocess(
+    allocateSize: Int,
+    block: ImageProcessorConfig.() -> Unit
+): TensorBuffer {
+    val config = ImageProcessorConfig().apply(block)
+    val uiImage = this.usePinned { pinned ->
+        val data = NSData.create(bytes = pinned.addressOf(0), length = this.size.toULong())
+        UIImage.imageWithData(data)
+    } ?: throw IllegalArgumentException("Could not decode ByteArray to UIImage")
+
+    val processedImage = uiImage.applyConfig(config)
+    val pixelData = processedImage.toRGBByteArray(config.normalize)
+    return pixelData.toNSData()
+}
+
 actual fun PlatformImage.imageToScaledByteBuffer(
     inputWidth: Int,
     inputHeight: Int,
     inputAllocateSize: Int,
     normalize: Boolean
 ): TensorBuffer {
-    val scaledImage = this.scaleTo(inputWidth, inputHeight)
-    val pixelData = scaledImage.toRGBByteArray(normalize)
-
-    println("RGB byte array size: ${pixelData.size}")
-    println("First 10 bytes of RGB byte array: ${pixelData.take(10)}")
-    return pixelData.toNSData()
+    return preprocess(inputAllocateSize) {
+        resize(inputWidth, inputHeight)
+        this.normalize = normalize
+    }
 }
 
-
-
-@OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
 actual fun ByteArray.bytesToScaledByteBuffer(
     inputWidth: Int,
     inputHeight: Int,
     inputAllocateSize: Int,
     normalize: Boolean
 ): TensorBuffer {
-    val uiImage = this.usePinned { pinned ->
-        val data = NSData.create(bytes = pinned.addressOf(0), length = this.size.toULong())
-        UIImage.imageWithData(data)
-    } ?: throw IllegalArgumentException("Could not decode ByteArray to UIImage")
-
-    val scaledImage = uiImage.scaleTo(inputWidth, inputHeight)
-
-    val pixelData = scaledImage.toRGBByteArray(normalize)
-
-    return pixelData.toNSData()
+    return preprocess(inputAllocateSize) {
+        resize(inputWidth, inputHeight)
+        this.normalize = normalize
+    }
 }

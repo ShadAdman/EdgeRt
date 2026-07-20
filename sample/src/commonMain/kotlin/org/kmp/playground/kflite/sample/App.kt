@@ -3,6 +3,7 @@ package org.kmp.playground.kflite.sample
 import androidx.compose.runtime.Composable
 import org.kmp.playground.kflite.sample.face_detection.BlazeFaceLiteRTSample
 import org.kmp.playground.kflite.sample.face_detection.BlazeFaceTFLiteSample
+import org.kmp.playground.kflite.sample.object_detection.litert.LitertRunModelWithImageSample
 import org.kmp.playground.kflite.sample.object_detection.litert.ResourceRunModelSample
 
 @Composable
@@ -12,6 +13,7 @@ fun App() {
     // ResourceRunModelSample("composeResources/kflitelib.sample.generated.resources/files/efficientdet-lite2.tflite")
 
     // BlazeFace Face Detection Examples
-    BlazeFaceTFLiteSample()
+//    BlazeFaceTFLiteSample()
+    LitertRunModelWithImageSample()
     // BlazeFaceLiteRTSample()
 }

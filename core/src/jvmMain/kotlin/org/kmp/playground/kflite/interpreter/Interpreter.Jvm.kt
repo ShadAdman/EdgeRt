@@ -13,6 +13,8 @@ internal interface PlatformInterpreterWrapper {
     fun getOutputTensor(index: Int): Tensor
     fun resizeInput(index: Int, shape: IntArray)
     fun run(inputs: List<Any>, outputs: Map<Int, Any>)
+    fun warmUp(config: WarmUpConfig)
+    fun wakeUp()
     fun getMetadata(): ModelMetadata
     fun close()
 }
@@ -29,6 +31,8 @@ internal class LiteRTInterpreterWrapper(
     override fun getOutputTensor(index: Int): Tensor = runtime.getOutputTensor(index)
     override fun resizeInput(index: Int, shape: IntArray) = runtime.resizeInput(index, shape)
     override fun run(inputs: List<Any>, outputs: Map<Int, Any>) = runtime.run(inputs, outputs)
+    override fun warmUp(config: WarmUpConfig) = runtime.warmUp(config)
+    override fun wakeUp() = runtime.wakeUp()
     override fun getMetadata(): ModelMetadata = runtime.getMetadata()
     override fun close() = runtime.close()
 }
@@ -48,6 +52,8 @@ actual class Interpreter actual constructor(modelSource: ModelSource, options: I
     actual fun getOutputTensor(index: Int): Tensor = wrapper.getOutputTensor(index)
     actual fun resizeInput(index: Int, shape: TensorShape) = wrapper.resizeInput(index, shape.dimensions)
     actual fun run(inputs: List<Any>, outputs: Map<Int, Any>) = wrapper.run(inputs, outputs)
+    actual fun warmUp(config: WarmUpConfig) = wrapper.warmUp(config)
+    actual fun wakeUp() = wrapper.wakeUp()
     actual fun getMetadata(): ModelMetadata = wrapper.getMetadata()
     actual fun close() = wrapper.close()
 }

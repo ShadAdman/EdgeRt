@@ -11,6 +11,7 @@ import org.kmp.playground.kflite.interpreter.*
 import org.kmp.playground.kflite.model.*
 import org.kmp.playground.kflite.delegation.*
 import org.kmp.playground.kflite.preprocessing.image.*
+import org.kmp.playground.kflite.sample.preprocess
 
 @Composable
 fun BlazeFaceTFLiteSample() {

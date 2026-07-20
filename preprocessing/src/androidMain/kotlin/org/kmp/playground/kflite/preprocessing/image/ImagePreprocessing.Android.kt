@@ -4,19 +4,17 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.Matrix
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asAndroidBitmap
-import androidx.core.graphics.get
-import androidx.core.graphics.scale
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-actual fun ImageBitmap.preprocess(
+actual typealias PlatformImage = Bitmap
+
+actual fun PlatformImage.preprocess(
     allocateSize: Int,
     block: ImageProcessorConfig.() -> Unit
 ): TensorBuffer {
     val config = ImageProcessorConfig().apply(block)
-    val processedBitmap = this.asAndroidBitmap().applyConfig(config)
+    val processedBitmap = this.applyConfig(config)
     return processedBitmap.toTensorBuffer(allocateSize, config.normalize)
 }
 
@@ -53,7 +51,7 @@ private fun Bitmap.applyConfig(config: ImageProcessorConfig): Bitmap {
 
     // 3. Resize
     if (config.resizeWidth != null && config.resizeHeight != null) {
-        result = result.scale(config.resizeWidth!!, config.resizeHeight!!)
+        result = Bitmap.createScaledBitmap(result, config.resizeWidth!!, config.resizeHeight!!, true)
     }
 
     return result
@@ -67,7 +65,7 @@ private fun Bitmap.toTensorBuffer(allocateSize: Int, normalize: Boolean): Tensor
 
     for (y in 0 until height) {
         for (x in 0 until width) {
-            val pixel = this[x, y]
+            val pixel = this.getPixel(x, y)
 
             val r = Color.red(pixel)
             val g = Color.green(pixel)
@@ -88,7 +86,7 @@ private fun Bitmap.toTensorBuffer(allocateSize: Int, normalize: Boolean): Tensor
     return byteBuffer
 }
 
-actual fun ImageBitmap.imageToScaledByteBuffer(
+actual fun PlatformImage.imageToScaledByteBuffer(
     inputWidth: Int,
     inputHeight: Int,
     inputAllocateSize: Int,

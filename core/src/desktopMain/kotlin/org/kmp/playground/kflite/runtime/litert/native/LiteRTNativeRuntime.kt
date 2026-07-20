@@ -194,6 +194,14 @@ class LiteRTNativeRuntime(
         return ModelMetadata(null, null, null, null, null, null, inputs, outputs)
     }
 
+    fun warmUp(config: WarmUpConfig) {
+        // Not implemented for native yet
+    }
+
+    fun wakeUp() {
+        // Not implemented for native yet
+    }
+
     fun close() {
         LiteRtDestroyCompiledModel(compiledModel)
         LiteRtDestroyModel(model)

@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalKotlinGradlePluginApi::class)
+
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
@@ -10,11 +12,15 @@ plugins {
 }
 
 kotlin {
+    jvmToolchain(22)
     applyDefaultHierarchyTemplate()
     jvm {
         @OptIn(ExperimentalKotlinGradlePluginApi::class)
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_22)
+        }
+        mainRun {
+            mainClass.set("org.kmp.playground.kflite.sample.MainKt")
         }
     }
     androidTarget {
@@ -92,6 +98,9 @@ kotlin {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
         }
+        jvmMain.dependencies {
+            implementation(compose.desktop.currentOs)
+        }
         commonMain.dependencies {
             implementation(project(":core"))
             implementation(project(":preprocessing"))
@@ -107,6 +116,12 @@ kotlin {
         commonTest.dependencies {
             implementation(kotlin("test"))
         }
+    }
+}
+
+tasks.withType<Jar> {
+    manifest {
+        attributes["Main-Class"] = "org.kmp.playground.kflite.sample.MainKt"
     }
 }
 
