@@ -12,6 +12,7 @@ Pod::Spec.new do |spec|
     spec.dependency 'TensorFlowLiteObjC'
     spec.dependency 'TensorFlowLiteObjC/CoreML'
     spec.dependency 'TensorFlowLiteObjC/Metal'
+    spec.dependency 'executorch'
                 
     if !Dir.exist?('build/cocoapods/framework/kflite.framework') || Dir.empty?('build/cocoapods/framework/kflite.framework')
         raise "
