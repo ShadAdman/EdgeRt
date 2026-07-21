@@ -8,7 +8,8 @@ import org.kmp.playground.kflite.tensor.*
 
 enum class RuntimeType {
     TFLITE,
-    LITERT
+    LITERT,
+    PYTORCH
 }
 
 

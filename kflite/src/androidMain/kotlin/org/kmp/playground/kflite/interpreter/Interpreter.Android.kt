@@ -10,6 +10,9 @@ import com.google.ai.edge.litert.CompiledModel
 import com.google.ai.edge.litert.Environment
 import com.google.ai.edge.litert.Accelerator
 import org.kmp.playground.kflite.AppContext
+import org.pytorch.executorch.EValue
+import org.pytorch.executorch.Module as PytorchModule
+import org.pytorch.executorch.Tensor as PytorchTensor
 import org.tensorflow.lite.DataType as TFLiteDataType
 import java.io.File
 import java.io.FileInputStream
@@ -33,6 +36,7 @@ actual class Interpreter actual constructor(modelSource: ModelSource, options: I
     private val wrapper: PlatformInterpreterWrapper = when (options.runtime) {
         RuntimeType.TFLITE -> TFLiteInterpreterWrapper(modelSource, options, context)
         RuntimeType.LITERT -> LiteRTInterpreterWrapper(modelSource, options, context)
+        RuntimeType.PYTORCH -> PytorchInterpreterWrapper(modelSource, options, context)
     }
 
     actual constructor(model: ByteArray, options: InterpreterOptions) : this(ByteArraySource(model), options)
@@ -298,6 +302,114 @@ actual class Interpreter actual constructor(modelSource: ModelSource, options: I
             override val dataType: TensorDataType get() = TensorDataType.FLOAT32 // FIXME
             override val name: String get() = "LiteRT Tensor"
             override val shape: IntArray get() = IntArray(0) // FIXME
+        }
+    }
+
+    private class PytorchInterpreterWrapper(
+        modelSource: ModelSource,
+        options: InterpreterOptions,
+        context: Context
+    ) : PlatformInterpreterWrapper {
+        private val module: PytorchModule = when (modelSource) {
+            is ByteArraySource -> PytorchModule.load(modelSource.bytes.writeToTempFile(context, suffix = ".pte").absolutePath)
+            is FileSource -> PytorchModule.load(modelSource.path)
+            is AssetSource -> {
+                val file = File(context.cacheDir, modelSource.path.substringAfterLast("/"))
+                context.assets.open(modelSource.path).use { input ->
+                    file.outputStream().use { output ->
+                        input.copyTo(output)
+                    }
+                }
+                PytorchModule.load(file.absolutePath)
+            }
+            is ResourceSource -> {
+                val file = File(context.cacheDir, modelSource.path.substringAfterLast("/"))
+                context.assets.open(modelSource.path).use { input ->
+                    file.outputStream().use { output ->
+                        input.copyTo(output)
+                    }
+                }
+                PytorchModule.load(file.absolutePath)
+            }
+        }
+
+        override val inputTensorCount: Int get() = 0 // Not available in Java API
+        override val outputTensorCount: Int get() = 0 // Not available in Java API
+
+        override fun getInputTensor(index: Int): Tensor {
+            throw UnsupportedOperationException("ExecuTorch doesn't expose input tensor info directly via Java API.")
+        }
+
+        override fun getOutputTensor(index: Int): Tensor {
+            throw UnsupportedOperationException("ExecuTorch doesn't expose output tensor info directly via Java API.")
+        }
+
+        override fun resizeInput(index: Int, shape: IntArray) {
+            // Not supported
+        }
+
+        override fun run(inputs: List<Any>, outputs: Map<Int, Any>) {
+            val eValues = inputs.map { input ->
+                toEValue(input)
+            }.toTypedArray()
+
+            val results = module.forward(*eValues)
+
+            outputs.forEach { (index, outputContainer) ->
+                if (index < results.size) {
+                    fromEValue(results[index], outputContainer)
+                }
+            }
+        }
+
+        private fun toEValue(input: Any): EValue {
+            return when (input) {
+                is FloatArray -> EValue.from(PytorchTensor.fromBlob(input, longArrayOf(input.size.toLong())))
+                is IntArray -> EValue.from(PytorchTensor.fromBlob(input, longArrayOf(input.size.toLong())))
+                is LongArray -> EValue.from(PytorchTensor.fromBlob(input, longArrayOf(input.size.toLong())))
+                is ByteArray -> EValue.from(PytorchTensor.fromBlob(input, longArrayOf(input.size.toLong())))
+                is Float -> EValue.from(input.toDouble())
+                is Int -> EValue.from(input.toLong())
+                is Long -> EValue.from(input)
+                is Boolean -> EValue.from(input)
+                is String -> EValue.from(input)
+                else -> throw IllegalArgumentException("Unsupported input type for ExecuTorch: ${input::class.simpleName}")
+            }
+        }
+
+        private fun fromEValue(eValue: EValue, outputContainer: Any) {
+            if (eValue.isTensor) {
+                val tensor = eValue.toTensor()
+                when (outputContainer) {
+                    is FloatArray -> tensor.getDataAsFloatArray().copyInto(outputContainer)
+                    is IntArray -> tensor.getDataAsIntArray().copyInto(outputContainer)
+                    is LongArray -> tensor.getDataAsLongArray().copyInto(outputContainer)
+                    is ByteArray -> tensor.getDataAsByteArray().copyInto(outputContainer)
+                    else -> throw IllegalArgumentException("Unsupported output type for ExecuTorch Tensor: ${outputContainer::class.simpleName}")
+                }
+            } else if (eValue.isBool) {
+                if (outputContainer is BooleanArray && outputContainer.isNotEmpty()) {
+                    outputContainer[0] = eValue.toBool()
+                }
+            } else if (eValue.isInt) {
+                if (outputContainer is LongArray && outputContainer.isNotEmpty()) {
+                    outputContainer[0] = eValue.toInt()
+                }
+            } else if (eValue.isDouble) {
+                if (outputContainer is DoubleArray && outputContainer.isNotEmpty()) {
+                    outputContainer[0] = eValue.toDouble()
+                }
+            } else if (eValue.isString) {
+                println("Warning: ExecuTorch String output not supported yet in kflite wrapper.")
+            }
+        }
+
+        override fun getMetadata(): ModelMetadata {
+            return ModelMetadata(null, null, null, null, null, null, emptyList(), emptyList())
+        }
+
+        override fun close() {
+            module.close()
         }
     }
 }

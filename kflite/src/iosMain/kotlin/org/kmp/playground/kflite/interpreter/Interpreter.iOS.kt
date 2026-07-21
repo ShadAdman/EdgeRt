@@ -25,6 +25,7 @@ actual class Interpreter actual constructor(modelSource: ModelSource, options: I
     private val wrapper: PlatformInterpreterWrapper = when (options.runtime) {
         RuntimeType.TFLITE -> TFLiteInterpreterWrapper(modelSource, options)
         RuntimeType.LITERT -> LiteRTInterpreterWrapper(modelSource, options)
+        RuntimeType.PYTORCH -> throw UnsupportedOperationException("ExecuTorch runtime is not supported yet on iOS.")
     }
 
     actual constructor(model: ByteArray, options: InterpreterOptions) : this(ByteArraySource(model), options)

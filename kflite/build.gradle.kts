@@ -50,6 +50,7 @@ kotlin {
             api("com.google.ai.edge.litert:litert-gpu:1.4.2") {
                 exclude(group = "com.google.ai.edge.litert", module = "litert-api")
             }
+            api(libs.executorch)
             implementation(libs.androidx.startup)
         }
     }
