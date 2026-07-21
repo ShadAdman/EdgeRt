@@ -47,9 +47,9 @@ Include the required dependencies in your shared `commonMain.dependencies`. You 
 
 ``` gradle
 val version = "3.4.0-alpha"
-implementation("io.github.shadadman:kflite:$version")
-implementation("io.github.shadadman:preprocessing:$version")
-implementation("io.github.shadadman:postprocessing:$version")
+implementation("io.github.shadadman:kflite-core:$version")
+implementation("io.github.shadadman:kflite-preprocessing:$version")
+implementation("io.github.shadadman:kflite-postprocessing:$version")
 ```
 
 #### Configure for iOS (Using SPM should remove this necesserity)
