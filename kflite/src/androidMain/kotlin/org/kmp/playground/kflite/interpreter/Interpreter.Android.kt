@@ -6,7 +6,6 @@ import org.kmp.playground.kflite.model.*
 import org.kmp.playground.kflite.tensor.*
 
 import android.content.Context
-import com.google.ai.edge.litert.CompiledModel
 import com.google.ai.edge.litert.Environment
 import com.google.ai.edge.litert.Accelerator
 import org.kmp.playground.kflite.AppContext
@@ -36,7 +35,7 @@ actual class Interpreter actual constructor(modelSource: ModelSource, options: I
     private val wrapper: PlatformInterpreterWrapper = when (options.runtime) {
         RuntimeType.TFLITE -> TFLiteInterpreterWrapper(modelSource, options, context)
         RuntimeType.LITERT -> LiteRTInterpreterWrapper(modelSource, options, context)
-        RuntimeType.PYTORCH -> PytorchInterpreterWrapper(modelSource, options, context)
+        RuntimeType.EXCUTORCH -> PytorchInterpreterWrapper(modelSource, options, context)
     }
 
     actual constructor(model: ByteArray, options: InterpreterOptions) : this(ByteArraySource(model), options)
@@ -349,6 +348,7 @@ actual class Interpreter actual constructor(modelSource: ModelSource, options: I
         }
 
         override fun run(inputs: List<Any>, outputs: Map<Int, Any>) {
+            println("pytorch runtime started")
             val eValues = inputs.map { input ->
                 toEValue(input)
             }.toTypedArray()
@@ -373,6 +373,12 @@ actual class Interpreter actual constructor(modelSource: ModelSource, options: I
                 is Long -> EValue.from(input)
                 is Boolean -> EValue.from(input)
                 is String -> EValue.from(input)
+                is ByteBuffer -> {
+                    // Assuming the buffer contains float32 data if it's coming from imageToScaledByteBuffer(normalize=true)
+                    // We need the shape. For now, assume a flat shape or use the buffer's capacity.
+                    val size = input.capacity() / 4 // 4 bytes for Float32
+                    EValue.from(PytorchTensor.fromBlob(input, longArrayOf(size.toLong())))
+                }
                 else -> throw IllegalArgumentException("Unsupported input type for ExecuTorch: ${input::class.simpleName}")
             }
         }

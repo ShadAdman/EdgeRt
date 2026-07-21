@@ -8,6 +8,7 @@ import org.kmp.playground.kflite.tensor.*
 
 
 import kotlinx.cinterop.*
+import platform.Foundation.NSData
 
 
 @OptIn(ExperimentalForeignApi::class)
@@ -27,7 +28,7 @@ actual class Interpreter actual constructor(modelSource: ModelSource, options: I
     private val wrapper: PlatformInterpreterWrapper = when (options.runtime) {
         RuntimeType.TFLITE -> TFLiteInterpreterWrapper(modelSource, options)
         RuntimeType.LITERT -> LiteRTInterpreterWrapper(modelSource, options)
-        RuntimeType.PYTORCH -> ExecuTorchInterpreterWrapper(modelSource, options)
+        RuntimeType.EXCUTORCH -> ExecuTorchInterpreterWrapper(modelSource, options)
     }
 
     actual constructor(model: ByteArray, options: InterpreterOptions) : this(ByteArraySource(model), options)
@@ -204,6 +205,11 @@ actual class Interpreter actual constructor(modelSource: ModelSource, options: I
                 is Float -> PlatformPytorchEValue.withDouble(input.toDouble())
                 is Int -> PlatformPytorchEValue.withInt(input.toLong())
                 is Boolean -> PlatformPytorchEValue.withBool(input)
+                is NSData -> {
+                    val size = input.length.toLong() / 4
+                    val tensor = PlatformPytorchTensor(input, listOf(size), 0) // Assume Float32
+                    PlatformPytorchEValue.withTensor(tensor)
+                }
                 else -> throw IllegalArgumentException("Unsupported input type for ExecuTorch: ${input::class.simpleName}")
             }
         }
