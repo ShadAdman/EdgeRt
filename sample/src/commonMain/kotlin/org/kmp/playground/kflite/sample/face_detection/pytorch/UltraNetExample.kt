@@ -6,6 +6,7 @@ import kflitelib.sample.generated.resources.Res
 import kflitelib.sample.generated.resources.largest_selfie
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.imageResource
+import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.kmp.playground.kflite.kflite.*
 import org.kmp.playground.kflite.interpreter.*
 import org.kmp.playground.kflite.model.*
@@ -13,9 +14,10 @@ import org.kmp.playground.kflite.delegation.*
 import org.kmp.playground.kflite.preprocessing.image.*
 
 /**
- * UltraNet Face Detection Example using PyTorch (ExecuTorch) runtime.
+ * UltraNet Face Detection Example using PyTorch runtime.
  * UltraNet usually expects 320x240 RGB input.
  */
+@OptIn(ExperimentalResourceApi::class)
 @Composable
 fun UltraNetPyTorchSample() {
     val scope = rememberCoroutineScope()
@@ -24,11 +26,14 @@ fun UltraNetPyTorchSample() {
     val inputHeight = 240
     
     scope.launch {
+        // Load model bytes from Compose Resources
+        val modelBytes = Res.readBytes("files/ultranet.pt")
+
         // Initialize Kflite with PyTorch runtime
         Kflite.init(
-            modelSource = KFliteModel.fromResource("composeResources/kflitelib.sample.generated.resources/files/ultranet.pt"),
+            modelSource = KFliteModel.fromBytes(modelBytes),
             options = InterpreterOptions(
-                runtime = RuntimeType.EXCUTORCH,
+                runtime = RuntimeType.PYTORCH,
                 numThreads = 4,
                 delegateType = DelegateType.CPU
             )

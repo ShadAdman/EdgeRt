@@ -9,6 +9,7 @@ Pod::Spec.new do |spec|
     spec.vendored_frameworks      = 'build/cocoapods/framework/kflite.framework'
     spec.libraries                = 'c++'
     spec.ios.deployment_target    = '16.0'
+    spec.dependency 'LibTorch-Lite'
     spec.dependency 'TensorFlowLiteObjC'
     spec.dependency 'TensorFlowLiteObjC/CoreML'
     spec.dependency 'TensorFlowLiteObjC/Metal'

@@ -29,6 +29,7 @@ kotlin {
         pod("TensorFlowLiteObjC", moduleName = "TFLTensorFlowLite")
         pod("TensorFlowLiteObjC/Metal") { linkOnly = true }
         pod("TensorFlowLiteObjC/CoreML") { linkOnly = true }
+        pod("LibTorch-Lite")
         pod("executorch")
 
         framework {
@@ -37,6 +38,7 @@ kotlin {
             linkerOpts(
                 project.file("../sample/iosApp/Pods/TensorFlowLiteObjC/Frameworks").path.let { "-F$it" },
                 "-framework", "TensorFlowLiteObjC",
+                "-framework", "LibTorch-Lite",
                 "-framework", "executorch"
             )
         }
@@ -47,11 +49,17 @@ kotlin {
             // Core abstractions
         }
         androidMain.dependencies {
-            api(libs.litert)
-            api("com.google.ai.edge.litert:litert-gpu:1.4.2") {
+            implementation(libs.litert)
+            implementation("com.google.ai.edge.litert:litert-gpu:1.4.2") {
                 exclude(group = "com.google.ai.edge.litert", module = "litert-api")
             }
-            api(libs.executorch)
+
+            implementation("org.pytorch:pytorch_android:2.1.0") {
+                exclude(group = "com.facebook.fbjni", module = "fbjni-java-only")
+            }
+            implementation("org.pytorch:executorch-android:1.3.1"){
+                exclude(group = "com.facebook.fbjni", module = "fbjni-java-only")
+            }
             implementation(libs.androidx.startup)
         }
     }

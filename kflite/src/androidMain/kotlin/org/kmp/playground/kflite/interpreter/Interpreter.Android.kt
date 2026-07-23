@@ -9,9 +9,12 @@ import android.content.Context
 import com.google.ai.edge.litert.Environment
 import com.google.ai.edge.litert.Accelerator
 import org.kmp.playground.kflite.AppContext
+import org.pytorch.IValue as PytorchMobileIValue
+import org.pytorch.Module as PytorchMobileModule
+import org.pytorch.Tensor as PytorchMobileTensor
 import org.pytorch.executorch.EValue
-import org.pytorch.executorch.Module as PytorchModule
-import org.pytorch.executorch.Tensor as PytorchTensor
+import org.pytorch.executorch.Module as ExecutorchModule
+import org.pytorch.executorch.Tensor as ExecutorchTensor
 import org.tensorflow.lite.DataType as TFLiteDataType
 import java.io.File
 import java.io.FileInputStream
@@ -35,7 +38,8 @@ actual class Interpreter actual constructor(modelSource: ModelSource, options: I
     private val wrapper: PlatformInterpreterWrapper = when (options.runtime) {
         RuntimeType.TFLITE -> TFLiteInterpreterWrapper(modelSource, options, context)
         RuntimeType.LITERT -> LiteRTInterpreterWrapper(modelSource, options, context)
-        RuntimeType.EXCUTORCH -> PytorchInterpreterWrapper(modelSource, options, context)
+        RuntimeType.PYTORCH -> PytorchInterpreterWrapper(modelSource, options, context)
+        RuntimeType.EXCUTORCH -> ExecutorchInterpreterWrapper(modelSource, options, context)
     }
 
     actual constructor(model: ByteArray, options: InterpreterOptions) : this(ByteArraySource(model), options)
@@ -304,31 +308,21 @@ actual class Interpreter actual constructor(modelSource: ModelSource, options: I
         }
     }
 
-    private class PytorchInterpreterWrapper(
+    private class ExecutorchInterpreterWrapper(
         modelSource: ModelSource,
         options: InterpreterOptions,
         context: Context
     ) : PlatformInterpreterWrapper {
-        private val module: PytorchModule = when (modelSource) {
-            is ByteArraySource -> PytorchModule.load(modelSource.bytes.writeToTempFile(context, suffix = ".pte").absolutePath)
-            is FileSource -> PytorchModule.load(modelSource.path)
+        private val module: ExecutorchModule = when (modelSource) {
+            is ByteArraySource -> ExecutorchModule.load(modelSource.bytes.writeToTempFile(context, suffix = ".pte").absolutePath)
+            is FileSource -> ExecutorchModule.load(modelSource.path)
             is AssetSource -> {
-                val file = File(context.cacheDir, modelSource.path.substringAfterLast("/"))
-                context.assets.open(modelSource.path).use { input ->
-                    file.outputStream().use { output ->
-                        input.copyTo(output)
-                    }
-                }
-                PytorchModule.load(file.absolutePath)
+                val bytes = context.assets.open(modelSource.path).use { it.readBytes() }
+                ExecutorchModule.load(bytes.writeToTempFile(context, suffix = ".pte").absolutePath)
             }
             is ResourceSource -> {
-                val file = File(context.cacheDir, modelSource.path.substringAfterLast("/"))
-                context.assets.open(modelSource.path).use { input ->
-                    file.outputStream().use { output ->
-                        input.copyTo(output)
-                    }
-                }
-                PytorchModule.load(file.absolutePath)
+                val bytes = context.assets.open(modelSource.path).use { it.readBytes() }
+                ExecutorchModule.load(bytes.writeToTempFile(context, suffix = ".pte").absolutePath)
             }
         }
 
@@ -348,7 +342,7 @@ actual class Interpreter actual constructor(modelSource: ModelSource, options: I
         }
 
         override fun run(inputs: List<Any>, outputs: Map<Int, Any>) {
-            println("pytorch runtime started")
+            println("executorch runtime started")
             val eValues = inputs.map { input ->
                 toEValue(input)
             }.toTypedArray()
@@ -364,20 +358,18 @@ actual class Interpreter actual constructor(modelSource: ModelSource, options: I
 
         private fun toEValue(input: Any): EValue {
             return when (input) {
-                is FloatArray -> EValue.from(PytorchTensor.fromBlob(input, longArrayOf(input.size.toLong())))
-                is IntArray -> EValue.from(PytorchTensor.fromBlob(input, longArrayOf(input.size.toLong())))
-                is LongArray -> EValue.from(PytorchTensor.fromBlob(input, longArrayOf(input.size.toLong())))
-                is ByteArray -> EValue.from(PytorchTensor.fromBlob(input, longArrayOf(input.size.toLong())))
+                is FloatArray -> EValue.from(ExecutorchTensor.fromBlob(input, longArrayOf(input.size.toLong())))
+                is IntArray -> EValue.from(ExecutorchTensor.fromBlob(input, longArrayOf(input.size.toLong())))
+                is LongArray -> EValue.from(ExecutorchTensor.fromBlob(input, longArrayOf(input.size.toLong())))
+                is ByteArray -> EValue.from(ExecutorchTensor.fromBlob(input, longArrayOf(input.size.toLong())))
                 is Float -> EValue.from(input.toDouble())
                 is Int -> EValue.from(input.toLong())
                 is Long -> EValue.from(input)
                 is Boolean -> EValue.from(input)
                 is String -> EValue.from(input)
                 is ByteBuffer -> {
-                    // Assuming the buffer contains float32 data if it's coming from imageToScaledByteBuffer(normalize=true)
-                    // We need the shape. For now, assume a flat shape or use the buffer's capacity.
-                    val size = input.capacity() / 4 // 4 bytes for Float32
-                    EValue.from(PytorchTensor.fromBlob(input, longArrayOf(size.toLong())))
+                    val size = input.capacity() / 4
+                    EValue.from(ExecutorchTensor.fromBlob(input, longArrayOf(size.toLong())))
                 }
                 else -> throw IllegalArgumentException("Unsupported input type for ExecuTorch: ${input::class.simpleName}")
             }
@@ -416,6 +408,117 @@ actual class Interpreter actual constructor(modelSource: ModelSource, options: I
 
         override fun close() {
             module.close()
+        }
+    }
+
+    private class PytorchInterpreterWrapper(
+        modelSource: ModelSource,
+        options: InterpreterOptions,
+        context: Context
+    ) : PlatformInterpreterWrapper {
+        private val module: PytorchMobileModule = when (modelSource) {
+            is ByteArraySource -> PytorchMobileModule.load(modelSource.bytes.writeToTempFile(context, suffix = ".pt").absolutePath)
+            is FileSource -> PytorchMobileModule.load(modelSource.path)
+            is AssetSource -> {
+                val bytes = context.assets.open(modelSource.path).use { it.readBytes() }
+                PytorchMobileModule.load(bytes.writeToTempFile(context, suffix = ".pt").absolutePath)
+            }
+            is ResourceSource -> {
+                val bytes = context.assets.open(modelSource.path).use { it.readBytes() }
+                PytorchMobileModule.load(bytes.writeToTempFile(context, suffix = ".pt").absolutePath)
+            }
+        }
+
+        override val inputTensorCount: Int get() = 0
+        override val outputTensorCount: Int get() = 0
+
+        override fun getInputTensor(index: Int): Tensor {
+            throw UnsupportedOperationException("PyTorch doesn't expose input tensor info directly via Java API.")
+        }
+
+        override fun getOutputTensor(index: Int): Tensor {
+            throw UnsupportedOperationException("PyTorch doesn't expose output tensor info directly via Java API.")
+        }
+
+        override fun resizeInput(index: Int, shape: IntArray) {
+            // Not supported
+        }
+
+        override fun run(inputs: List<Any>, outputs: Map<Int, Any>) {
+            println("pytorch runtime started")
+            val iValues = inputs.map { input ->
+                toIValue(input)
+            }.toTypedArray()
+
+            val result = module.forward(*iValues)
+
+            if (outputs.size == 1) {
+                val index = outputs.keys.first()
+                fromIValue(result, outputs[index]!!)
+            } else {
+                if (result.isTuple) {
+                    val tuple = result.toTuple()
+                    outputs.forEach { (index, outputContainer) ->
+                        if (index < tuple.size) {
+                            fromIValue(tuple[index], outputContainer)
+                        }
+                    }
+                }
+            }
+        }
+
+        private fun toIValue(input: Any): PytorchMobileIValue {
+            return when (input) {
+                is FloatArray -> PytorchMobileIValue.from(PytorchMobileTensor.fromBlob(input, longArrayOf(input.size.toLong())))
+                is IntArray -> PytorchMobileIValue.from(PytorchMobileTensor.fromBlob(input, longArrayOf(input.size.toLong())))
+                is LongArray -> PytorchMobileIValue.from(PytorchMobileTensor.fromBlob(input, longArrayOf(input.size.toLong())))
+                is ByteArray -> PytorchMobileIValue.from(PytorchMobileTensor.fromBlob(input, longArrayOf(input.size.toLong())))
+                is Float -> PytorchMobileIValue.from(input.toDouble())
+                is Int -> PytorchMobileIValue.from(input.toLong())
+                is Long -> PytorchMobileIValue.from(input)
+                is Boolean -> PytorchMobileIValue.from(input)
+                is String -> PytorchMobileIValue.from(input)
+                is ByteBuffer -> {
+                    val size = input.capacity() / 4
+                    PytorchMobileIValue.from(PytorchMobileTensor.fromBlob(input, longArrayOf(size.toLong())))
+                }
+                else -> throw IllegalArgumentException("Unsupported input type for PyTorch: ${input::class.simpleName}")
+            }
+        }
+
+        private fun fromIValue(iValue: PytorchMobileIValue, outputContainer: Any) {
+            if (iValue.isTensor) {
+                val tensor = iValue.toTensor()
+                when (outputContainer) {
+                    is FloatArray -> tensor.dataAsFloatArray.copyInto(outputContainer)
+                    is IntArray -> tensor.dataAsIntArray.copyInto(outputContainer)
+                    is LongArray -> tensor.dataAsLongArray.copyInto(outputContainer)
+                    is ByteArray -> tensor.dataAsByteArray.copyInto(outputContainer)
+                    else -> throw IllegalArgumentException("Unsupported output type for PyTorch Tensor: ${outputContainer::class.simpleName}")
+                }
+            } else if (iValue.isBool) {
+                if (outputContainer is BooleanArray && outputContainer.isNotEmpty()) {
+                    outputContainer[0] = iValue.toBool()
+                }
+            } else if (iValue.isLong) {
+                if (outputContainer is LongArray && outputContainer.isNotEmpty()) {
+                    outputContainer[0] = iValue.toLong()
+                }
+            } else if (iValue.isDouble) {
+                if (outputContainer is DoubleArray && outputContainer.isNotEmpty()) {
+                    outputContainer[0] = iValue.toDouble()
+                }
+            } else if (iValue.isString) {
+                println("Warning: PyTorch String output not supported yet in kflite wrapper.")
+            }
+        }
+
+        override fun getMetadata(): ModelMetadata {
+            return ModelMetadata(null, null, null, null, null, null, emptyList(), emptyList())
+        }
+
+        override fun close() {
+            module.destroy()
         }
     }
 }

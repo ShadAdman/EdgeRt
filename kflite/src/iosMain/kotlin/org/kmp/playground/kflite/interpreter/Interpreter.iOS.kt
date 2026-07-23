@@ -28,6 +28,7 @@ actual class Interpreter actual constructor(modelSource: ModelSource, options: I
     private val wrapper: PlatformInterpreterWrapper = when (options.runtime) {
         RuntimeType.TFLITE -> TFLiteInterpreterWrapper(modelSource, options)
         RuntimeType.LITERT -> LiteRTInterpreterWrapper(modelSource, options)
+        RuntimeType.PYTORCH -> PytorchInterpreterWrapper(modelSource, options)
         RuntimeType.EXCUTORCH -> ExecuTorchInterpreterWrapper(modelSource, options)
     }
 
@@ -56,7 +57,7 @@ actual class Interpreter actual constructor(modelSource: ModelSource, options: I
 
         init {
             tflInterpreter = errorHandled { errPtr ->
-                when (modelSource) {
+                val result: PlatformInterpreter? = when (modelSource) {
                     is ByteArraySource -> PlatformInterpreter(modelSource.bytes.writeToTempFile(), options = options.tflInterpreterOptions, error = errPtr)
                     is FileSource -> PlatformInterpreter(modelSource.path, options = options.tflInterpreterOptions, error = errPtr)
                     is ResourceSource, is AssetSource -> {
@@ -72,6 +73,7 @@ actual class Interpreter actual constructor(modelSource: ModelSource, options: I
                         PlatformInterpreter(path, options = options.tflInterpreterOptions, error = errPtr)
                     }
                 }
+                result
             }!!
             errorHandled { errPtr ->
                 val interpreter = requireNotNull(tflInterpreter) { "Interpreter has been closed or not initialized." }
@@ -171,9 +173,9 @@ actual class Interpreter actual constructor(modelSource: ModelSource, options: I
         @OptIn(ExperimentalForeignApi::class)
         override fun run(inputs: List<Any>, outputs: Map<Int, Any>) {
             val eValues = inputs.map { toEValue(it) }
-            val results = errorHandled { errPtr ->
+            val results = errorHandled<List<*>> { errPtr ->
                 module?.forward(eValues, errPtr)
-            } as? List<*> ?: emptyList()
+            } ?: emptyList<Any?>()
 
             outputs.forEach { (index, outputContainer) ->
                 val result = results.getOrNull(index) as? PlatformPytorchEValue
@@ -231,13 +233,52 @@ actual class Interpreter actual constructor(modelSource: ModelSource, options: I
                 }
             } else if (eValue.isInt()) {
                 if (outputContainer is LongArray && outputContainer.isNotEmpty()) {
-                    outputContainer[0] = eValue.toInt()
+                    outputContainer[0] = eValue.toInt().toLong()
                 }
             } else if (eValue.isDouble()) {
                 if (outputContainer is DoubleArray && outputContainer.isNotEmpty()) {
                     outputContainer[0] = eValue.toDouble()
                 }
             }
+        }
+    }
+
+    private class PytorchInterpreterWrapper(
+        modelSource: ModelSource,
+        options: InterpreterOptions
+    ) : PlatformInterpreterWrapper {
+        private var module: Any? = null
+
+        init {
+            println("Warning: PyTorch runtime for iOS is not yet implemented.")
+        }
+
+        override val inputTensorCount: Int get() = 0
+        override val outputTensorCount: Int get() = 0
+
+        override fun getInputTensor(index: Int): Tensor {
+            throw UnsupportedOperationException("PyTorch doesn't expose input tensor info directly via ObjC API.")
+        }
+
+        override fun getOutputTensor(index: Int): Tensor {
+            throw UnsupportedOperationException("PyTorch doesn't expose output tensor info directly via ObjC API.")
+        }
+
+        override fun resizeInput(index: Int, shape: IntArray) {
+            // Not supported
+        }
+
+        @OptIn(ExperimentalForeignApi::class)
+        override fun run(inputs: List<Any>, outputs: Map<Int, Any>) {
+            throw UnsupportedOperationException("PyTorch runtime not yet fully implemented for iOS.")
+        }
+
+        override fun getMetadata(): ModelMetadata {
+            return ModelMetadata(null, null, null, null, null, null, emptyList(), emptyList())
+        }
+
+        override fun close() {
+            module = null
         }
     }
 }
