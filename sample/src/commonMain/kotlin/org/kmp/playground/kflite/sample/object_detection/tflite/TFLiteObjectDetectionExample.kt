@@ -54,11 +54,9 @@ fun TFLiteRunModelWithImageSample() {
 
         Kflite.run(
             listOf(
-                inputImage.imageToScaledByteBuffer(
-                    inputWidth = inputImageWidth,
-                    inputHeight = inputImageHeight,
-                    inputAllocateSize = modelInputSize
-                )
+                inputImage.preprocess(allocateSize = modelInputSize) {
+                    resize(inputImageWidth, inputImageHeight)
+                }
             ),
             mapOf(Pair(0, modelOutputSize))
         )
@@ -96,7 +94,11 @@ fun MemoryMappedRunModelWithImageSample(modelPath: String) {
 //        }
 
         Kflite.run(
-            listOf(inputImage.imageToScaledByteBuffer(inputImageSize, inputImageSize, modelInputSize)),
+            listOf(
+                inputImage.preprocess(allocateSize = modelInputSize) {
+                    resize(inputImageSize, inputImageSize)
+                }
+            ),
             mapOf(Pair(0, modelOutputSize))
         )
 

@@ -44,11 +44,9 @@ fun LitertRunModelWithImageSample() {
 
         Kflite.run(
             listOf(
-                inputImage.imageToScaledByteBuffer(
-                    inputWidth = inputImageSize,
-                    inputHeight = inputImageSize,
-                    inputAllocateSize = modelInputSize
-                )
+                inputImage.preprocess(allocateSize = modelInputSize) {
+                    resize(inputImageSize, inputImageSize)
+                }
             ),
             mapOf(Pair(0, modelOutputSize))
         )
@@ -86,7 +84,11 @@ fun ResourceRunModelSample(resourcePath: String) {
 //        }
 
         Kflite.run(
-            listOf(inputImage.imageToScaledByteBuffer(inputImageSize, inputImageSize, modelInputSize)),
+            listOf(
+                inputImage.preprocess(allocateSize = modelInputSize) {
+                    resize(inputImageSize, inputImageSize)
+                }
+            ),
             mapOf(Pair(0, modelOutputSize))
         )
 
