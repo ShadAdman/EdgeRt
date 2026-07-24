@@ -1,4 +1,4 @@
-package org.kmp.playground.kflite.sample.face_detection.pytorch
+package org.kmp.playground.kflite.sample.face_detection.executorch
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
@@ -28,7 +28,7 @@ fun UltraNetPyTorchSample() {
         Kflite.init(
             modelSource = KFliteModel.fromResource("composeResources/kflitelib.sample.generated.resources/files/ultranet.pt"),
             options = InterpreterOptions(
-                runtime = RuntimeType.EXCUTORCH,
+                runtime = RuntimeType.EXECUTORCH,
                 numThreads = 4,
                 delegateType = DelegateType.CPU
             )

@@ -35,7 +35,7 @@ actual class Interpreter actual constructor(modelSource: ModelSource, options: I
     private val wrapper: PlatformInterpreterWrapper = when (options.runtime) {
         RuntimeType.TFLITE -> TFLiteInterpreterWrapper(modelSource, options, context)
         RuntimeType.LITERT -> LiteRTInterpreterWrapper(modelSource, options, context)
-        RuntimeType.EXCUTORCH -> PytorchInterpreterWrapper(modelSource, options, context)
+        RuntimeType.EXECUTORCH -> ExecutorchInterpreterWrapper(modelSource, options, context)
     }
 
     actual constructor(model: ByteArray, options: InterpreterOptions) : this(ByteArraySource(model), options)
@@ -304,7 +304,7 @@ actual class Interpreter actual constructor(modelSource: ModelSource, options: I
         }
     }
 
-    private class PytorchInterpreterWrapper(
+    private class ExecutorchInterpreterWrapper(
         modelSource: ModelSource,
         options: InterpreterOptions,
         context: Context
