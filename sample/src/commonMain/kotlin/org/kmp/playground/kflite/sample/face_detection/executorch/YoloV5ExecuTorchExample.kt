@@ -27,7 +27,7 @@ fun YoloV5ExecuTorchSample() {
     
     scope.launch {
         // Load model bytes from Compose Resources
-        val modelBytes = Res.readBytes("files/yolov5s.pte")
+        val modelBytes = Res.readBytes("files/ultranet.pt")
 
         // Initialize Kflite with ExecuTorch runtime
         Kflite.init(

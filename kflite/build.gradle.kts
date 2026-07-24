@@ -54,12 +54,8 @@ kotlin {
                 exclude(group = "com.google.ai.edge.litert", module = "litert-api")
             }
 
-            implementation("org.pytorch:pytorch_android:2.1.0") {
-                exclude(group = "com.facebook.fbjni", module = "fbjni-java-only")
-            }
-            implementation("org.pytorch:executorch-android:1.3.1"){
-                exclude(group = "com.facebook.fbjni", module = "fbjni-java-only")
-            }
+            implementation("org.pytorch:pytorch_android:2.1.0")
+//            implementation("org.pytorch:executorch-android:1.3.1")
             implementation(libs.androidx.startup)
         }
     }
