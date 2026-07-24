@@ -201,13 +201,13 @@ fun ContentArea(item: NavItem) {
                 title = "ExecuTorch Runtime",
                 what = "ExecuTorch is the official on-device runtime for PyTorch. It is designed to provide high-performance and efficient execution of PyTorch models on edge devices including mobile, embedded, and wearables. **Note: PyTorch Mobile is now deprecated and replaced by ExecuTorch.**",
                 whenToUse = "Use ExecuTorch for running PyTorch models natively on mobile devices with optimal performance. It is the recommended path for all new PyTorch-based mobile applications.",
-                howToUse = "To use ExecuTorch, initialize Kflite with `RuntimeType.EXECUTORCH` and provide a `.pte` model file. Learn more at [executorch.ai](https://executorch.ai/)\n\nFor converting LLMs to ExecuTorch format, refer to the [Quick Start Guide](https://github.com/pytorch/executorch#quick-start):\n\n```kotlin\nval options = InterpreterOptions(runtime = RuntimeType.EXECUTORCH)\nKflite.init(modelSource, options)\n```"
+                howToUse = "To use ExecuTorch, initialize EdgeRt with `RuntimeType.EXECUTORCH` and provide a `.pte` model file. Learn more at [executorch.ai](https://executorch.ai/)\n\nFor converting LLMs to ExecuTorch format, refer to the [Quick Start Guide](https://github.com/pytorch/executorch#quick-start):\n\n```kotlin\nval options = InterpreterOptions(runtime = RuntimeType.EXECUTORCH)\nEdgeRt.init(modelSource, options)\n```"
             )
             is NavItem.PreparingOutput -> DetailPage(
                 title = "Preparing Output",
                 what = "Model outputs are raw multidimensional arrays. To read results, you must provide a pre-allocated container (like a FloatArray or Nested Array) that perfectly matches the model's output tensor shape.",
                 whenToUse = "Every time you run inference, you need to provide containers for the model to fill with its predictions.",
-                howToUse = "Define a container matching the output shape (e.g., [1, 25, 4] for 25 boxes):\n\n```kotlin\nval outputContainer = Array(1) { \n    Array(25) { FloatArray(4) }\n}\n\nKflite.run(\n    inputs = listOf(inputImage),\n    outputs = mapOf(0 to outputContainer)\n)\n\n// Access detection results\nval firstBox = outputContainer[0][0]\n```"
+                howToUse = "Define a container matching the output shape (e.g., [1, 25, 4] for 25 boxes):\n\n```kotlin\nval outputContainer = Array(1) { \n    Array(25) { FloatArray(4) }\n}\n\nEdgeRt.run(\n    inputs = listOf(inputImage),\n    outputs = mapOf(0 to outputContainer)\n)\n\n// Access detection results\nval firstBox = outputContainer[0][0]\n```"
             )
             is NavItem.WarmingUp -> WarmingUpPage()
             is NavItem.PostProcessing.Reshaping -> DetailPage(
@@ -263,7 +263,7 @@ fun IntroPage() {
         
         SectionHeader("About")
         Text(
-            "`edgert` runs ML models (TensorFlow, PyTorch, JAX) on mobile devices using Kotlin Multiplatform. It abstracts platform-specific complexities (JNI on Android, C-API on iOS) behind a unified, high-performance API.",
+            "`EdgeRt` runs ML models (TensorFlow, PyTorch, JAX) on mobile devices using Kotlin Multiplatform. It abstracts platform-specific complexities (JNI on Android, C-API on iOS) behind a unified, high-performance API.",
             style = MaterialTheme.typography.bodyLarge
         )
 
@@ -312,13 +312,13 @@ fun WarmingUpPage() {
 
         DetailSection(
             header = "1. Wake Up",
-            content = "A lightweight preparation that triggers delegate initialization and pre-touches tensors without necessarily running full math operations. Use this to prepare the engine when the user enters a screen, but before they hit 'start'.\n\n```kotlin\nKflite.wakeUp() \n```",
+            content = "A lightweight preparation that triggers delegate initialization and pre-touches tensors without necessarily running full math operations. Use this to prepare the engine when the user enters a screen, but before they hit 'start'.\n\n```kotlin\nedgert.wakeUp() \n```",
             isCode = true
         )
 
         DetailSection(
             header = "2. Warm Up",
-            content = "Performs full 'dry runs' of the model using dummy data. This ensures all execution paths and memory caches are fully primed. It increases the 'first impression' of your app by ensuring the very first real inference is as fast as the hundredth.\n\n```kotlin\nval config = WarmUpConfig(iterations = 5)\nKflite.warmUp(config)\n```",
+            content = "Performs full 'dry runs' of the model using dummy data. This ensures all execution paths and memory caches are fully primed. It increases the 'first impression' of your app by ensuring the very first real inference is as fast as the hundredth.\n\n```kotlin\nval config = WarmUpConfig(iterations = 5)\nEdgeRt.warmUp(config)\n```",
             isCode = true
         )
     }

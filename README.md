@@ -19,7 +19,9 @@ Key features:
 
 - Works with Compose Multiplatform `composeResources`
 - No more 16kb issues on Android
-- Ability to switch between TFLite and LiteRT runtimes
+- Ability to switch between TFLite, LiteRT, and ExecuTorch runtimes
+- Official support for **ExecuTorch** (PyTorch Mobile is deprecated and replaced by ExecuTorch)
+[How to convert LLM to ExecuTorch (.pte) format](https://github.com/pytorch/executorch#quick-start)
 - Supports model normalization (`YOLO`, `COCO`, `PascalVOC`, `TF formats`) via the `postprocessing` module
 - Supports reshaping model output via `postprocessing` module
 - Enable/Disable
