@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.ComposeViewport
 import edgertlib.doc.generated.resources.Res
-import edgertlib.doc.generated.resources.poster
+import edgertlib.doc.generated.resources.edgert
 import kotlinx.browser.document
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
@@ -252,7 +252,7 @@ fun IntroPage() {
             colors = CardDefaults.cardColors(containerColor = Color.DarkGray)
         ) {
             Image(
-                painter = painterResource(Res.drawable.poster),
+                painter = painterResource(Res.drawable.edgert),
                 contentDescription = "EdgeRt Poster",
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Fit

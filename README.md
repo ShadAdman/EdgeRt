@@ -2,7 +2,7 @@
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.2.21-blue.svg?style=flat-square&logo=kotlin)](https://kotlinlang.org/)
 [![Gradle](https://img.shields.io/badge/Gradle-8.x-green.svg?style=flat-square&logo=gradle)](https://gradle.org/)
 
-![](poster.png)
+![](edgert.png)
 
 ## About
 
