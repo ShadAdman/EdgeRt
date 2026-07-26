@@ -29,17 +29,24 @@ kotlin {
         pod("TensorFlowLiteObjC", moduleName = "TFLTensorFlowLite")
         pod("TensorFlowLiteObjC/Metal") { linkOnly = true }
         pod("TensorFlowLiteObjC/CoreML") { linkOnly = true }
-        pod("executorch")
 
         framework {
             baseName = "edgert"
             isStatic = true
             linkerOpts(
                 project.file("../sample/iosApp/Pods/TensorFlowLiteObjC/Frameworks").path.let { "-F$it" },
-                "-framework", "TensorFlowLiteObjC",
-                "-framework", "executorch"
+                "-framework", "TensorFlowLiteObjC"
             )
         }
+    }
+
+    swiftPMDependencies {
+        iosMinimumDeploymentTarget.set("16.0")
+        swiftPackage(
+            url = url("https://github.com/pytorch/executorch.git"),
+            version = branch("swiftpm-1.3.1"),
+            products = listOf(product("executorch"))
+        )
     }
 
     sourceSets {
