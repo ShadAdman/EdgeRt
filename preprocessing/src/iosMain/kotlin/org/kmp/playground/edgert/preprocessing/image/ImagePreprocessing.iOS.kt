@@ -8,7 +8,7 @@ import platform.Foundation.NSData
 import platform.Foundation.create
 import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.usePinned
-import org.kmp.playground.edgert.kflite.toNSData
+import org.kmp.playground.edgert.edgert.toNSData
 
 actual fun ImageBitmap.preprocess(
     allocateSize: Int,
