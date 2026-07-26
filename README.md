@@ -63,7 +63,7 @@ Create a `Podfile` inside your `iosApp` with following pods:
 ```
 target 'iosApp' do
   use_frameworks!
-  platform :ios, '16.0'
+  platform :ios, '17.0'
   pod 'TensorFlowLiteObjC'
   pod 'TensorFlowLiteObjC/Metal'
   pod 'TensorFlowLiteObjC/CoreML'

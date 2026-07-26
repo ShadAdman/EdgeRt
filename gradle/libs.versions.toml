@@ -14,7 +14,7 @@ vanniktech-publish = "0.32.0"
 groupId = "io.github.shadadman"
 artifactId = "kflite"
 snapshotVersion = "1.73.0-SNAPSHOT"
-iosDeploymentTarget = "16.0"
+iosDeploymentTarget = "17.0"
 startup = "1.2.0"
 
 [libraries]

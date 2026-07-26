@@ -18,13 +18,13 @@ kotlin {
     }
 
 
-    listOf(iosX64(),
-    iosArm64(),
+    listOf(iosArm64(),
     iosSimulatorArm64()).forEach { iosTarget ->
         iosTarget.binaries.framework {
             baseName = "ComposeApp"
             isStatic = true
             binaryOption("bundleId", "org.kmp.playground.edgert.sample")
+            linkerOpts("-Wl,-all_load")
         }
     }
 
@@ -32,7 +32,7 @@ kotlin {
         summary = "KFlite Sample"
         homepage = "https://github.com/ShadAdman/kflite"
         version = "1.0"
-        ios.deploymentTarget = "16.0"
+        ios.deploymentTarget = "17.0"
         podfile = project.file("iosApp/Podfile")
 
         pod("TensorFlowLiteObjC", moduleName = "TFLTensorFlowLite")

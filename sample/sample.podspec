@@ -8,7 +8,7 @@ Pod::Spec.new do |spec|
     spec.summary                  = 'KFlite Sample'
     spec.vendored_frameworks      = 'build/cocoapods/framework/sample.framework'
     spec.libraries                = 'c++'
-    spec.ios.deployment_target    = '16.0'
+    spec.ios.deployment_target    = '17.0'
     spec.dependency 'TensorFlowLiteObjC'
     spec.dependency 'TensorFlowLiteObjC/CoreML'
     spec.dependency 'TensorFlowLiteObjC/Metal'
