@@ -10,12 +10,12 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(project(":kflite"))
+            implementation(project(":edgert"))
         }
     }
 }
 
 android {
-    namespace = "org.kmp.playground.kflite.postprocessing"
+    namespace = "org.kmp.playground.edgert.postprocessing"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 }

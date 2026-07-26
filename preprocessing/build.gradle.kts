@@ -12,13 +12,13 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(project(":kflite"))
+            implementation(project(":edgert"))
             implementation(compose.ui)
         }
     }
 }
 
 android {
-    namespace = "org.kmp.playground.kflite.preprocessing"
+    namespace = "org.kmp.playground.edgert.preprocessing"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 }

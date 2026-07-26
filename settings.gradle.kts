@@ -20,8 +20,8 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-rootProject.name = "KfliteLib"
-include(":kflite")
+rootProject.name = "EdgeRtLib"
+include(":edgert")
 include(":preprocessing")
 include(":postprocessing")
 include(":doc")

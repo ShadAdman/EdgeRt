@@ -2,15 +2,13 @@
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.2.21-blue.svg?style=flat-square&logo=kotlin)](https://kotlinlang.org/)
 [![Gradle](https://img.shields.io/badge/Gradle-8.x-green.svg?style=flat-square&logo=gradle)](https://gradle.org/)
 
-![](poster.png)
+![](edgert.png)
 
 ## About
 
 `kflite` runs ml models such as TensorFlow, PyTorch, and JAX models on mobile device (support for all edge devices is the goal) with help of Kotlin Multiplatform.
 It abstracts platform differences, and manages model loading, tensor creation, and inference through
 a unified API without any performance change & completely native. 
-
-It now supports the new **ExecuTorch** runtime, the official successor to PyTorch Mobile, which is now deprecated. [Learn more about ExecuTorch](https://executorch.ai/).
 
 `kflite` is now split into 4 main artifacts for better flexibility:
 - **`kflite`**: The main runtime and model management.
@@ -23,7 +21,7 @@ Key features:
 - No more 16kb issues on Android
 - Ability to switch between TFLite, LiteRT, and ExecuTorch runtimes
 - Official support for **ExecuTorch** (PyTorch Mobile is deprecated and replaced by ExecuTorch)
-- [How to convert LLM to ExecuTorch (.pte) format](https://github.com/pytorch/executorch#quick-start)
+[How to convert LLM to ExecuTorch (.pte) format](https://github.com/pytorch/executorch#quick-start)
 - Supports model normalization (`YOLO`, `COCO`, `PascalVOC`, `TF formats`) via the `postprocessing` module
 - Supports reshaping model output via `postprocessing` module
 - Enable/Disable

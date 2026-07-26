@@ -24,7 +24,7 @@ kotlin {
         iosTarget.binaries.framework {
             baseName = "ComposeApp"
             isStatic = true
-            binaryOption("bundleId", "org.kmp.playground.kflite.sample")
+            binaryOption("bundleId", "org.kmp.playground.edgert.sample")
         }
     }
 
@@ -53,7 +53,7 @@ kotlin {
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
-            implementation(project(":kflite"))
+            implementation(project(":edgert"))
             implementation(project(":preprocessing"))
             implementation(project(":postprocessing"))
         }
@@ -64,11 +64,11 @@ kotlin {
 }
 
 android {
-    namespace = "org.kmp.playground.kflite.sample"
+    namespace = "org.kmp.playground.edgert.sample"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 
     defaultConfig {
-        applicationId = "org.kmp.playground.kflite.sample"
+        applicationId = "org.kmp.playground.edgert.sample"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
