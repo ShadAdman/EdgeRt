@@ -10,6 +10,10 @@ import cocoapods.TFLTensorFlowLite.TFLTensor
 import cocoapods.TFLTensorFlowLite.TFLInterpreter
 import cocoapods.TFLTensorFlowLite.TFLInterpreterOptions
 
+import cocoapods.executorch.ExecutorchModule
+import cocoapods.executorch.ExecutorchEValue
+import cocoapods.executorch.ExecutorchTensor
+
 import kotlinx.cinterop.ExperimentalForeignApi
 
 @OptIn(ExperimentalForeignApi::class)
@@ -18,6 +22,13 @@ internal typealias PlatformInterpreter = TFLInterpreter
 internal typealias PlatformTensor = TFLTensor
 @OptIn(ExperimentalForeignApi::class)
 internal typealias PlatformInterpreterOptions = TFLInterpreterOptions
+
+@OptIn(ExperimentalForeignApi::class)
+internal typealias PlatformPytorchModule = ExecutorchModule
+@OptIn(ExperimentalForeignApi::class)
+internal typealias PlatformPytorchEValue = ExecutorchEValue
+@OptIn(ExperimentalForeignApi::class)
+internal typealias PlatformPytorchTensor = ExecutorchTensor
 
 
 

@@ -19,8 +19,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.ComposeViewport
-import kflitelib.doc.generated.resources.Res
-import kflitelib.doc.generated.resources.poster
+import edgertlib.doc.generated.resources.Res
+import edgertlib.doc.generated.resources.poster
 import kotlinx.browser.document
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
@@ -38,6 +38,7 @@ sealed class NavItem(val title: String, val icon: ImageVector) {
     data object PreparingInput : NavItem("Preparing Input", Icons.AutoMirrored.Filled.ArrowForward)
     data object TFLite : NavItem("TFLite Runtime", Icons.Default.Settings)
     data object LiteRT : NavItem("LiteRT Runtime", Icons.Default.Bolt)
+    data object ExecuTorch : NavItem("ExecuTorch Runtime", Icons.Default.Star)
     data object PreparingOutput : NavItem("Preparing Output", Icons.AutoMirrored.Filled.ArrowBack)
     data object WarmingUp : NavItem("Warming Up", Icons.Default.Refresh)
     
@@ -112,6 +113,7 @@ fun LazySidebarContent(selectedItem: NavItem, onItemSelected: (NavItem) -> Unit)
         SidebarItem(NavItem.PreparingInput, selectedItem == NavItem.PreparingInput) { onItemSelected(NavItem.PreparingInput) }
         SidebarItem(NavItem.TFLite, selectedItem == NavItem.TFLite) { onItemSelected(NavItem.TFLite) }
         SidebarItem(NavItem.LiteRT, selectedItem == NavItem.LiteRT) { onItemSelected(NavItem.LiteRT) }
+        SidebarItem(NavItem.ExecuTorch, selectedItem == NavItem.ExecuTorch) { onItemSelected(NavItem.ExecuTorch) }
         SidebarItem(NavItem.PreparingOutput, selectedItem == NavItem.PreparingOutput) { onItemSelected(NavItem.PreparingOutput) }
         SidebarItem(NavItem.WarmingUp, selectedItem == NavItem.WarmingUp) { onItemSelected(NavItem.WarmingUp) }
 
@@ -195,6 +197,12 @@ fun ContentArea(item: NavItem) {
                 whenToUse = "Choose LiteRT for new projects where you want the latest performance improvements and a more streamlined runtime experience on Android and beyond.",
                 howToUse = "Select `RuntimeType.LITERT` in your `InterpreterOptions`:\n\n```kotlin\nval options = InterpreterOptions(runtime = RuntimeType.LITERT)\nKflite.init(modelSource, options)\n```"
             )
+            is NavItem.ExecuTorch -> DetailPage(
+                title = "ExecuTorch Runtime",
+                what = "ExecuTorch is the official on-device runtime for PyTorch. It is designed to provide high-performance and efficient execution of PyTorch models on edge devices including mobile, embedded, and wearables. **Note: PyTorch Mobile is now deprecated and replaced by ExecuTorch.**",
+                whenToUse = "Use ExecuTorch for running PyTorch models natively on mobile devices with optimal performance. It is the recommended path for all new PyTorch-based mobile applications.",
+                howToUse = "To use ExecuTorch, initialize Kflite with `RuntimeType.EXECUTORCH` and provide a `.pte` model file. Learn more at [executorch.ai](https://executorch.ai/)\n\nFor converting LLMs to ExecuTorch format, refer to the [Quick Start Guide](https://github.com/pytorch/executorch#quick-start):\n\n```kotlin\nval options = InterpreterOptions(runtime = RuntimeType.EXECUTORCH)\nKflite.init(modelSource, options)\n```"
+            )
             is NavItem.PreparingOutput -> DetailPage(
                 title = "Preparing Output",
                 what = "Model outputs are raw multidimensional arrays. To read results, you must provide a pre-allocated container (like a FloatArray or Nested Array) that perfectly matches the model's output tensor shape.",
@@ -264,7 +272,8 @@ fun IntroPage() {
         SectionHeader("Features")
         BulletPoint("Native performance with unified KMP API")
         BulletPoint("No more 16kb issues on Android")
-        BulletPoint("Switch runtimes between TFLite and LiteRT")
+        BulletPoint("Switch runtimes between TFLite, LiteRT and ExecuTorch")
+        BulletPoint("Official ExecuTorch support (PyTorch Mobile successor)")
         BulletPoint("Built-in Preprocessing (Image scaling/normalization)")
         BulletPoint("Built-in Postprocessing (Reshaping, Box normalization, NMS)")
         BulletPoint("Hardware acceleration support (GPU, NNAPI, Metal, CoreML)")

@@ -14,6 +14,51 @@ fun ByteArray.toNSData(): NSData = usePinned {
     NSData.create(bytes = it.addressOf(0), length = this.size.toULong())
 }
 
+@OptIn(ExperimentalForeignApi::class)
+fun FloatArray.toNSData(): NSData = usePinned {
+    NSData.create(bytes = it.addressOf(0), length = (this.size * 4).toULong())
+}
+
+@OptIn(ExperimentalForeignApi::class)
+fun IntArray.toNSData(): NSData = usePinned {
+    NSData.create(bytes = it.addressOf(0), length = (this.size * 4).toULong())
+}
+
+@OptIn(ExperimentalForeignApi::class)
+fun LongArray.toNSData(): NSData = usePinned {
+    NSData.create(bytes = it.addressOf(0), length = (this.size * 8).toULong())
+}
+
+@OptIn(ExperimentalForeignApi::class)
+fun NSData.toFloatArray(): FloatArray {
+    val size = this.length.toInt() / 4
+    val array = FloatArray(size)
+    array.usePinned { pinned ->
+        platform.posix.memcpy(pinned.addressOf(0), this.bytes, this.length)
+    }
+    return array
+}
+
+@OptIn(ExperimentalForeignApi::class)
+fun NSData.toIntArray(): IntArray {
+    val size = this.length.toInt() / 4
+    val array = IntArray(size)
+    array.usePinned { pinned ->
+        platform.posix.memcpy(pinned.addressOf(0), this.bytes, this.length)
+    }
+    return array
+}
+
+@OptIn(ExperimentalForeignApi::class)
+fun NSData.toByteArray(): ByteArray {
+    val size = this.length.toInt()
+    val array = ByteArray(size)
+    array.usePinned { pinned ->
+        platform.posix.memcpy(pinned.addressOf(0), this.bytes, this.length)
+    }
+    return array
+}
+
 fun ByteArray.writeToTempFile(): String {
     val tempDir = NSTemporaryDirectory()
     val fileName = "model_${currentTimeMillis()}.tflite"

@@ -16,9 +16,8 @@ kotlin {
         }
     }
 
-    iosX64()
-    iosArm64()
-    iosSimulatorArm64()
+
+    iosX64(); iosArm64(); iosSimulatorArm64()
 
     cocoapods {
         summary = "Core abstractions and native dependencies for KFlite"
@@ -30,13 +29,15 @@ kotlin {
         pod("TensorFlowLiteObjC", moduleName = "TFLTensorFlowLite")
         pod("TensorFlowLiteObjC/Metal") { linkOnly = true }
         pod("TensorFlowLiteObjC/CoreML") { linkOnly = true }
+        pod("executorch")
 
         framework {
             baseName = "kflite"
             isStatic = true
             linkerOpts(
                 project.file("../sample/iosApp/Pods/TensorFlowLiteObjC/Frameworks").path.let { "-F$it" },
-                "-framework", "TensorFlowLiteObjC"
+                "-framework", "TensorFlowLiteObjC",
+                "-framework", "executorch"
             )
         }
     }
@@ -46,10 +47,11 @@ kotlin {
             // Core abstractions
         }
         androidMain.dependencies {
-            api(libs.litert)
-            api("com.google.ai.edge.litert:litert-gpu:1.4.2") {
+            implementation(libs.litert)
+            implementation("com.google.ai.edge.litert:litert-gpu:1.4.2") {
                 exclude(group = "com.google.ai.edge.litert", module = "litert-api")
             }
+            implementation(libs.executorch)
             implementation(libs.androidx.startup)
         }
     }
