@@ -10,9 +10,9 @@ import cocoapods.TFLTensorFlowLite.TFLTensor
 import cocoapods.TFLTensorFlowLite.TFLInterpreter
 import cocoapods.TFLTensorFlowLite.TFLInterpreterOptions
 
-import swiftPMImport.io.github.shadadman.edgert.ExecutorchModule
-import swiftPMImport.io.github.shadadman.edgert.ExecutorchEValue
-import swiftPMImport.io.github.shadadman.edgert.ExecutorchTensor
+import swiftPMImport.executorch.ExecutorchModule
+import swiftPMImport.executorch.ExecutorchEValue
+import swiftPMImport.executorch.ExecutorchTensor
 
 import kotlinx.cinterop.ExperimentalForeignApi
 

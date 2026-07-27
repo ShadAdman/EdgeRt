@@ -171,9 +171,9 @@ actual class Interpreter actual constructor(modelSource: ModelSource, options: I
         @OptIn(ExperimentalForeignApi::class)
         override fun run(inputs: List<Any>, outputs: Map<Int, Any>) {
             val eValues = inputs.map { toEValue(it) }
-            val results = errorHandled { errPtr ->
+            val results = errorHandled<List<*>> { errPtr ->
                 module?.forward(eValues, errPtr)
-            } as? List<*> ?: emptyList()
+            } ?: emptyList()
 
             outputs.forEach { (index, outputContainer) ->
                 val result = results.getOrNull(index) as? PlatformPytorchEValue
@@ -231,7 +231,7 @@ actual class Interpreter actual constructor(modelSource: ModelSource, options: I
                 }
             } else if (eValue.isInt()) {
                 if (outputContainer is LongArray && outputContainer.isNotEmpty()) {
-                    outputContainer[0] = eValue.toInt()
+                    outputContainer[0] = eValue.toInt().toLong()
                 }
             } else if (eValue.isDouble()) {
                 if (outputContainer is DoubleArray && outputContainer.isNotEmpty()) {
