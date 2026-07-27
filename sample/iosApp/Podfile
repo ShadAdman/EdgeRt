@@ -1,6 +1,6 @@
 target 'iosApp' do
   use_frameworks!
-  platform :ios, '16.0'
+  platform :ios, '17.0'
   pod 'ComposeApp', :path => '..'
   pod 'TensorFlowLiteObjC'
   pod 'TensorFlowLiteObjC/Metal'

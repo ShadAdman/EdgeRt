@@ -23,7 +23,7 @@ kotlin {
         summary = "Core abstractions and native dependencies for EdgeRt"
         homepage = "https://github.com/ShadAdman/edgert"
         version = "1.0"
-        ios.deploymentTarget = "16.0"
+        ios.deploymentTarget = "17.0"
         podfile = project.file("../sample/iosApp/Podfile")
 
         pod("TensorFlowLiteObjC", moduleName = "TFLTensorFlowLite")
@@ -41,7 +41,7 @@ kotlin {
     }
 
     swiftPMDependencies {
-        iosMinimumDeploymentTarget.set("16.0")
+        iosMinimumDeploymentTarget.set("17.0")
         swiftPackage(
             url = url("https://github.com/pytorch/executorch.git"),
             version = branch("swiftpm-1.3.1"),
