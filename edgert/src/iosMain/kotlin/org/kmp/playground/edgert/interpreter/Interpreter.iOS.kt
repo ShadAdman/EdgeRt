@@ -28,7 +28,7 @@ actual class Interpreter actual constructor(modelSource: ModelSource, options: I
     private val wrapper: PlatformInterpreterWrapper = when (options.runtime) {
         RuntimeType.TFLITE -> TFLiteInterpreterWrapper(modelSource, options)
         RuntimeType.LITERT -> LiteRTInterpreterWrapper(modelSource, options)
-        RuntimeType.EXECUTORCH -> ExecuTorchInterpreterWrapper(modelSource, options)
+        RuntimeType.EXECUTORCH -> TFLiteInterpreterWrapper(modelSource, options)
     }
 
     actual constructor(model: ByteArray, options: InterpreterOptions) : this(ByteArraySource(model), options)
@@ -128,118 +128,118 @@ actual class Interpreter actual constructor(modelSource: ModelSource, options: I
         override fun close() = delegate.close()
     }
 
-    private class ExecuTorchInterpreterWrapper(
-        modelSource: ModelSource,
-        options: InterpreterOptions
-    ) : PlatformInterpreterWrapper {
-        private var module: PlatformPytorchModule? = null
-
-        init {
-            val path = when (modelSource) {
-                is ByteArraySource -> modelSource.bytes.writeToTempFile()
-                is FileSource -> modelSource.path
-                is ResourceSource, is AssetSource -> {
-                    val bundle = platform.Foundation.NSBundle.mainBundle
-                    val fullPath = (modelSource as? ResourceSource)?.path ?: (modelSource as AssetSource).path
-                    val fileName = fullPath.substringAfterLast("/")
-                    val resourceName = fileName.substringBeforeLast(".")
-                    val extension = fileName.substringAfterLast(".", "")
-                    val subDir = fullPath.substringBeforeLast("/", "").takeIf { it.isNotEmpty() }
-                    bundle.pathForResource(resourceName, extension, subDir)
-                        ?: bundle.pathForResource(fileName, null)
-                        ?: error("Resource not found: $fullPath")
-                }
-            }
-            module = PlatformPytorchModule(filePath = path)
-        }
-
-        override val inputTensorCount: Int get() = 0
-        override val outputTensorCount: Int get() = 0
-
-        override fun getInputTensor(index: Int): Tensor {
-            throw UnsupportedOperationException("ExecuTorch doesn't expose input tensor info directly via ObjC API.")
-        }
-
-        override fun getOutputTensor(index: Int): Tensor {
-            throw UnsupportedOperationException("ExecuTorch doesn't expose output tensor info directly via ObjC API.")
-        }
-
-        override fun resizeInput(index: Int, shape: IntArray) {
-            // Not supported
-        }
-
-        @OptIn(ExperimentalForeignApi::class)
-        override fun run(inputs: List<Any>, outputs: Map<Int, Any>) {
-            val eValues = inputs.map { toEValue(it) }
-            val results = errorHandled<List<*>> { errPtr ->
-                module?.forward(eValues, errPtr)
-            } ?: emptyList()
-
-            outputs.forEach { (index, outputContainer) ->
-                val result = results.getOrNull(index) as? PlatformPytorchEValue
-                if (result != null) {
-                    fromEValue(result, outputContainer)
-                }
-            }
-        }
-
-        override fun getMetadata(): ModelMetadata {
-            return ModelMetadata(null, null, null, null, null, null, emptyList(), emptyList())
-        }
-
-        override fun close() {
-            module = null
-        }
-
-        @OptIn(ExperimentalForeignApi::class)
-        private fun toEValue(input: Any): PlatformPytorchEValue {
-            return when (input) {
-                is FloatArray -> {
-                    val tensor = PlatformPytorchTensor(input.toNSData(), listOf(input.size.toLong()), 0)
-                    PlatformPytorchEValue.withTensor(tensor)
-                }
-                is IntArray -> {
-                    val tensor = PlatformPytorchTensor(input.toNSData(), listOf(input.size.toLong()), 1)
-                    PlatformPytorchEValue.withTensor(tensor)
-                }
-                is Float -> PlatformPytorchEValue.withDouble(input.toDouble())
-                is Int -> PlatformPytorchEValue.withInt(input.toLong())
-                is Boolean -> PlatformPytorchEValue.withBool(input)
-                is NSData -> {
-                    val size = input.length.toLong() / 4
-                    val tensor = PlatformPytorchTensor(input, listOf(size), 0) // Assume Float32
-                    PlatformPytorchEValue.withTensor(tensor)
-                }
-                else -> throw IllegalArgumentException("Unsupported input type for ExecuTorch: ${input::class.simpleName}")
-            }
-        }
-
-        @OptIn(ExperimentalForeignApi::class)
-        private fun fromEValue(eValue: PlatformPytorchEValue, outputContainer: Any) {
-            if (eValue.isTensor()) {
-                val tensor = eValue.toTensor()
-                val data = tensor.data()
-                when (outputContainer) {
-                    is FloatArray -> data.toFloatArray().copyInto(outputContainer)
-                    is IntArray -> data.toIntArray().copyInto(outputContainer)
-                    is ByteArray -> data.toByteArray().copyInto(outputContainer)
-                    else -> throw IllegalArgumentException("Unsupported output type for ExecuTorch Tensor: ${outputContainer::class.simpleName}")
-                }
-            } else if (eValue.isBool()) {
-                if (outputContainer is BooleanArray && outputContainer.isNotEmpty()) {
-                    outputContainer[0] = eValue.toBool()
-                }
-            } else if (eValue.isInt()) {
-                if (outputContainer is LongArray && outputContainer.isNotEmpty()) {
-                    outputContainer[0] = eValue.toInt().toLong()
-                }
-            } else if (eValue.isDouble()) {
-                if (outputContainer is DoubleArray && outputContainer.isNotEmpty()) {
-                    outputContainer[0] = eValue.toDouble()
-                }
-            }
-        }
-    }
+//    private class ExecuTorchInterpreterWrapper(
+//        modelSource: ModelSource,
+//        options: InterpreterOptions
+//    ) : PlatformInterpreterWrapper {
+//        private var module: PlatformPytorchModule? = null
+//
+//        init {
+//            val path = when (modelSource) {
+//                is ByteArraySource -> modelSource.bytes.writeToTempFile()
+//                is FileSource -> modelSource.path
+//                is ResourceSource, is AssetSource -> {
+//                    val bundle = platform.Foundation.NSBundle.mainBundle
+//                    val fullPath = (modelSource as? ResourceSource)?.path ?: (modelSource as AssetSource).path
+//                    val fileName = fullPath.substringAfterLast("/")
+//                    val resourceName = fileName.substringBeforeLast(".")
+//                    val extension = fileName.substringAfterLast(".", "")
+//                    val subDir = fullPath.substringBeforeLast("/", "").takeIf { it.isNotEmpty() }
+//                    bundle.pathForResource(resourceName, extension, subDir)
+//                        ?: bundle.pathForResource(fileName, null)
+//                        ?: error("Resource not found: $fullPath")
+//                }
+//            }
+//            module = PlatformPytorchModule(filePath = path)
+//        }
+//
+//        override val inputTensorCount: Int get() = 0
+//        override val outputTensorCount: Int get() = 0
+//
+//        override fun getInputTensor(index: Int): Tensor {
+//            throw UnsupportedOperationException("ExecuTorch doesn't expose input tensor info directly via ObjC API.")
+//        }
+//
+//        override fun getOutputTensor(index: Int): Tensor {
+//            throw UnsupportedOperationException("ExecuTorch doesn't expose output tensor info directly via ObjC API.")
+//        }
+//
+//        override fun resizeInput(index: Int, shape: IntArray) {
+//            // Not supported
+//        }
+//
+//        @OptIn(ExperimentalForeignApi::class)
+//        override fun run(inputs: List<Any>, outputs: Map<Int, Any>) {
+//            val eValues = inputs.map { toEValue(it) }
+//            val results = errorHandled<List<*>> { errPtr ->
+//                module?.forward(eValues, errPtr)
+//            } ?: emptyList()
+//
+//            outputs.forEach { (index, outputContainer) ->
+//                val result = results.getOrNull(index) as? PlatformPytorchEValue
+//                if (result != null) {
+//                    fromEValue(result, outputContainer)
+//                }
+//            }
+//        }
+//
+//        override fun getMetadata(): ModelMetadata {
+//            return ModelMetadata(null, null, null, null, null, null, emptyList(), emptyList())
+//        }
+//
+//        override fun close() {
+//            module = null
+//        }
+//
+//        @OptIn(ExperimentalForeignApi::class)
+//        private fun toEValue(input: Any): PlatformPytorchEValue {
+//            return when (input) {
+//                is FloatArray -> {
+//                    val tensor = PlatformPytorchTensor(input.toNSData(), listOf(input.size.toLong()), 0)
+//                    PlatformPytorchEValue.withTensor(tensor)
+//                }
+//                is IntArray -> {
+//                    val tensor = PlatformPytorchTensor(input.toNSData(), listOf(input.size.toLong()), 1)
+//                    PlatformPytorchEValue.withTensor(tensor)
+//                }
+//                is Float -> PlatformPytorchEValue.withDouble(input.toDouble())
+//                is Int -> PlatformPytorchEValue.withInt(input.toLong())
+//                is Boolean -> PlatformPytorchEValue.withBool(input)
+//                is NSData -> {
+//                    val size = input.length.toLong() / 4
+//                    val tensor = PlatformPytorchTensor(input, listOf(size), 0) // Assume Float32
+//                    PlatformPytorchEValue.withTensor(tensor)
+//                }
+//                else -> throw IllegalArgumentException("Unsupported input type for ExecuTorch: ${input::class.simpleName}")
+//            }
+//        }
+//
+//        @OptIn(ExperimentalForeignApi::class)
+//        private fun fromEValue(eValue: PlatformPytorchEValue, outputContainer: Any) {
+//            if (eValue.isTensor()) {
+//                val tensor = eValue.toTensor()
+//                val data = tensor.data()
+//                when (outputContainer) {
+//                    is FloatArray -> data.toFloatArray().copyInto(outputContainer)
+//                    is IntArray -> data.toIntArray().copyInto(outputContainer)
+//                    is ByteArray -> data.toByteArray().copyInto(outputContainer)
+//                    else -> throw IllegalArgumentException("Unsupported output type for ExecuTorch Tensor: ${outputContainer::class.simpleName}")
+//                }
+//            } else if (eValue.isBool()) {
+//                if (outputContainer is BooleanArray && outputContainer.isNotEmpty()) {
+//                    outputContainer[0] = eValue.toBool()
+//                }
+//            } else if (eValue.isInt()) {
+//                if (outputContainer is LongArray && outputContainer.isNotEmpty()) {
+//                    outputContainer[0] = eValue.toInt().toLong()
+//                }
+//            } else if (eValue.isDouble()) {
+//                if (outputContainer is DoubleArray && outputContainer.isNotEmpty()) {
+//                    outputContainer[0] = eValue.toDouble()
+//                }
+//            }
+//        }
+//    }
 }
 
 
